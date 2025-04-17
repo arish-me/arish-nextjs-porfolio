@@ -1,3 +1,4 @@
+
 # Arish Dev - Your Creative Web Development Partner
 
 Welcome to my digital space! I'm Arish, a passionate full-stack developer based in Indore, India. I craft elegant, performant, and user-centric web experiences, blending technical expertise with a keen eye for design.
@@ -9,6 +10,8 @@ Welcome to my digital space! I'm Arish, a passionate full-stack developer based 
 I believe in turning ideas into impactful web solutions. My journey in web development is driven by a constant desire to learn and innovate. Whether it's building responsive interfaces with React and Next.js, crafting robust backends with Ruby on Rails, or diving into the world of serverless functions, I'm always eager to explore new technologies.
 
 My approach is collaborative and detail-oriented. I thrive in environments where I can contribute to meaningful projects and work alongside talented individuals. I'm not just a coder; I'm a problem-solver, a creative thinker, and a lifelong learner.
+
+![Portfolio Demo](public/demo.gif)
 
 ## What You'll Find Here
 
@@ -36,13 +39,13 @@ This project is built with Next.js. To get started locally:
 1.  **Clone the repository:**
 
     ```bash
-    git clone [your-repo-url]
+    git clone https://github.com/arish-me/arish-nextjs-porfolio.git
     ```
 
 2.  **Navigate to the project directory:**
 
     ```bash
-    cd [your-project-directory]
+    cd arish-nextjs-porfolio
     ```
 
 3.  **Install dependencies:**
@@ -89,8 +92,8 @@ For detailed deployment instructions, refer to the [Next.js deployment documenta
 
 I'm always open to new opportunities and collaborations. Let's connect!
 
-* **LinkedIn:** [https://www.linkedin.com/in/arish-khan-784065104/]
-* **GitHub:** [https://github.com/arish-me/arish-me]
-* **Email:** [hello@arishdev.com]
+* **[LinkedIn](https://www.linkedin.com/in/arish-khan-784065104/)**
+* **[GitHub](https://github.com/arish-me/arish-me)**
+* **[Email](hello@arishdev.com)**
 
 Thank you for visiting!
