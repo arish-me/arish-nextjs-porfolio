@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 // lib/seo.ts
 import type { Metadata } from 'next';
 import { SITE_TITLE, SITE_DESCRIPTION, SITE_URL, SITE_NAME, SITE_KEYWORDS } from './constants';

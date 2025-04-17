@@ -1,4 +1,3 @@
-import { Metadata } from "next";
 import Blogs from './blog'
 import { generateMetadata } from '@/lib/seo';
 const title = 'Blogs';

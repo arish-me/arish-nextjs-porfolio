@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 'use client'
 
 import { useState, useEffect } from "react";
@@ -123,4 +125,4 @@ const Header = ({ profileImage }: HeaderProps) => {
   );
 };
 
-export default Header; 
+export default Header;

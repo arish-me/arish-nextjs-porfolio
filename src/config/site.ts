@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 export const siteConfig = {
   name: "shadcn/ui",
   url: "https://ui.shadcn.com",

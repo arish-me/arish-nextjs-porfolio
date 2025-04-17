@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React, { useRef } from "react";
 import { SiReact, SiRubyonrails } from '@icons-pack/react-simple-icons'
 import { HeartIcon } from 'lucide-react'

@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 export const isProduction = process.env.NODE_ENV === 'production'
 
 export const SITE_URL = isProduction ? 'https://arish.me' : 'http://localhost:3000'

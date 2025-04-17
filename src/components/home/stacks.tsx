@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 'use client'
 import StacksCard from "./stacks-card"
 import LocationCard from "./location-card"

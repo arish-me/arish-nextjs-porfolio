@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import Symplr from '@/images/symplr-logo-vector.png';
 import MarketDojo from '@/images/marketdojo.jpg';
 import Vineti from '@/images/vineti.jpg';

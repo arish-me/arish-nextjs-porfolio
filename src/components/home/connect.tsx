@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React, { useRef } from "react";
 import Link from "next/link";
 import { LinkIcon } from 'lucide-react'

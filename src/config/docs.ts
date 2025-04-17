@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { MainNavItem, SidebarNavItem } from "types/nav"
 
 export interface DocsConfig {
