@@ -57,7 +57,7 @@ export default function AboutPage() {
               <BlurImage
                 src={Logo}
                 alt="Arish's avatar"
-                size="5xl"
+                size="4xl"
                 className="h-full w-full"
                 loading="lazy"
               />
