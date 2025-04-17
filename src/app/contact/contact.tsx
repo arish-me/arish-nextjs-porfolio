@@ -11,7 +11,16 @@ import { SITE_LINKEDIN_URL, SITE_GITHUB_URL, SITE_X_URL } from '@/lib/constants'
 import { SiLinkedin, SiGithub, SiTwitter } from '@icons-pack/react-simple-icons'
 
 export default function Contact() {
+  function sendEmail() {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const subject = document.getElementById('subject').value;
+    const message = document.getElementById('message').value;
 
+    const mailtoLink = `mailto:hello@arishdev.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)}`;
+
+    window.location.href = mailtoLink;
+  }
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -55,7 +64,7 @@ export default function Contact() {
                   <Label htmlFor="message">Message</Label>
                   <Textarea id="message" rows={5} placeholder="Your message" />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button onClick={sendEmail} className="w-full">
                   Send Message
                 </Button>
               </form>
