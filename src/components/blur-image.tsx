@@ -24,7 +24,7 @@ export function BlurImage({
 }: BlurImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
-  
+
   // Define size classes
   const sizeClasses = {
     sm: 'h-8 w-8',
@@ -33,6 +33,7 @@ export function BlurImage({
     '2xl': 'h-32 w-32',
     '3xl': 'h-40 w-40',
     '4xl': 'h-56 w-56',
+    '5xl': 'h-64 w-64',
   }
 
   // Fallback if image fails to load

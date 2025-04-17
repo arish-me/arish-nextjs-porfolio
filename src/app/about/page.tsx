@@ -3,7 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
+import Logo from '@/images/arishkhan.jpg';
+import { BlurImage } from "@/components/blur-image"
 export const metadata: Metadata = {
   title: "About | Arish's Portfolio",
   description: "Learn more about Arish, my background, skills, and experience",
@@ -16,37 +17,25 @@ export default function AboutPage() {
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <h1 className="text-5xl font-bold">About Me</h1>
           <p className="text-xl text-muted-foreground">
-            Full Stack Developer passionate about building beautiful, functional applications
+            Senior Software Engineer & Team Lead specializing in Ruby on Rails.
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-12">
-          <div className="md:col-span-1 flex justify-center">
-            {/* Placeholder for a bigger profile image */}
-            <div className="aspect-square w-full max-w-xs relative bg-muted rounded-xl overflow-hidden flex items-center justify-center text-muted-foreground border-4 border-primary/20">
-              Profile Image
-            </div>
-          </div>
           <div className="md:col-span-2 space-y-6">
             <div className="space-y-4">
-              <h2 className="text-3xl font-bold">Hi there! I'm Arish</h2>
+              <h2 className="text-3xl font-bold">Hi there! I'm Arish Khan</h2>
               <p className="text-lg leading-relaxed">
-                I'm a passionate Full Stack Developer with expertise in creating beautiful, 
-                user-friendly web experiences. I specialize in building modern web applications
-                using Ruby on Rails, React, and Next.js.
+                I am a Senior Software Engineer and Team Lead with over 8+ years of experience in web development, specializing in Ruby on Rails. I have built, scaled, and maintained products in various sectors including procurement software, CRM, data analysis, travel, and supply chain management.
               </p>
               <p className="leading-relaxed">
-                With a background in both design and development, I bring a unique perspective 
-                to every project, ensuring both aesthetics and functionality work harmoniously.
-                I believe in clean code, intuitive design, and building applications that solve
-                real problems.
+                Throughout my career, I have successfully led cross-functional teams to create scalable applications from scratch and improve performance in large-scale production systems. I am passionate about clean code, efficient solutions, and delivering high-quality products.
               </p>
               <p className="leading-relaxed">
-                When I'm not coding, you might find me exploring design trends, contributing to 
-                open-source projects, reading tech blogs, or enjoying outdoor activities.
+                I am also an AWS Solution Innovator, recognized for effectively leveraging AWS to optimize cloud-based application performance and scalability.
               </p>
             </div>
-            
+
             <div className="flex gap-4 pt-4">
               <Button asChild>
                 <Link href="/contact">Get In Touch</Link>
@@ -56,46 +45,69 @@ export default function AboutPage() {
               </Button>
             </div>
           </div>
+
+        <div className="md:col-span-1 flex justify-center">
+          <div className="aspect-square w-full max-w-xs relative bg-muted rounded-xl overflow-hidden flex items-center justify-center text-muted-foreground border-4 border-primary/20">
+            <BlurImage
+              src={Logo}
+              alt="Arish's avatar"
+              size="5xl"
+              className="h-full w-full"
+              loading="lazy"
+            />
+          </div>
+        </div>
         </div>
       </section>
 
       <section className="space-y-8">
-        <h2 className="text-3xl font-bold text-center">My Journey</h2>
+        <h2 className="text-3xl font-bold text-center">Professional Experience</h2>
         <div className="max-w-3xl mx-auto">
           <div className="space-y-12">
             {[
               {
-                role: "Senior Full Stack Developer",
-                company: "Tech Company",
-                period: "2021 - Present",
-                description: "Leading development for various web applications using Ruby on Rails, React, and Next.js. Implementing responsive designs and improving user experience. Mentoring junior developers and implementing best practices across projects.",
+                role: "Team Lead",
+                company: "Tietoevry India Pvt Ltd",
+                period: "Dec 2022 – Present",
+                description: "Led end-to-end development of symplr Talent Sourcing, designing AI-driven features for candidate matching and CRM, automating workflows, and ensuring HIPAA compliance. Managed a cross-functional team, optimized performance for scalability, and aligned with stakeholders through regular updates.",
                 achievements: [
-                  "Redesigned and optimized the main product, improving performance by 40%",
-                  "Led a team of 5 developers to deliver major features on time and under budget",
-                  "Implemented CI/CD pipeline reducing deployment time by 60%"
-                ]
+                  "Designed AI-driven features for candidate matching and CRM.",
+                  "Automated workflows and ensured HIPAA compliance.",
+                  "Optimized performance for scalability."
+                ],
               },
               {
-                role: "Full Stack Developer",
-                company: "Previous Company",
-                period: "2019 - 2021",
-                description: "Developed and maintained web applications using Ruby on Rails and React. Collaborated with design teams to implement pixel-perfect UIs and ensure optimal user experience.",
+                role: "Senior Software Engineer",
+                company: "BigBinary Pvt Ltd",
+                period: "Apr 2021 – Dec 2022",
+                description: "Developed and optimized scalable applications using Rails, React, and Kubernetes for clients in procurement, form building, and eSourcing, with a strong focus on database management and performance.",
                 achievements: [
-                  "Built and launched 3 successful client projects from inception to deployment",
-                  "Integrated payment processing system reducing transaction errors by 25%",
-                  "Implemented responsive design principles improving mobile conversion by 35%"
-                ]
+                  "Developed scalable applications using Rails, React, and Kubernetes.",
+                  "Optimized database management and performance.",
+                  "Worked on procurement, form building, and eSourcing projects.",
+                ],
               },
               {
-                role: "UI/UX Designer & Developer",
-                company: "Design Studio",
-                period: "2017 - 2019",
-                description: "Designed user interfaces for web and mobile applications. Collaborated with development teams to implement designs and ensure pixel-perfect results.",
+                role: "Senior Software Engineer | Client: Market Dojo",
+                company: "Cyber Infrastructure Pvt. Ltd",
+                period: "May 2019 – Mar 2021",
+                description: "Lead the development of a scalable eSourcing platform for Market Dojo, a client in the procurement industry. Spearheaded a team focused on feature enhancement, bug resolution, and performance optimization. Implemented CI/CD pipelines using GitHub Actions.",
                 achievements: [
-                  "Created design systems for 5 major clients ensuring consistent branding",
-                  "Reduced design-to-implementation time by 30% through better documentation",
-                  "Won design award for e-commerce website redesign project"
-                ]
+                  "Lead development of a scalable eSourcing platform.",
+                  "Implemented CI/CD pipelines using GitHub Actions.",
+                  "Focused on feature enhancement, bug resolution, and performance optimization.",
+                ],
+              },
+              {
+                role: "Software Engineer | FlightsMachine | BuyBaggage | MyX Fitness",
+                company: "NCS Private Ltd.",
+                period: "Jun 2016 – Mar 2019",
+                description: "Led and developed multiple client projects across sectors, including a flight deals alert system, a baggage management platform, and a fitness tech solution. Built and optimized applications for scalability, designed REST APIs, and implemented third-party integrations.",
+                achievements: [
+                  "Developed flight deals alert system with Twilio integration.",
+                  "Built baggage management platform with Stripe payment integration.",
+                  "Developed fitness tech solution and designed REST APIs.",
+                ],
               },
             ].map((job, index) => (
               <Card key={index} className="relative pl-6 border-l-4 border-primary">
@@ -124,30 +136,40 @@ export default function AboutPage() {
       </section>
 
       <section className="space-y-8">
-        <h2 className="text-3xl font-bold text-center">Education</h2>
+        <h2 className="text-3xl font-bold text-center">Education & Training</h2>
         <Card className="max-w-3xl mx-auto border-l-4 border-primary pl-6">
           <CardHeader>
-            <CardTitle>Bachelor's in Computer Science</CardTitle>
+            <CardTitle>Bachelor of Engineering</CardTitle>
             <CardDescription className="flex justify-between text-base">
-              <span>University Name</span>
-              <span>2013 - 2017</span>
+              <span>Sushila Devi Bansal College of Engineering</span>
+              <span>2011 - 2015</span>
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p>
-              Focused on software engineering, web development, algorithms, and data structures.
-              Participated in various coding competitions and hackathons.
+              Focused on software engineering and web development.
             </p>
-            <div className="mt-4">
-              <h4 className="font-semibold mb-2">Relevant Coursework:</h4>
-              <div className="flex flex-wrap gap-2">
-                {["Data Structures", "Algorithms", "Web Development", "Database Systems", "UI/UX Design"].map((course) => (
-                  <span key={course} className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full">
-                    {course}
-                  </span>
-                ))}
-              </div>
-            </div>
+          </CardContent>
+        </Card>
+        <Card className="max-w-3xl mx-auto border-l-4 border-primary pl-6">
+          <CardHeader>
+            <CardTitle>Agile & Scrum Training</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>
+              Completed Agile Training, including Scrum Master methodologies, with hands-on experience leading Agile sprints and managing cross-functional teams.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="max-w-3xl mx-auto border-l-4 border-primary pl-6">
+          <CardHeader>
+            <CardTitle>AWS Solution Innovator</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>
+              Recognized for effectively leveraging AWS to optimize cloud-based application performance and scalability, implementing solutions that improved system reliability and reduced operational costs, despite no formal AWS training.
+            </p>
           </CardContent>
         </Card>
       </section>
@@ -163,4 +185,4 @@ export default function AboutPage() {
       </section>
     </div>
   );
-} 
+}
