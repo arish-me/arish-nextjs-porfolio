@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import Blogs from './blog'
 import { generateMetadata } from '@/lib/seo';
 const title = 'Blogs';

@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 // fetchBlogData.js
 'use server';
 

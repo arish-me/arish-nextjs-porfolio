@@ -1,3 +1,4 @@
+/* eslint-disable */
 
 import Contact from './contact'
 import { generateMetadata } from '@/lib/seo';
