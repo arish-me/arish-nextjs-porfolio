@@ -3,70 +3,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { PROJECTS_DATA } from "@/config/project.tsx"
+import { BlurImage } from '@/components/blur-image'
 export const metadata: Metadata = {
   title: "Projects | Arish's Portfolio",
   description: "Explore my recent projects and technical work",
 };
-
-// Project data (in a real app, this could come from a CMS or API)
-const projects = [
-  {
-    id: 1,
-    title: "E-commerce Platform",
-    description: "A fully responsive e-commerce website built with Next.js, featuring product filtering, search functionality, shopping cart, and payment processing with Stripe.",
-    longDescription: "This project was built to provide a complete online shopping experience. I implemented features like real-time inventory updates, user reviews, wishlist functionality, and a streamlined checkout process. The admin dashboard allows for easy product management and order tracking.",
-    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Stripe", "Prisma", "PostgreSQL"],
-    image: "/placeholder.jpg", // Replace with actual image path
-    link: "https://ecommerce-demo.example.com",
-    github: "https://github.com/username/ecommerce-platform",
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "Task Management App",
-    description: "A productivity app with drag-and-drop task management, team collaboration features, and real-time updates using WebSockets.",
-    longDescription: "This application helps teams organize their work efficiently. I built features like custom board views, task dependencies, deadline notifications, and performance analytics. The app includes role-based permissions and integrates with popular calendar services.",
-    technologies: ["React", "Node.js", "MongoDB", "Socket.io", "Redux", "Express"],
-    image: "/placeholder.jpg", // Replace with actual image path
-    link: "https://tasks-app.example.com",
-    github: "https://github.com/username/task-management",
-    featured: true,
-  },
-  {
-    id: 3,
-    title: "Content Management System",
-    description: "A modern CMS built with Ruby on Rails, featuring a rich text editor, media library, user management, and custom content types.",
-    longDescription: "I developed this CMS to provide content creators with a flexible yet powerful publishing platform. The system includes features like content scheduling, revision history, custom fields, and SEO optimization tools. The API-first approach allows for headless CMS functionality.",
-    technologies: ["Ruby on Rails", "PostgreSQL", "Hotwire", "Stimulus", "AWS S3", "Redis"],
-    image: "/placeholder.jpg", // Replace with actual image path
-    link: "https://cms-demo.example.com",
-    github: "https://github.com/username/rails-cms",
-    featured: false,
-  },
-  {
-    id: 4,
-    title: "Weather Dashboard",
-    description: "An interactive weather application that provides current weather information and forecasts for multiple locations with beautiful data visualizations.",
-    longDescription: "This dashboard helps users track weather conditions across multiple locations simultaneously. I implemented features like historical weather data charts, severe weather alerts, custom location groups, and weather-based recommendations. The app uses geolocation for precise local forecasts.",
-    technologies: ["React", "Chart.js", "OpenWeather API", "Tailwind CSS", "Vite"],
-    image: "/placeholder.jpg", // Replace with actual image path
-    link: "https://weather-app.example.com",
-    github: "https://github.com/username/weather-dashboard",
-    featured: false,
-  },
-  {
-    id: 5,
-    title: "Portfolio Website",
-    description: "A personal portfolio website built with Next.js and Shadcn UI components to showcase my projects and skills.",
-    longDescription: "I designed and built this portfolio to showcase my work and skills as a developer. The site features a clean, responsive design with subtle animations and a dark/light mode. The project section dynamically loads content and includes filtering capabilities.",
-    technologies: ["Next.js", "TypeScript", "Shadcn UI", "Tailwind CSS", "Framer Motion"],
-    image: "/placeholder.jpg", // Replace with actual image path
-    link: "/",
-    github: "https://github.com/username/portfolio",
-    featured: false,
-  },
-];
 
 export default function ProjectsPage() {
   return (
@@ -82,10 +24,15 @@ export default function ProjectsPage() {
       <section className="space-y-8">
         <h2 className="text-2xl font-bold">Featured Work</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {projects.filter(p => p.featured).map((project) => (
+          {PROJECTS_DATA.filter(p => p.featured).map((project) => (
             <Card key={project.id} className="overflow-hidden group hover:border-primary transition-all">
               <div className="h-64 bg-muted flex items-center justify-center text-muted-foreground relative overflow-hidden">
-                Project Screenshot
+                 <BlurImage
+                    src={project.image}
+                    alt="Arish's avatar"
+                    className="w-full h-full"
+                    objectFit="cover"
+                  />
                 <div className="absolute inset-0 bg-primary/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="text-primary-foreground flex gap-4">
                     <Button asChild size="sm" variant="secondary">
@@ -123,10 +70,15 @@ export default function ProjectsPage() {
       <section className="space-y-8">
         <h2 className="text-2xl font-bold">Other Projects</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {projects.filter(p => !p.featured).map((project) => (
+          {PROJECTS_DATA.filter(p => !p.featured).map((project) => (
             <Card key={project.id} className="overflow-hidden group hover:border-primary transition-all flex flex-col">
               <div className="h-48 bg-muted flex items-center justify-center text-muted-foreground">
-                Project Screenshot
+               <BlurImage
+                src={project.image}
+                alt="Arish's avatar"
+                className="w-full h-full"
+                objectFit="cover"
+              />
               </div>
               <CardHeader className="flex-1">
                 <CardTitle className="group-hover:text-primary transition-colors text-xl">{project.title}</CardTitle>
@@ -175,4 +127,4 @@ export default function ProjectsPage() {
       </section>
     </div>
   );
-} 
+}

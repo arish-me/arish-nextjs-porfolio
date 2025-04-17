@@ -6,12 +6,6 @@ import Manofix from '@/images/manofix.jpg';
 import FlightsMachine from '@/images/flightsmachine.jpg';
 import NeetForm from '@/images/neetoForm.jpg';
 
-type SocialLinks = Array<{
-  href: string
-  title: string
-  icon: IconType
-}>
-
 export const PROJECTS_DATA: ProjectsData =
 [
   {
@@ -83,7 +77,7 @@ export const PROJECTS_DATA: ProjectsData =
     image: Manofix,
     link: "https://manofix.com/",
     github: null,
-    featured: true,
+    featured: false,
     tags: ["Marketplace", "Handyman", "Ruby on Rails", "Stripe"]
   },
   {
@@ -95,7 +89,7 @@ export const PROJECTS_DATA: ProjectsData =
     image: FlightsMachine,
     link: null,
     github: null,
-    featured: true,
+    featured: false,
     tags: ["Flight Deals", "Notifications", "Web Scraping", "Sinatra"]
   }
 ]
