@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { BlurImage } from '@/components/blur-image'
 import Logo from '@/images/arishme.png';
 import { Github, Linkedin, Mail, Twitter } from 'lucide-react'
+import { SOCIAL_LINKS } from '@/config/links'
 import {
   SITE_FACEBOOK_URL,
   SITE_GITHUB_URL,

@@ -41,7 +41,14 @@ export default function AboutPage() {
                 <Link href="/contact">Get In Touch</Link>
               </Button>
               <Button asChild variant="outline">
-                <a href="/resume.pdf" download="Arish-Resume.pdf">Download Resume</a>
+                <a
+                  href="https://drive.google.com/file/d/1m0JhsxZl56SDPc0GEijBPyyRnufZk8Rt/view?usp=sharing"
+                  download="Arish-Resume.pdf"
+                  target="_blank" // Opens the link in a new tab
+                  rel="noopener noreferrer" // Recommended for security
+                >
+                  Download Resume
+                </a>
               </Button>
             </div>
           </div>
