@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 
 'use client'
 
@@ -13,17 +13,26 @@ import { SITE_LINKEDIN_URL, SITE_GITHUB_URL, SITE_X_URL } from '@/lib/constants'
 import { SiLinkedin, SiGithub, SiTwitter } from '@icons-pack/react-simple-icons'
 
 export default function Contact() {
-  function sendEmail() {
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const subject = document.getElementById('subject').value;
-    const message = document.getElementById('message').value;
+function sendEmail() {
+  const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('email');
+  const subjectInput = document.getElementById('subject');
+  const messageInput = document.getElementById('message');
+
+  if (nameInput && emailInput && subjectInput && messageInput) {
+    const name = nameInput.value;
+    const email = emailInput.value;
+    const subject = subjectInput.value;
+    const message = messageInput.value;
 
     const mailtoLink = `mailto:hello@arishdev.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)}`;
 
     window.location.href = mailtoLink;
+  } else {
+    console.error('One or more form elements not found.');
+    alert("There was a problem sending the email. Please try again later.");
   }
-  return (
+}  return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
