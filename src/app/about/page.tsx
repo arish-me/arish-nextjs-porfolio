@@ -5,11 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Logo from '@/images/arishkhan.jpg';
 import { BlurImage } from "@/components/blur-image"
-export const metadata: Metadata = {
-  title: "About | Arish's Portfolio",
-  description: "Learn more about Arish, my background, skills, and experience",
-};
+import { generateMetadata } from '@/lib/seo';
 
+const title = 'About Me';
+export const metadata = generateMetadata(title);
 export default function AboutPage() {
   return (
     <div className="py-16 space-y-16">
@@ -53,17 +52,17 @@ export default function AboutPage() {
             </div>
           </div>
 
-        <div className="md:col-span-1 flex justify-center">
-          <div className="aspect-square w-full max-w-xs relative bg-muted rounded-xl overflow-hidden flex items-center justify-center text-muted-foreground border-4 border-primary/20">
-            <BlurImage
-              src={Logo}
-              alt="Arish's avatar"
-              size="5xl"
-              className="h-full w-full"
-              loading="lazy"
-            />
+          <div className="md:col-span-1 flex justify-center">
+            <div className="aspect-square w-full max-w-xs relative bg-muted rounded-xl overflow-hidden flex items-center justify-center text-muted-foreground border-4 border-primary/20">
+              <BlurImage
+                src={Logo}
+                alt="Arish's avatar"
+                size="5xl"
+                className="h-full w-full"
+                loading="lazy"
+              />
+            </div>
           </div>
-        </div>
         </div>
       </section>
 
