@@ -49,23 +49,8 @@ type SocialLinks = Array<{
 export const HEADER_LINKS: HeaderLinks = [
   {
     icon: <PencilIcon className='size-3.5' />,
-    href: '/blog',
-    text: 'Blog'
-  },
-  {
-    icon: <MessageCircleIcon className='size-3.5' />,
-    href: '/guestbook',
-    text: 'Guestbook'
-  },
-  {
-    icon: <BarChartIcon className='size-3.5' />,
-    href: '/dashboard',
-    text: 'Dashboard'
-  },
-  {
-    icon: <FlameIcon className='size-3.5' />,
-    href: '/projects',
-    text: 'Projects'
+    href: '/',
+    text: 'Home'
   },
   {
     icon: <UserCircleIcon className='size-3.5' />,
@@ -73,9 +58,14 @@ export const HEADER_LINKS: HeaderLinks = [
     text: 'About'
   },
   {
-    icon: <MonitorIcon className='size-3.5' />,
-    href: '/uses',
-    text: 'Uses'
+    icon: <FlameIcon className='size-3.5' />,
+    href: '/projects',
+    text: 'Projects'
+  },
+  {
+    icon: <BarChartIcon className='size-3.5' />,
+    href: '/contact',
+    text: 'Contact'
   }
 ]
 
@@ -88,12 +78,16 @@ export const FOOTER_LINKS: FooterLinks = [
         text: 'Home'
       },
       {
-        href: '/blogs',
-        text: 'Blogs'
+        href: '/projects',
+        text: 'Projects'
       },
       {
         href: '/about',
         text: 'About'
+      },
+      {
+        href: '/contact',
+        text: 'Contact'
       }
     ]
   },
@@ -152,3 +146,4 @@ export const SOCIAL_LINKS: SocialLinks = [
     icon: SiYoutube
   }
 ]
+

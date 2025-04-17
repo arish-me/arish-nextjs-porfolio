@@ -34,7 +34,7 @@ export default function MainNav() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <nav className="hidden md:block flex items-center gap-4 lg:gap-6 text-sm">
+          <nav className="flex items-center gap-4 lg:gap-6 text-sm">
             {mainNav.map((item, index) => {
               const isActive = pathname === item.href
               return (
