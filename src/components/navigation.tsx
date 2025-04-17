@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
+
 import { BlurImage } from '@/components/blur-image'
 import Logo from '@/images/arishme.png';
 const mainNav = [
@@ -26,7 +26,7 @@ export function Navigation() {
            <BlurImage
               src={Logo}
               alt="Arish's avatar"
-              fallbackText="a"
+
               size="sm"
               className="rounded-full"
             />

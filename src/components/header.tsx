@@ -115,7 +115,6 @@ export default function Header() {
         <BlurImage
           src={Logo}
           alt="Arish's avatar"
-          fallbackText="A"
           size="4xl"
           className="rounded-full"
           loading="lazy"

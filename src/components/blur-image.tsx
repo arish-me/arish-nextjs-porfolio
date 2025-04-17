@@ -1,33 +1,71 @@
-import { cn } from '@/lib/utils'
-import NextImage from 'next/image'
+'use client'
+
 import { useState } from 'react'
+import Image from 'next/image'
 
-type ImageProps = {
-  imageClassName?: string
-  lazy?: boolean
-} & React.ComponentProps<typeof NextImage>
+type BlurImageProps = {
+  src: string | any
+  alt: string
+  fallbackText?: string
+  size?: 'sm' | 'md' | 'lg' | '2xl' | '3xl' | '4xl'
+  className?: string
+  objectFit?: 'cover' | 'contain' | 'fill'
+  loading?: 'lazy' | 'eager'
+}
 
-const BlurImage = (props: ImageProps) => {
-  const { alt, src, className, imageClassName, lazy = true, ...rest } = props
+export function BlurImage({
+  src,
+  alt,
+  fallbackText,
+  size = 'md',
+  className = '',
+  objectFit = 'cover',
+  loading = 'eager',
+}: BlurImageProps) {
   const [isLoading, setIsLoading] = useState(true)
+  const [hasError, setHasError] = useState(false)
+  
+  // Define size classes
+  const sizeClasses = {
+    sm: 'h-8 w-8',
+    md: 'h-16 w-16',
+    lg: 'h-24 w-24',
+    '2xl': 'h-32 w-32',
+    '3xl': 'h-40 w-40',
+    '4xl': 'h-56 w-56',
+  }
+
+  // Fallback if image fails to load
+  if (hasError && fallbackText) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-primary text-primary-foreground font-semibold ${sizeClasses[size]} ${className}`}
+      >
+        {fallbackText.charAt(0).toUpperCase()}
+      </div>
+    )
+  }
 
   return (
-    <div className={cn('overflow-hidden', isLoading && 'animate-pulse', className)}>
-      <NextImage
-        className={cn(isLoading && 'scale-[1.02] blur-xl grayscale', imageClassName)}
-        style={{
-          transition: 'filter 700ms ease, scale 150ms ease'
-        }}
+    <div className={`relative overflow-hidden ${sizeClasses[size]} ${className}`}>
+      <Image
         src={src}
         alt={alt}
-        loading={lazy ? 'lazy' : undefined}
-        priority={!lazy}
-        quality={100}
+        fill
+        className={`
+          ${objectFit === 'cover' ? 'object-cover' : ''}
+          ${objectFit === 'contain' ? 'object-contain' : ''}
+          ${objectFit === 'fill' ? 'object-fill' : ''}
+          transition-opacity duration-500
+          ${isLoading ? 'opacity-0 scale-110' : 'opacity-100 scale-100'}
+        `}
+        loading={loading}
         onLoad={() => setIsLoading(false)}
-        {...rest}
+        onError={() => setHasError(true)}
       />
+      {isLoading && !hasError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted animate-pulse" />
+      )}
     </div>
   )
 }
-
-export { BlurImage }
