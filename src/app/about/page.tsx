@@ -37,7 +37,7 @@ export default function AboutPage() {
 
             <div className="flex gap-4 pt-4">
               <Button asChild>
-                <Link href="/contact">Get In Touch</Link>
+                <Link href="/contact/">Get In Touch</Link>
               </Button>
               <Button asChild variant="outline">
                 <a
@@ -186,7 +186,7 @@ export default function AboutPage() {
           I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
         </p>
         <Button asChild size="lg">
-          <Link href="/contact">Contact Me</Link>
+          <Link href="/contact/">Contact Me</Link>
         </Button>
       </section>
     </div>

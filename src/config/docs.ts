@@ -11,23 +11,23 @@ export const docsConfig: DocsConfig = {
   mainNav: [
     {
       title: "Blogs",
-      href: "/blogs",
+      href: "/blogs/",
     },
     {
       title: "Projects",
-      href: "/projects",
+      href: "/projects/",
     },
     {
       title: "Learning",
-      href: "/videos",
+      href: "/videos/",
     },
     {
       title: "About",
-      href: "/about",
+      href: "/about/",
     },
     {
       title: "Startups",
-      href: "/startups",
+      href: "/startups/",
     },
   ],
   sidebarNav: [
@@ -36,23 +36,23 @@ export const docsConfig: DocsConfig = {
       items: [
         {
           title: "Blogs",
-          href: "/blogs",
+          href: "/blogs/",
           items: [],
         },
         {
           title: "Projects",
-          href: "/projects",
+          href: "/projects/",
           items: [],
         },
 
         {
           title: "About Me",
-          href: "/about",
+          href: "/about/",
           items: [],
         },
         {
           title: "Startups",
-          href: "/startups",
+          href: "/startups/",
           items: [],
         },
       ],

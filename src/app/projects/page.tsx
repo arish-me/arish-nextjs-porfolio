@@ -123,7 +123,7 @@ export default function ProjectsPage() {
           feel free to reach out!
         </p>
         <Button asChild size="lg">
-          <Link href="/contact">Let's Collaborate</Link>
+          <Link href="/contact/">Let's Collaborate</Link>
         </Button>
       </section>
     </div>

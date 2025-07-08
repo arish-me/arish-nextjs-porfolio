@@ -56,22 +56,22 @@ export const HEADER_LINKS: HeaderLinks = [
   },
   {
     icon: <PencilIcon className='size-3.5' />,
-    href: '/blogs',
+    href: '/blogs/',
     text: 'Blogs'
   },
   {
     icon: <UserCircleIcon className='size-3.5' />,
-    href: '/about',
+    href: '/about/',
     text: 'About'
   },
   {
     icon: <FlameIcon className='size-3.5' />,
-    href: '/projects',
+    href: '/projects/',
     text: 'Projects'
   },
   {
     icon: <MessageCircleIcon className='size-3.5' />,
-    href: '/contact',
+    href: '/contact/',
     text: 'Contact'
   }
 ]
@@ -85,15 +85,15 @@ export const FOOTER_LINKS: FooterLinks = [
         text: 'Home'
       },
       {
-        href: '/projects',
+        href: '/projects/',
         text: 'Projects'
       },
       {
-        href: '/about',
+        href: '/about/',
         text: 'About'
       },
       {
-        href: '/contact',
+        href: '/contact/',
         text: 'Contact'
       }
     ]

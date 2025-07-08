@@ -3,23 +3,23 @@ import type { MetadataRoute } from 'next'
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: 'https://arishdev.com',
+      url: 'https://www.arishdev.com', // Corrected
       lastModified: new Date(),
     },
     {
-      url: 'https://arishdev.com/about',
+      url: 'https://arishdev.com/about/', // Added trailing slash
       lastModified: new Date(),
     },
     {
-      url: 'https://arishdev.com/blogs',
+      url: 'https://arishdev.com/blogs/', // Added trailing slash
       lastModified: new Date(),
     },
     {
-      url: 'https://arishdev.com/projects',
+      url: 'https://arishdev.com/projects/', // Added trailing slash
       lastModified: new Date(),
     },
     {
-      url: 'https://arishdev.com/contact',
+      url: 'https://arishdev.com/contact/', // Added trailing slash
       lastModified: new Date(),
     },
   ]

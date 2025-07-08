@@ -17,7 +17,7 @@ export const PROJECTS_DATA: ProjectsData =
     longDescription: "Symplr Talent Sourcing, built on the Symplr Platform, empowers healthcare organizations to proactively address workforce needs. Features include enhanced candidate engagement, workflow automation, and comprehensive data analytics.",
     technologies: ["Ruby on Rails", "ReactJS", "GraphQL", "Solr", "Managed Kafka", "AWS"],
     image: Symplr,
-    link: "https://www.symplr.com/products/symplr-talent-sourcing",
+    link: "https://www.symplr.com/products/symplr-talent-sourcing/",
     github: null,
     featured: true,
     tags: ["Ruby on Rails", "ReactJS", "GraphQL", "AWS"]
