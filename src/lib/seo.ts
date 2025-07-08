@@ -2,7 +2,7 @@
 
 // lib/seo.ts
 import type { Metadata } from 'next';
-import { SITE_TITLE, SITE_DESCRIPTION, SITE_URL, SITE_NAME, SITE_KEYWORDS } from './constants';
+import { SITE_TITLE, SITE_DESCRIPTION, SITE_URL, SITE_NAME, SITE_KEYWORDS, OG_IMAGE_URL } from './constants';
 
 
 export const generateMetadata = (
@@ -25,13 +25,13 @@ export const generateMetadata = (
       url: SITE_URL,
       siteName: SITE_NAME,
       type: 'website',
-      images: imageUrl ? [{ url: imageUrl }] : [], // Add image if provided
+      images: imageUrl ? [{ url: imageUrl }] : OG_IMAGE_URL, // Add image if provided
     },
     twitter: {
       card: 'summary_large_image',
       title: pageTitle,
       description: pageDescription,
-      images: imageUrl ? [imageUrl] : [],
+      images: imageUrl ? [imageUrl] : OG_IMAGE_URL,
     },
   };
 };
