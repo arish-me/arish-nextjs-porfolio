@@ -3,9 +3,10 @@
 import Blogs from './blog'
 import { generateMetadata } from '@/lib/seo';
 const title = 'Blogs';
-export const metadata = generateMetadata(title, undefined, undefined, undefined, 'blogs');
+const description = 'My personal website and blog where I share my thoughts on various topics including tutorials, notes, and personal experiences.';
+export const metadata = generateMetadata(title, description, undefined, undefined, 'blogs');
 export default function BlogPage() {
-  const description = 'My personal website and blog where I share my thoughts on various topics including tutorials, notes, and personal experiences.';
+  
   return(
      <div className="py-16 space-y-16">
       <section className="space-y-8">

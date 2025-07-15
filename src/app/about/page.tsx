@@ -8,7 +8,8 @@ import { BlurImage } from "@/components/blur-image"
 import { generateMetadata } from '@/lib/seo';
 
 const title = 'About Me';
-export const metadata = generateMetadata(title, undefined, undefined, undefined, 'about');
+const description = "Experienced Full Stack Developer based in India, specializing in Ruby on Rails and React. Learn more about Arish’s background, skills, and passion for building robust web applications and delivering innovative solutions for clients worldwide.";
+export const metadata = generateMetadata(title, description, undefined, undefined, 'about');
 export default function AboutPage() {
   return (
     <div className="py-16 space-y-16">
