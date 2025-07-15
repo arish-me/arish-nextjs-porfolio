@@ -8,7 +8,7 @@ import { BlurImage } from "@/components/blur-image"
 import { generateMetadata } from '@/lib/seo';
 
 const title = 'About Me';
-export const metadata = generateMetadata(title);
+export const metadata = generateMetadata(title, undefined, undefined, undefined, 'about');
 export default function AboutPage() {
   return (
     <div className="py-16 space-y-16">

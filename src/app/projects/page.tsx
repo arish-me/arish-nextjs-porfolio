@@ -1,15 +1,17 @@
 /* eslint-disable */
 
-import { Metadata } from "next";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PROJECTS_DATA } from "@/config/project.tsx"
 import { BlurImage } from '@/components/blur-image'
-export const metadata: Metadata = {
-  title: "Projects | Arish's Portfolio",
-  description: "Explore my recent projects and technical work",
-};
+import { generateMetadata } from '@/lib/seo';
+
+const title = 'Projects';
+const description = "Explore my recent projects and technical work"
+
+export const metadata = generateMetadata(title, description, undefined, undefined, 'projects');
 
 export default function ProjectsPage() {
   return (

@@ -10,15 +10,20 @@ export const generateMetadata = (
   description?: string,
   keywords?: string[],
   imageUrl?: string,
+  path?: string,
 ): Metadata => {
-  const pageTitle = title ? `${title} | ${SITE_DESCRIPTION}` : SITE_TITLE;
+  const pageTitle = title ? `${title} | ${SITE_TITLE}` : SITE_TITLE;
   const pageDescription = description || SITE_DESCRIPTION;
   const pageKeywords = keywords || SITE_KEYWORDS;
+  const canonicalUrl = `${SITE_URL}${path}`;
 
   return {
     title: pageTitle,
     description: pageDescription,
     keywords: pageKeywords,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: pageTitle,
       description: pageDescription,
