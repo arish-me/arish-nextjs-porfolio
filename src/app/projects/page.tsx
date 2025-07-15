@@ -9,7 +9,7 @@ import { BlurImage } from '@/components/blur-image'
 import { generateMetadata } from '@/lib/seo';
 
 const title = 'Projects';
-const description = "Explore my recent projects and technical work"
+const description = "Discover a curated selection of my recent projects, showcasing expertise in Ruby on Rails, React, and full stack development. Explore innovative web applications, technical solutions, and the impact delivered for clients across various industries.";
 
 export const metadata = generateMetadata(title, description, undefined, undefined, 'projects');
 
