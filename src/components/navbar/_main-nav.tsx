@@ -14,6 +14,7 @@ const mainNav = [
   { title: 'Home', href: '/' },
   { title: 'About', href: '/about' },
   { title: 'Projects', href: '/projects' },
+  { title: 'Resources', href: '/resources' },
   { title: 'Contact', href: '/contact' },
 ];
 
