@@ -17,9 +17,9 @@ export default function Home() {
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <h2 className="text-3xl font-bold mb-6">FullStack Rails & React Developer</h2>
           <p className="text-lg text-muted-foreground mb-6">
-            As a passionate FullStack developer specializing in Ruby on Rails and React, I bring over 3 years of experience in building scalable web applications, modern user interfaces, and robust backend systems. My expertise spans the entire development stack, from database design and API development to responsive frontend interfaces and deployment strategies.
+            As a passionate FullStack developer specializing in Ruby on Rails and React, I bring over 10 years of experience in building scalable web applications, modern user interfaces, and robust backend systems. My expertise spans the entire development stack, from database design and API development to responsive frontend interfaces and deployment strategies.
           </p>
-          
+
           <div className="grid md:grid-cols-2 gap-8 mt-8">
             <div>
               <h3 className="text-xl font-semibold mb-4">Backend Development</h3>
@@ -34,7 +34,7 @@ export default function Home() {
                 <li>Background job processing with Sidekiq</li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="text-xl font-semibold mb-4">Frontend Development</h3>
               <p className="text-muted-foreground mb-4">
@@ -49,7 +49,7 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          
+
           <div className="mt-8 p-6 bg-muted rounded-lg">
             <h3 className="text-xl font-semibold mb-4">Development Approach</h3>
             <p className="text-muted-foreground mb-4">
@@ -61,7 +61,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      
+
       <FeaturedProject />
       <HomeCTA />
     </div>
