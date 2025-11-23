@@ -5,19 +5,40 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { COURSES_DATA } from '@/config/courses';
+import type { Course } from '@/config/courses';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BlurImage } from '@/components/blur-image';
 import { Clock, BookOpen, GraduationCap, Users, Calendar, CheckCircle2, Circle } from 'lucide-react';
 import { ChevronRight } from 'lucide-react';
 import { isLessonCompleted, getCourseCompletionCount } from '@/lib/course-progress';
+import { getCourseBySlug, getCourseById } from '@/lib/sanity/utils';
+import { PortableText } from '@/components/portable-text';
 
 export default function CourseDetailPage() {
   const params = useParams();
   const courseId = params.courseId as string;
-  const course = COURSES_DATA.find(c => c.id === courseId);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    async function fetchCourse() {
+      try {
+        // Try by slug first, then by ID
+        let fetchedCourse = await getCourseBySlug(courseId);
+        if (!fetchedCourse) {
+          fetchedCourse = await getCourseById(courseId);
+        }
+        setCourse(fetchedCourse);
+      } catch (error) {
+        console.error('Error fetching course:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCourse();
+  }, [courseId]);
 
   // Load progress from localStorage
   useEffect(() => {
@@ -57,6 +78,14 @@ export default function CourseDetailPage() {
       window.removeEventListener('course-progress-updated', handleStorageChange);
     };
   }, [course, courseId]);
+
+  if (loading) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-muted-foreground">Loading course...</p>
+      </div>
+    );
+  }
 
   if (!course) {
     return (
@@ -104,9 +133,13 @@ export default function CourseDetailPage() {
                 </Badge>
               )}
             </div>
-            <p className="text-lg text-muted-foreground">
-              {course.longDescription || course.description}
-            </p>
+            <div className="text-lg text-muted-foreground">
+              {course.longDescription ? (
+                <PortableText content={course.longDescription} />
+              ) : (
+                <p>{course.description}</p>
+              )}
+            </div>
           </div>
 
           {/* Course Content */}

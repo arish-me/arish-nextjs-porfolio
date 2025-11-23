@@ -2,35 +2,62 @@
 
 'use client'
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { COURSES_DATA } from '@/config/courses';
 import CourseCard from '@/components/courses/course-card';
+import { getCourses } from '@/lib/sanity/utils';
+import type { Course } from '@/config/courses';
 
 export default function CoursesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All Courses');
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const fetchedCourses = await getCourses();
+        setCourses(fetchedCourses);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCourses();
+  }, []);
 
   // Get all unique categories
   const categories = useMemo(() => {
-    const cats = ['All Courses', ...new Set(COURSES_DATA.map(course => course.category))];
+    const cats = ['All Courses', ...new Set(courses.map(course => course.category))];
     return cats;
-  }, []);
+  }, [courses]);
 
   // Filter courses by category
   const filteredCourses = useMemo(() => {
     if (selectedCategory === 'All Courses') {
-      return COURSES_DATA;
+      return courses;
     }
-    return COURSES_DATA.filter(course => course.category === selectedCategory);
-  }, [selectedCategory]);
+    return courses.filter(course => course.category === selectedCategory);
+  }, [selectedCategory, courses]);
 
   // Count courses per category
   const getCategoryCount = (category: string) => {
     if (category === 'All Courses') {
-      return COURSES_DATA.length;
+      return courses.length;
     }
-    return COURSES_DATA.filter(course => course.category === category).length;
+    return courses.filter(course => course.category === category).length;
   };
+
+  if (loading) {
+    return (
+      <div className="py-16 space-y-12">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading courses...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-16 space-y-12">

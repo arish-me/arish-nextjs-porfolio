@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         hostname: 'cdn.hashnode.com',
         pathname: '**', // Allow all paths under this hostname
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+        pathname: '**', // Allow all paths under this hostname
+      },
     ],
   },
 };

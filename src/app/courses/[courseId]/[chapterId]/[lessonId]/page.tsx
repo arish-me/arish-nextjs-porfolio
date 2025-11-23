@@ -2,14 +2,16 @@
 
 'use client'
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { COURSES_DATA } from '@/config/courses';
+import type { Course } from '@/config/courses';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronRight, ChevronLeft, Clock, BookOpen } from 'lucide-react';
 import { markLessonComplete } from '@/lib/course-progress';
+import { getCourseBySlug, getCourseById } from '@/lib/sanity/utils';
+import { PortableText } from '@/components/portable-text';
 
 export default function LessonPage() {
   const params = useParams();
@@ -17,16 +19,41 @@ export default function LessonPage() {
   const courseId = params.courseId as string;
   const chapterId = params.chapterId as string;
   const lessonId = params.lessonId as string;
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCourse() {
+      try {
+        let fetchedCourse = await getCourseBySlug(courseId);
+        if (!fetchedCourse) {
+          fetchedCourse = await getCourseById(courseId);
+        }
+        setCourse(fetchedCourse);
+      } catch (error) {
+        console.error('Error fetching course:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCourse();
+  }, [courseId]);
 
   // Mark lesson as complete when viewed
   useEffect(() => {
-    markLessonComplete(courseId, chapterId, lessonId);
-    
-    // Dispatch custom event to update other components
-    window.dispatchEvent(new Event('course-progress-updated'));
-  }, [courseId, chapterId, lessonId]);
+    if (course) {
+      markLessonComplete(courseId, chapterId, lessonId);
+      window.dispatchEvent(new Event('course-progress-updated'));
+    }
+  }, [course, courseId, chapterId, lessonId]);
 
-  const course = COURSES_DATA.find(c => c.id === courseId);
+  if (loading) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-muted-foreground">Loading lesson...</p>
+      </div>
+    );
+  }
   
   if (!course) {
     return (
@@ -130,9 +157,7 @@ export default function LessonPage() {
         </CardHeader>
         <CardContent>
           <div className="prose prose-lg dark:prose-invert max-w-none">
-            <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-              {lesson.content}
-            </div>
+            <PortableText content={lesson.content} />
           </div>
         </CardContent>
       </Card>
