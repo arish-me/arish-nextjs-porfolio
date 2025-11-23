@@ -111,7 +111,7 @@ export default function LessonPage() {
   const totalLessons = allLessons.length;
 
   return (
-    <div className="py-16 space-y-8">
+    <div className="py-8 space-y-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link href="/courses" className="hover:text-foreground transition-colors">
@@ -134,33 +134,24 @@ export default function LessonPage() {
       </nav>
 
       {/* Lesson Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <BookOpen className="h-6 w-6 text-primary" />
-            <h1 className="text-4xl font-bold">{lesson.title}</h1>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <BookOpen className="h-6 w-6 text-primary" />
+          <h1 className="text-4xl font-bold">{lesson.title}</h1>
+        </div>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-4 w-4" />
+            <span>Estimated time: {lesson.duration} {lesson.duration === 1 ? 'minute' : 'minutes'}</span>
           </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4" />
-              <span>Estimated time: {lesson.duration} {lesson.duration === 1 ? 'minute' : 'minutes'}</span>
-            </div>
-            <span>Lesson {lessonNumber} of {totalLessons}</span>
-          </div>
+          <span>Lesson {lessonNumber} of {totalLessons}</span>
         </div>
       </div>
 
       {/* Lesson Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lesson Content</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            <PortableText content={lesson.content} />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="max-w-4xl">
+        <PortableText content={lesson.content} />
+      </div>
 
       {/* Navigation */}
       <div className="flex items-center justify-between gap-4 pt-8 border-t">

@@ -176,17 +176,20 @@ const components = {
     },
   },
   block: {
+    normal: ({ children }: any) => (
+      <p className="text-base leading-7 mb-6 text-foreground">{children}</p>
+    ),
     h1: ({ children }: any) => (
-      <h1 className="text-4xl font-bold mt-8 mb-4">{children}</h1>
+      <h1 className="text-3xl font-bold mt-10 mb-6 text-foreground">{children}</h1>
     ),
     h2: ({ children }: any) => (
-      <h2 className="text-3xl font-bold mt-6 mb-3">{children}</h2>
+      <h2 className="text-2xl font-bold mt-8 mb-4 text-foreground">{children}</h2>
     ),
     h3: ({ children }: any) => (
-      <h3 className="text-2xl font-semibold mt-4 mb-2">{children}</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-3 text-foreground">{children}</h3>
     ),
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-primary pl-4 italic my-4 text-muted-foreground">
+      <blockquote className="border-l-4 border-primary pl-6 italic my-6 text-muted-foreground bg-muted/50 py-4 rounded-r">
         {children}
       </blockquote>
     ),
@@ -199,14 +202,30 @@ export function PortableText({ content }: PortableTextProps) {
     try {
       // Try to parse as JSON (PortableText)
       const parsed = JSON.parse(content)
-      return <SanityPortableText value={parsed} components={components} />
+      return (
+        <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-p:text-foreground prose-p:leading-relaxed prose-p:mb-6 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+          <SanityPortableText value={parsed} components={components} />
+        </div>
+      )
     } catch {
-      // If not JSON, render as plain text
-      return <div className="whitespace-pre-wrap">{content}</div>
+      // If not JSON, render as plain text with proper formatting
+      return (
+        <div className="text-base leading-7 space-y-6 text-foreground">
+          {content.split('\n\n').map((paragraph, index) => (
+            <p key={index} className="mb-6">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      )
     }
   }
 
   // If content is already PortableText blocks
-  return <SanityPortableText value={content} components={components} />
+  return (
+    <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-p:text-foreground prose-p:leading-relaxed prose-p:mb-6 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+      <SanityPortableText value={content} components={components} />
+    </div>
+  )
 }
 
