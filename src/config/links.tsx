@@ -16,7 +16,8 @@ import {
   MessageCircleIcon,
   MonitorIcon,
   PencilIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  GraduationCap
 } from 'lucide-react'
 
 import {
@@ -68,6 +69,11 @@ export const HEADER_LINKS: HeaderLinks = [
     icon: <FlameIcon className='size-3.5' />,
     href: '/projects/',
     text: 'Projects'
+  },
+  {
+    icon: <GraduationCap className='size-3.5' />,
+    href: '/courses/',
+    text: 'Courses'
   },
   {
     icon: <MessageCircleIcon className='size-3.5' />,

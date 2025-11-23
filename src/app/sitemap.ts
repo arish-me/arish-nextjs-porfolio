@@ -19,6 +19,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
     },
     {
+      url: 'https://www.arishdev.com/courses/', // Added www
+      lastModified: new Date(),
+    },
+    {
       url: 'https://www.arishdev.com/contact/', // Added www
       lastModified: new Date(),
     },
