@@ -1,0 +1,534 @@
+---
+title: Installing Ruby on Rails on MacOS
+chapterSlug: getting-started
+duration: 10
+order: 1
+---
+## **Enabling Rosetta for Terminal on M1 Mac**
+
+If `Rosetta 2 is not installed by default in your M1 Mac, then open the pre-installed `Terminal\` app and run the following command:
+
+```bash
+/usr/sbin/softwareupdate --install-rosetta --agree-to-license
+```
+
+Rosetta allows us to use apps built for Mac with intel chip.
+
+Several CLI tools do not have native versions built for the new M1 architecture.
+
+Enabling them on your native M1 Mac terminal can be frustrating.
+
+Follow these steps to enable Rosetta:
+
+* Select the app(Terminal) in the Finder. Note that the "Terminal app" could be at "Applications/Utilities".
+* Right click on the app(Terminal) and select `Get Info`.
+* In `General`, check the `Open using Rosetta` check-box.
+* Close the Terminal Info.
+* Now when you quit the terminal and open it again.
+* If you haven't installed Rosetta yet, then it would prompt you to install it.
+* If the popup shows up, then click on `Install` button, then enter your user name and password to allow installation to proceed.
+* Close the Terminal and open again.
+* Now we have a special terminal that can install tools with Rosetta translation.
+
+To verify that you are using a Rosetta terminal, run the following command and it should output `i386`:
+
+```bash
+arch
+```
+
+The native terminal without Rosetta would output `arm64` for the above command. If you still do not see `i386` in the terminal then please restart the laptop.
+
+**Moving forward, all commands we ask you to execute should be done in Rosetta enabled terminal.**
+
+## **Installing Xcode command line tools**
+
+Check the version of your operating system. If your version number is 10.9 or higher, follow the next step. If your OS X version is less than 10.9, you should consider upgrading your operating system to 10.9 or higher. It's completely free.
+
+In this book, we will not be installing Xcode. Hence no need to download Xcode from App Store. In this section, we will be installing Xcode command line developer tools.
+
+We can install Xcode command line developer tools like this:
+
+```bash
+xcode-select --install`
+```
+
+## **Uninstalling arm64 brew**
+
+If you have installed brew in the past from the native terminal, it is likely that you have an arm64 build of brew. Having two different builds of brew can cause major problems as the packages with different builds will not be compatible with each other.
+
+To avoid this problem you need to uninstall your current installation of arm64 brew.
+
+You can check which build you have by running the following command:
+
+```bash
+   which brew
+```
+
+If your installation of brew is the Intel build, then the command should output `/usr/local/bin/brew`. If that is the case you can skip installing brew and just update your current installation by running `brew update`.
+
+If your output is `/opt/homebrew` then your installation of brew is the arm64 build.
+
+You need to uninstall the arm64 build of brew by running the following command from the native terminal:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"`
+```
+
+## **Installing Intel brew**
+
+Install [Homebrew](https://brew.sh/), which is the package manager:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Now verify the installation of the `brew` command:
+
+`which brew`
+
+The command should output `/usr/local/bin/brew`, which is the expected path.
+
+## **Ensuring ZSH is the default shell**
+
+Before going forward, please make sure `zsh` is your default terminal shell. To check that execute the following command.
+
+```bash
+echo $SHELL
+```
+
+If the output is not "/bin/zsh" then `zsh` is not your default shell.
+
+Execute the following command to set `zsh` shell as default shell manually:
+
+`chsh -s $(which zsh)`
+
+## **Installing Oh My ZSH**
+
+Oh My Zsh(OMZ) is a delightful, open source, community-driven framework for managing your Zsh configuration.
+
+It comes bundled with thousands of helpful functions, helpers, plugins, themes, and other goodies that will make you say `Oh My ...!`.
+
+Install OMZ:
+
+```bash
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+
+Now restart your terminal.
+
+## **Adding OMZ plugins**
+
+To add a new plugin, type the names shown in parentheses below to `plugins` key, making sure to include a space between each name.
+
+Add the following at the top of your `.zshrc`:
+
+```bash
+plugins=(git ruby rails yarn bundler brew macos z node)
+```
+
+Restart the terminal for zsh to auto install all the specified plugins.
+
+If you ever feel that your `SHELL` is slow in starting, then removing few of these plugins is a good step.
+
+## **Installing fonts**
+
+Now if you restart your terminal, zsh will auto install all the plugins.
+
+But most probably your shell prompt would be looking very ugly.
+
+The issue is that we don't have a good font which contains all the glyphs that are part of our prompt.
+
+Thus let's install powerline fonts:
+
+```bash
+git clone https://github.com/powerline/fonts.git --depth=1 # install the fonts cd fonts ./install.sh # clean-up a bit cd .. rm -rf fonts
+```
+
+Now let's setup the terminal font.
+
+Open `Terminal` app, and do the following:
+
+* Open `Terminal > Preferences > Profiles > Text > Change Font`.
+* Set it to something that has "for Powerline" in its name.
+* Use `Meslo LG DZ for Powerline` font.
+
+Now restart your terminal and you should be seeing a beautiful prompt!
+
+## **Installing z for jumping around**
+
+z allows you to jump to folders quickly in one command, rather than having to tab through a nested folder structure.
+
+In the plugins section we included `z`. That should work for most of people. First let's see if that works for you or not. Open terminal and just type `z`. If you don't see `command not found` then you are all set. You can skip to the last part of this section where we have mentioned a YouTube video for to watch to learn how to use `z` effectively.
+
+To install `z` execute the following command.
+
+```bash
+curl -o "${HOME}/z.sh" "https://raw.githubusercontent.com/rupa/z/master/z.sh"
+```
+
+Open `~/.zshrc` file and include the following line at the very bottom and then restart your terminal:
+
+```bash
+. ~/z.sh
+```
+
+Now open a new terminal and type `z` on the command line. You should see some output.
+
+## **Installing ripgrep**
+
+You can search a keyword/sentence within a directory or file and `ripgrep` will give your the results almost instantly.
+
+`ripgrep` is really fast when compared to other searching tools like `find`.
+
+Let's install it:
+
+```
+brew install ripgrep
+```
+
+Great! Now goto any project and search for any keyword like this:
+
+```bash
+rg "keyword"
+```
+
+## **Installing Vim**
+
+At one point of your development life, you will rely on `vim` to get the job done.
+
+There will be valid cases like say SSH'ing into a server, where `vim` can be your knight in shining armor.
+
+Install vim, like this:
+
+```bash
+brew install vim
+```
+
+## **Installing Node.js**
+
+Different applications use different versions of Node.js.
+
+Thus it is useful to be able to switch between different versions of Node.js on the fly.
+
+At BigBinary we use [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm), which helps us maintain the correct Node.js version specific to a project, and switch between them without much hassle.
+
+### **Installing nvm**
+
+Running the below command on your terminal will install nvm locally:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+```
+
+### **Installing a Node.js version using nvm**
+
+Currently, we use Node.js `v22.12` in our `this` project. You can install the same version by running the following:
+
+```bash
+nvm install 22.13 nvm alias default 22.12
+```
+
+If you're not a fan of `nvm`, then [n](https://github.com/tj/n) is a good alternative.
+
+## **Installing Yarn**
+
+You shouldn't use `npm` command in BigBinary projects.
+
+We make use of `yarn` to manage JavaScript libraries and tool chains.
+
+Install it:
+
+```bash
+brew install yarn
+```
+
+## **Setting up VSCode**
+
+VSCode, short for Visual Studio Code, can be downloaded and installed from [their official website](https://code.visualstudio.com/download).
+
+If you're using M1 Mac, then you can opt for `Apple Silicon` build and download it from their website.
+
+These are the steps for installation:
+
+* Download Visual Studio Code for macOS.
+* Open the browser's download list and locate the downloaded archive.
+* Select the 'magnifying glass' icon to open the archive in Finder.
+* Drag `Visual Studio Code.app` to the `Applications` folder, making it available in the macOS Launchpad.
+* Add VSCode to your Dock by right-clicking on the icon to bring up the context menu and choosing `Options > Keep in Dock`.
+
+Most of us in BigBinary use VSCode as our daily tool for editing files. Thus if you ever wanted to check out how to do something faster or better in VSCode, then your colleagues are always there to help you out!
+
+## **Enabling code command**
+
+To run VSCode from terminal, we need to add `code` command in to our `PATH`.
+
+There are two ways to do this.
+
+First method is from VSCode itself:
+
+* Go to VSCode application.
+* Press "Shift" button, "Command" button and "p".
+* Type > shell command.
+* Select "Install 'code' command in PATH.
+* VSCode will give you a prompt. Click "Ok".
+* VSCode will ask for your laptop password. provide password.
+
+Or you can add it manually from your terminal itself without opening VSCode, like mentioned below.
+
+**Note:** You don't need to run below command if you had already added to `PATH` from VSCode.
+
+For Zsh users, run the following command from your terminal:
+
+```bash
+cat << EOF >> ~/.zshrc # Add Visual Studio Code (code) export PATH="\$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin" EOF
+```
+
+Since we have made changes to `.zshrc` we need to reload the shell for the changes to take effect. The easiest way to do so is to quit the current terminal and open a new terminal.
+
+Now let's test if command `code` is working or not.
+
+Open terminal and type `code dummy.txt` and that file should be opening up in VSCode.
+
+## **Enabling auto save feature**
+
+`Auto Save` feature will save your changes after a configured delay or when focus leaves the editor.
+
+With this option turned on, there is no need to explicitly save the file.
+
+The easiest way to turn on Auto Save is with the `File > Auto Save` toggle from menu bar, that turns on and off save option after a delay.
+
+Other way of enabling this feature, is by appending the following to your user settings and reload. It does the same job:
+
+```bash
+{   
+ // rest of the keys as it was   
+ "files.autoSave": "afterDelay",   
+ "files.autoSaveDelay": 1000 
+}
+```
+
+## **Installing recommended extensions**
+
+VSCode provides many extensions which can improve our coding experience. Here are some VSCode extensions that we recommend using to enhance productivity:
+
+* [bradlc.vscode-tailwindcss](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss): Provides IntelliSense for Tailwind CSS classes.
+* [kaiwood.endwise](https://marketplace.visualstudio.com/items?itemName=kaiwood.endwise): Automatically adds `end` when opening a `do` block in Ruby.
+* [Shopify.ruby-lsp](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp): Offers Ruby language support and basic IntelliSense.
+* [redhat.vscode-yaml](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml): Provides support for YAML language.
+* [editorconfig.editorconfig](https://marketplace.visualstudio.com/items?itemName=editorconfig.editorconfig): Overrides user/workspace settings with configurations from `.editorconfig` files.
+* [dbaeumer.vscode-eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): Integrates ESLint into VSCode, displaying errors and warnings while coding.
+* [streetsidesoftware.code-spell-checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker): Detects typos in code, accommodating various coding styles like camelCase and snake\_case.
+* [CraigMaslowski.erb](https://marketplace.visualstudio.com/items?itemName=CraigMaslowski.erb): Provides syntax highlighting for ERB files.
+* [eamodio.gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens): Integrates multiple Git features into VSCode.
+
+Install all the above-mentioned extension using the following command:
+
+```bash
+curl -s "https://raw.githubusercontent.com/bigbinary/wheel/main/.scripts/setup_vscode.sh" | ruby -
+```
+
+Here are some optional settings you can set to VSCode globally. You can press `Cmd + Shift + P` and input `>Preferences: Open User Settings (JSON)` to open `settings.json` file.
+
+Add these lines in the file as settings:
+
+```bash
+"editor.renderWhitespace": "all",
+"files.trimTrailingWhitespace": true,
+"files.trimFinalNewlines": true,
+"editor.tabSize": 2,
+"editor.bracketPairColorization.enabled": true,
+"files.insertFinalNewline": true,
+"terminal.integrated.scrollback": 1000000
+```
+
+## **Spell checking in VSCode**
+
+If you are using VSCode to write blogs, articles, or generically any markdown file, etc, then spell checking is very important. To get real time spell checking on whatever you are editing and to provide automated corrections we use the [Code Spell Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker\&utm_source=pocket_mylist) extension from VSCode which we have installed in the last section.
+
+## **Installing Prettier plugin**
+
+To make code more readable and consistent we can install the `Prettier` plugin.
+
+This tool works well with Visual Studio Code such that code is automatically formatted every time changes are saved.
+
+### **Installing the Prettier Visual Studio Code plugin**
+
+* Hit Cmd+Shift+P on Mac or Ctrl+Shift+P on Linux.
+* Select "Extensions: Install Extensions".
+* Search for `Prettier` plugin.
+* Click "Install" and then reload VSCode after the installation.
+
+#### **Run Prettier every time a JavaScript file is saved**
+
+**This is also an optional step.**
+
+* Hit Cmd+Shift+P on Mac or Ctrl+Shift+P on Linux.
+* Type "Preferences: Open Workspace Settings".
+* We will see two options.
+* Select the option that has the word JSON.
+* Paste the following content in the Settings file.
+
+```bash
+{
+  // rest of the keys as it was
+  "folders": [],
+  "settings": {},
+  "[javascript]": {
+    "editor.formatOnSave": true
+  }
+}
+```
+
+## **Enabling Rosetta in VSCode**
+
+We can check if Rosetta is enabled in our VSCode terminal by running the command `arch` on our VSCode terminal. If it outputs `i386` we are good and can skip this section.
+
+If the output of `arch` is not `i386`, then we need to enable Rosetta in the VSCode integrated terminal. We can add a terminal profile for Rosetta in VSCode, as follows:
+
+* Open VSCode
+* Press `cmd+shift+p` to open the command palette.
+* Search for `Open Settings`.
+* Select `Open Settings (JSON)` and add the following lines towards the end of the JSON file:
+
+```bash
+{
+  //rest of the keys as it was
+  "terminal.integrated.profiles.osx": {
+    "rosetta": {
+      "path": "arch",
+      "args": ["-x86_64", "zsh", "-l"],
+      "overrideName": true
+    }
+  },
+  "terminal.integrated.defaultProfile.osx": "rosetta"
+}
+```
+
+* Restart VSCode.
+
+Now check if we configured it correctly. Type `arch` command and it should return `i386`.\
+\
+\
+**Install system packages**
+
+Ruby needs certain system packages like Openssl for it to be compiled properly. Thus install the following packages from the Rosetta enabled terminal:
+
+```bash
+brew install ruby-build openssl readline libyaml zlib
+```
+
+## **Install rbenv**
+
+Install [rbenv](https://github.com/rbenv/rbenv). Using rbenv we can install a specific version of Ruby:
+
+```bash
+brew update brew install rbenv
+```
+
+If you don't know which shell you are using then [refer to this answer](https://unix.stackexchange.com/questions/96305/which-shell-am-i-running-on).
+
+If you are using zsh shell then use the following command:
+
+```bash
+echo 'eval "$(rbenv init -)"' >> ~/.zshrc
+```
+
+If you are using bash shell then execute the following command:
+
+```bash
+echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+```
+
+Now restart the terminal and run the following:
+
+```bash
+rbenv install 3.3.5 rbenv rehash
+```
+
+Add `~/.rbenv/bin` to your `$PATH` for accessing the `rbenv` command-line utility.
+
+If you are using bash shell then execute the following command:
+
+```bash
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
+```
+
+If you are using zsh shell then use the following command:
+
+```bash
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.zshrc
+```
+
+Restart the terminal and `rbenv` should be available as a command.
+
+It's often seen that folks have a Ruby version conflicts in their system. It's mostly because Ruby gets installed by default on the system level. But system-level `ruby` command has different permissions and paths, compared to the `ruby` command installed via `rbenv`.
+
+Thus let's set the global version of the `ruby` command to be a `rbenv` specific version, like this:
+
+```bash
+rbenv global 3.3.5
+```
+
+Now that we have set the global Ruby version to be an `rbenv` specific version, let's verify the same, by running the following commands:
+
+```bash
+rbenv version # version should be 3.3.5 ruby -v # version should be 3.3.5
+```
+
+In M1 Mac, we need to install the shared mime info, if it doesn't already exist:
+
+`brew install shared-mime-info`
+
+## **Installing Ruby on Rails on macOS**
+
+Now install Ruby on Rails gem:
+
+```bash
+gem install rails --no-document -v 7.1.3.4
+```
+
+Flag `--no-document` disables document generation.
+
+Now install bundler which help us manage Ruby gems:
+
+```bash
+gem install bundler
+```
+
+## **TypeError for Rails project in M1 Mac**
+
+If you ever receive the `TypeError: Unable to resolve type 'size_t'` error while working on a Rails project in M1 Mac, then run the following command to fix it:
+
+```bash
+bundle update ffi sassc
+```
+
+## **Rbenv Ruby build definitions not found error**
+
+`Rbenv Ruby build definitions not found` error is thrown if `ruby-build` is not installed. `ruby-build` is an `rbenv` plugin that provides the `rbenv install` command to compile and install different versions of Ruby on UNIX-like systems.
+
+You can check if `ruby-build` is installed system-wide under homebrew using `which` command like this:
+
+```bash
+which ruby-build
+```
+
+If `ruby-build` already installed, then the following installed path should show up in the terminal:
+
+```bash
+/usr/local/bin/ruby-build
+```
+
+Otherwise you will receive the following error:
+
+```bash
+ruby-build not found.
+```
+
+If `ruby-build` is not installed, then you should install it like this:
+
+```bash
+brew install ruby-build
+```
+
+You're now ready to start building with Ruby on Rails on your Mac.

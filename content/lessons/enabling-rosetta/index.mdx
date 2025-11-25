@@ -1,0 +1,53 @@
+---
+title: Enabling Rosetta for Terminal on M1 Mac
+chapterSlug: installing-rails
+duration: 10
+order: 1
+---
+
+## Enabling Rosetta for Terminal on M1 Mac
+
+If `Rosetta 2` is not installed by default in your M1 Mac, then open the pre-installed `Terminal` app and run the following command:
+
+```bash
+/usr/sbin/softwareupdate --install-rosetta --agree-to-license
+```
+
+Rosetta allows us to use apps built for Mac with intel chip.
+
+Several CLI tools do not have native versions built for the new M1 architecture.
+
+Enabling them on your native M1 Mac terminal can be frustrating.
+
+Follow these steps to enable Rosetta:
+
+- Select the app(Terminal) in the Finder. Note that the "Terminal app" could be at "Applications/Utilities".
+- Right click on the app(Terminal) and select `Get Info`.
+- In `General`, check the `Open using Rosetta` check-box.
+- Close the Terminal Info.
+- Now when you quit the terminal and open it again.
+
+## Installing Homebrew
+
+After enabling Rosetta, let's install Homebrew:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+This will install Homebrew, the package manager for macOS.
+
+## Verifying Installation
+
+To verify that Homebrew is installed correctly, run:
+
+```bash
+brew --version
+```
+
+You should see output like:
+
+```
+Homebrew 4.0.0
+```
+

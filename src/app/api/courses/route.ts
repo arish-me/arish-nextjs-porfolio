@@ -1,16 +1,21 @@
-/* eslint-disable */
-
 import { NextResponse } from 'next/server'
-import { getCourses } from '@/lib/sanity/utils'
+import { getKeyCourses } from '@/lib/keystatic'
+import { COURSES_DATA } from '@/config/courses'
 
 export async function GET() {
   try {
-    const courses = await getCourses()
+    // Try Keystatic first
+    let courses = await getKeyCourses()
+    
+    // Fall back to static data if no Keystatic courses
+    if (courses.length === 0) {
+      courses = COURSES_DATA
+    }
+    
     return NextResponse.json(courses)
   } catch (error) {
     console.error('Error fetching courses:', error)
-    return NextResponse.json([], { status: 200 }) // Return empty array on error
+    // Return static data as fallback
+    return NextResponse.json(COURSES_DATA)
   }
 }
-
-

@@ -7,12 +7,12 @@ import { Footer } from "@/components/footer";
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isStudioRoute = pathname?.startsWith('/studio');
+  const isKeystaticRoute = pathname?.startsWith('/keystatic');
 
   // Update body classes based on route
   useEffect(() => {
-    if (isStudioRoute) {
-      // For studio routes, remove flex layout classes for full-width
+    if (isKeystaticRoute) {
+      // For Keystatic admin, remove flex layout classes for full-width
       document.body.classList.remove('min-h-screen', 'flex', 'flex-col');
       document.body.style.height = '100vh';
       document.body.style.overflow = 'hidden';
@@ -22,10 +22,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       document.body.style.height = '';
       document.body.style.overflow = '';
     }
-  }, [isStudioRoute]);
+  }, [isKeystaticRoute]);
 
-  // For studio routes, render children only (full width, no navigation/footer)
-  if (isStudioRoute) {
+  // For Keystatic admin, render children only (full width, no navigation/footer)
+  if (isKeystaticRoute) {
     return <>{children}</>;
   }
 

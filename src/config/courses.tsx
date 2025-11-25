@@ -5,7 +5,7 @@ export interface Lesson {
   id: string;
   title: string;
   duration: number; // in minutes
-  content: string; // markdown or HTML content
+  content: string | any; // markdown, HTML, or MDX content
   completed?: boolean;
 }
 
@@ -20,7 +20,7 @@ export interface Course {
   id: string;
   title: string;
   description: string;
-  longDescription?: string;
+  longDescription?: string | any; // Can be string or MDX content
   category: string;
   image: string;
   duration: number; // total duration in minutes
