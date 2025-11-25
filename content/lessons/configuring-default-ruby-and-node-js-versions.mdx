@@ -1,0 +1,72 @@
+---
+title: Configuring default Ruby and Node.js versions
+chapterSlug: introduction-to-the-rails-application
+duration: 5
+order: 3
+---
+We can lock our application with a specific Ruby and Node.js version. This will help us to isolate the dependencies of Ruby and Node.js modules used in the application.
+
+In our application, we will use Node.js version `22.13` and Ruby version `3.3.5`.
+
+Run the following commands from the terminal:
+
+```bash
+echo "22.13" > .nvmrc > .node-version echo "3.3.5" > .ruby-version
+```
+
+These files will be read by `rbenv` and `nvm` to auto-set the versions.
+
+Now run the following commands from the terminal to ensure that our project is currently using these specified versions:
+
+```bash
+rbenv install nvm install
+```
+
+The above commands should ideally point out that the specified versions are already installed and you can safely exit. If that's not the case, then please go ahead with the installation of the required versions, using the same commands.
+
+### **Fixing rexml gem issue**
+
+We are not going to use some of the auto-generated gems for testing. Thus let's remove those unwanted gems, among which there are `selenium` based gems that may cause `rexml` dependency issue.
+
+Run the following command from the terminal:
+
+```bash
+bundle remove capybara selenium-webdriver webdrivers
+```
+
+The above command should've removed those unwanted gems from the `Gemfile`.
+
+### **Remove unwanted gems**
+
+Some gems come pre-installed in Rails 7 but are not required for our Granite application like `importmap-rails`, `turbo-rails`, and `stimulus-rails`.
+
+Remove the following lines, including the comments, from the `Gemfile`:
+
+```bash
+# Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
+gem "importmap-rails"
+
+# Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
+gem "turbo-rails"
+
+# Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
+gem "stimulus-rails"
+```
+
+Then update the `Gemfile.lock` file by running the following command:
+
+```bash
+bundle install
+```
+
+### **Updating .gitignore file**
+
+We don't need all of the generated files to be version-controlled. To ignore these unwanted files, we specify them in the `.gitignore` file. BigBinary has specified a standard set of folders and files to be ignored by git in the [Wheel repository](https://raw.githubusercontent.com/bigbinary/wheel/main/.gitignore).
+
+Run the following command from the terminal, in the root of the project, to use that config:
+
+```bash
+curl -o ".gitignore" "https://raw.githubusercontent.com/bigbinary/wheel/main/.gitignore"
+```
+
+Now the `.gitignore` file should be visible in your project's root.
