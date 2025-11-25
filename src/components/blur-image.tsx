@@ -67,7 +67,7 @@ export function BlurImage({
         onError={() => setHasError(true)}
       />
       {isLoading && !hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted animate-pulse" />
+        <div className="absolute inset-0 flex items-center justify-center bg-white animate-pulse" />
       )}
     </div>
   )

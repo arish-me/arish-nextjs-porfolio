@@ -80,7 +80,7 @@ export default function ProjectsPage() {
                 src={project.image}
                 alt="Arish's avatar"
                 className="w-full h-full"
-                objectFit="cover"
+                objectFit="contain"
               />
               </div>
               <CardHeader className="flex-1">

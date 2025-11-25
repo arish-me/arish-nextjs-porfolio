@@ -191,12 +191,12 @@ export default function CourseDetailPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Course Image */}
-          <div className="relative w-full aspect-square bg-muted rounded-xl overflow-hidden">
+          <div className="relative w-full aspect-square bg-white border-2 rounded-xl overflow-hidden">
             <BlurImage
               src={course.image}
               alt={course.title}
               className="w-full h-full"
-              objectFit="cover"
+              objectFit="contain"
             />
             <div className="absolute bottom-4 left-4">
               <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">

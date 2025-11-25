@@ -16,10 +16,20 @@ export default function CoursesPage() {
   useEffect(() => {
     async function fetchCourses() {
       try {
-        const fetchedCourses = await getCourses();
-        setCourses(fetchedCourses);
+        // Try to fetch from API route first (server-side)
+        const response = await fetch('/api/courses');
+        if (response.ok) {
+          const fetchedCourses = await response.json();
+          setCourses(fetchedCourses);
+        } else {
+          // Fallback to direct client fetch
+          const fetchedCourses = await getCourses();
+          setCourses(fetchedCourses);
+        }
       } catch (error) {
         console.error('Error fetching courses:', error);
+        // Fallback to empty array
+        setCourses([]);
       } finally {
         setLoading(false);
       }

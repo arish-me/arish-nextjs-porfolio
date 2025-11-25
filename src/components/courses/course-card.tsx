@@ -1,4 +1,4 @@
-/* eslint-disable */
+  /* eslint-disable */
 
 'use client'
 
@@ -25,8 +25,9 @@ const CourseCard = ({ course }: CourseCardProps) => {
           <BlurImage
             src={course.image}
             alt={course.title}
+            size="lg"
             className="w-full h-full"
-            objectFit="cover"
+            objectFit="contain"
           />
           <div className="absolute top-2 left-2">
             <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">
