@@ -2,11 +2,10 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/navigation";
-import { Footer } from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { generateMetadata } from '@/lib/seo';
 import { Analytics } from "@/components/analytics";
+import { LayoutWrapper } from "@/components/layout-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +17,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = generateMetadata(undefined, undefined, undefined, undefined, '');
+export const metadata = generateMetadata('', undefined, undefined, undefined, '');
 
 export default function RootLayout({
   children,
@@ -32,11 +31,9 @@ export default function RootLayout({
       >
         <Analytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <Navigation />
-          <main className="max-w-7xl w-full mx-auto px-4 py-24 flex-1">
+          <LayoutWrapper>
             {children}
-          </main>
-          <Footer />
+          </LayoutWrapper>
         </ThemeProvider>
       </body>
     </html>

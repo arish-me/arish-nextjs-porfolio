@@ -33,7 +33,17 @@ function transformSanityCourse(sanityCourse: any): Course {
 
 export async function getCourses(): Promise<Course[]> {
   try {
+    // Check if Sanity is configured
+    const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
+    if (!projectId || projectId.trim() === '' || projectId === 'build-placeholder-12345678') {
+      console.warn('Sanity project ID not configured, returning empty courses array')
+      return []
+    }
+    
     const courses = await client.fetch(coursesQuery)
+    if (!courses || !Array.isArray(courses)) {
+      return []
+    }
     return courses.map(transformSanityCourse)
   } catch (error) {
     console.error('Error fetching courses from Sanity:', error)
@@ -43,6 +53,12 @@ export async function getCourses(): Promise<Course[]> {
 
 export async function getCourseBySlug(slug: string): Promise<Course | null> {
   try {
+    const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
+    if (!projectId || projectId.trim() === '' || projectId === 'build-placeholder-12345678') {
+      console.warn('Sanity project ID not configured')
+      return null
+    }
+    
     const course = await client.fetch(courseBySlugQuery, { slug })
     if (!course) return null
     return transformSanityCourse(course)
@@ -54,6 +70,12 @@ export async function getCourseBySlug(slug: string): Promise<Course | null> {
 
 export async function getCourseById(id: string): Promise<Course | null> {
   try {
+    const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
+    if (!projectId || projectId.trim() === '' || projectId === 'build-placeholder-12345678') {
+      console.warn('Sanity project ID not configured')
+      return null
+    }
+    
     const course = await client.fetch(courseByIdQuery, { id })
     if (!course) return null
     return transformSanityCourse(course)

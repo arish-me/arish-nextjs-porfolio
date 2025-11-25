@@ -10,9 +10,12 @@ import MobileNav from './navbar/mobile-nav'
 import Navbar from './navbar/navbar'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme-toggle';
+import { usePathname } from 'next/navigation';
+
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
-
+  const pathname = usePathname();
+  const isCourseRoute = pathname?.startsWith('/courses');
 
   useEffect(() => {
     const changeBackground = () => {
@@ -31,7 +34,8 @@ export function Navigation() {
   return (
     <motion.header
       className={cn(
-        'bg-background/30 shadow-xs fixed inset-x-0 top-4 z-40 mx-auto flex h-[60px] max-w-5xl items-center justify-between rounded-2xl px-8 saturate-100 backdrop-blur-[10px] transition-colors',
+        'bg-background/30 shadow-xs inset-x-0 top-4 z-40 mx-auto flex h-[60px] max-w-5xl items-center justify-between rounded-2xl px-8 saturate-100 backdrop-blur-[10px] transition-colors',
+        !isCourseRoute && 'fixed',
         isScrolled && 'bg-background/80'
       )}
       initial={{
