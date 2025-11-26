@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { generateMetadata } from '@/lib/seo';
 import { Analytics } from "@/components/analytics";
 import { LayoutWrapper } from "@/components/layout-wrapper";
+import { NavigationProgress } from "@/components/navigation-progress";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +31,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <Analytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <LayoutWrapper>
