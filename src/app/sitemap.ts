@@ -1,30 +1,80 @@
 import type { MetadataRoute } from 'next'
+import { getKeyCourses } from '@/lib/keystatic'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  return [
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = 'https://www.arishdev.com'
+  
+  // Static pages
+  const staticPages: MetadataRoute.Sitemap = [
     {
-      url: 'https://www.arishdev.com/', // Homepage URL should also have a trailing slash if all others do for consistency
+      url: `${baseUrl}/`,
       lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 1,
     },
     {
-      url: 'https://www.arishdev.com/about/', // Added www
+      url: `${baseUrl}/about/`,
       lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
     },
     {
-      url: 'https://www.arishdev.com/blogs/', // Added www
+      url: `${baseUrl}/blogs/`,
       lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
     },
     {
-      url: 'https://www.arishdev.com/projects/', // Added www
+      url: `${baseUrl}/projects/`,
       lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
     },
     {
-      url: 'https://www.arishdev.com/courses/', // Added www
+      url: `${baseUrl}/courses/`,
       lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
     },
     {
-      url: 'https://www.arishdev.com/contact/', // Added www
+      url: `${baseUrl}/contact/`,
       lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.5,
     },
   ]
+
+  // Fetch courses from Keystatic
+  let coursePages: MetadataRoute.Sitemap = []
+  
+  try {
+    const courses = await getKeyCourses()
+    
+    // Add course pages
+    courses.forEach((course) => {
+      // Course detail page
+      coursePages.push({
+        url: `${baseUrl}/courses/${course.id}/`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.7,
+      })
+      
+      // Lesson pages
+      course.chapters.forEach((chapter) => {
+        chapter.lessons.forEach((lesson) => {
+          coursePages.push({
+            url: `${baseUrl}/courses/${course.id}/${chapter.id}/${lesson.id}/`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.6,
+          })
+        })
+      })
+    })
+  } catch (error) {
+    console.error('Error fetching courses for sitemap:', error)
+  }
+
+  return [...staticPages, ...coursePages]
 }
