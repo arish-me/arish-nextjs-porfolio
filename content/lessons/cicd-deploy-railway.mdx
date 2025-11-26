@@ -1,0 +1,72 @@
+---
+title: Deploying to Railway
+chapterSlug: cicd-deployment
+duration: 8
+order: 2
+---
+
+## Railway Deploy
+
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      
+      - name: Deploy to Railway
+        run: railway up
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+```
+
+## With Docker
+
+```yaml
+- name: Deploy Docker to Railway
+  run: railway up --service myapp
+  env:
+    RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+```
+
+## Environment-Specific Deploy
+
+```yaml
+deploy-staging:
+  runs-on: ubuntu-latest
+  needs: test
+  if: github.ref == 'refs/heads/develop'
+  environment: staging
+  steps:
+    - uses: actions/checkout@v4
+    - run: railway up --environment staging
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+
+deploy-production:
+  runs-on: ubuntu-latest
+  needs: test
+  if: github.ref == 'refs/heads/main'
+  environment: production
+  steps:
+    - uses: actions/checkout@v4
+    - run: railway up --environment production
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
+```
+
+## Post-Deploy Tasks
+
+```yaml
+- name: Run migrations
+  run: railway run rails db:migrate
+  env:
+    RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+```
+

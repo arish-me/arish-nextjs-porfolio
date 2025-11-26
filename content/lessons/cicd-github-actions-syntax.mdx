@@ -1,0 +1,82 @@
+---
+title: GitHub Actions Syntax
+chapterSlug: cicd-github-actions
+duration: 10
+order: 2
+---
+
+## Workflow Structure
+
+```yaml
+name: Workflow Name
+
+on: [push, pull_request]
+
+env:
+  RAILS_ENV: test
+
+jobs:
+  job-name:
+    runs-on: ubuntu-latest
+    
+    env:
+      DATABASE_URL: postgres://localhost/test
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+    
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Hello World"
+```
+
+## Using Actions
+
+```yaml
+steps:
+  # Use action with version
+  - uses: actions/checkout@v4
+  
+  # With inputs
+  - uses: ruby/setup-ruby@v1
+    with:
+      ruby-version: '3.2'
+      bundler-cache: true
+  
+  # Run command
+  - run: bundle exec rspec
+  
+  # Multi-line command
+  - run: |
+      bundle install
+      bundle exec rails db:setup
+      bundle exec rspec
+```
+
+## Job Dependencies
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps: [...]
+
+  deploy:
+    needs: test  # Runs after test passes
+    runs-on: ubuntu-latest
+    steps: [...]
+```
+
+## Conditionals
+
+```yaml
+steps:
+  - run: echo "Only on main"
+    if: github.ref == 'refs/heads/main'
+```
+

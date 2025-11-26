@@ -1,0 +1,81 @@
+---
+title: Docker Compose Commands
+chapterSlug: docker-compose-basics
+duration: 8
+order: 3
+---
+
+## Starting and Stopping
+
+```bash
+# Start all services
+docker compose up
+
+# Start in detached mode
+docker compose up -d
+
+# Start specific service
+docker compose up web
+
+# Stop services
+docker compose stop
+
+# Stop and remove containers
+docker compose down
+
+# Remove volumes too
+docker compose down -v
+```
+
+## Building
+
+```bash
+# Build images
+docker compose build
+
+# Build without cache
+docker compose build --no-cache
+
+# Build and start
+docker compose up --build
+```
+
+## Logs and Status
+
+```bash
+# View logs
+docker compose logs
+
+# Follow logs
+docker compose logs -f
+
+# Specific service
+docker compose logs -f web
+
+# List containers
+docker compose ps
+
+# List all (including stopped)
+docker compose ps -a
+```
+
+## Running Commands
+
+```bash
+# Run one-off command
+docker compose run web rails console
+
+# Execute in running container
+docker compose exec web bash
+
+# Run without starting dependencies
+docker compose run --no-deps web bash
+```
+
+## Scaling
+
+```bash
+# Scale service
+docker compose up -d --scale web=3
+```
+

@@ -1,0 +1,52 @@
+---
+title: GitHub Container Registry
+chapterSlug: docker-registry
+duration: 8
+order: 2
+---
+
+## GitHub Container Registry (GHCR)
+
+Free private registry for GitHub users.
+
+## Authentication
+
+```bash
+# Create Personal Access Token with 'packages' scope
+# Then login
+echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+```
+
+## Pushing Images
+
+```bash
+# Tag for GHCR
+docker tag myapp:latest ghcr.io/username/myapp:latest
+
+# Push
+docker push ghcr.io/username/myapp:latest
+```
+
+## In GitHub Actions
+
+```yaml
+- name: Login to GHCR
+  uses: docker/login-action@v2
+  with:
+    registry: ghcr.io
+    username: ${{ github.actor }}
+    password: ${{ secrets.GITHUB_TOKEN }}
+
+- name: Build and Push
+  uses: docker/build-push-action@v4
+  with:
+    push: true
+    tags: ghcr.io/${{ github.repository }}:latest
+```
+
+## Package Visibility
+
+- Private by default
+- Can be linked to repository
+- Access controlled via repository settings
+

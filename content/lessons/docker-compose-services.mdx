@@ -1,0 +1,71 @@
+---
+title: Defining Services
+chapterSlug: docker-compose-basics
+duration: 10
+order: 2
+---
+
+## Service Configuration
+
+```yaml
+services:
+  web:
+    # Build from Dockerfile
+    build: .
+    # Or use image
+    image: nginx:latest
+    
+    # Container name
+    container_name: my-web
+    
+    # Port mapping
+    ports:
+      - "3000:3000"
+    
+    # Environment variables
+    environment:
+      - RAILS_ENV=development
+      - SECRET_KEY_BASE=abc123
+    
+    # Or from file
+    env_file:
+      - .env
+    
+    # Volume mounts
+    volumes:
+      - .:/app
+      - bundle-cache:/usr/local/bundle
+    
+    # Dependencies
+    depends_on:
+      - db
+      - redis
+    
+    # Restart policy
+    restart: unless-stopped
+```
+
+## Build Options
+
+```yaml
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        RUBY_VERSION: "3.2"
+```
+
+## Health Checks
+
+```yaml
+services:
+  web:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+```
+

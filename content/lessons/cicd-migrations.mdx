@@ -1,0 +1,73 @@
+---
+title: Handling Migrations
+chapterSlug: cicd-database
+duration: 8
+order: 2
+---
+
+## Schema Load vs Migrate
+
+```yaml
+# Fast: Load schema directly
+- run: bundle exec rails db:schema:load
+
+# Safe: Run all migrations
+- run: bundle exec rails db:migrate
+```
+
+## Best Practice
+
+Use `schema:load` for CI, `migrate` for production.
+
+## Migration Testing
+
+```yaml
+jobs:
+  test-migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        # ...
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history
+      
+      - name: Checkout main
+        run: git checkout main
+      
+      - name: Setup database
+        run: |
+          bundle install
+          bundle exec rails db:create db:migrate
+      
+      - name: Checkout PR branch
+        run: git checkout ${{ github.head_ref }}
+      
+      - name: Run new migrations
+        run: |
+          bundle install
+          bundle exec rails db:migrate
+```
+
+## Seeding Test Data
+
+```yaml
+- name: Setup database
+  run: |
+    bundle exec rails db:schema:load
+    bundle exec rails db:seed
+```
+
+## Database Caching
+
+```yaml
+- name: Cache database
+  uses: actions/cache@v3
+  with:
+    path: db/test.sqlite3
+    key: db-${{ hashFiles('db/schema.rb') }}
+```
+

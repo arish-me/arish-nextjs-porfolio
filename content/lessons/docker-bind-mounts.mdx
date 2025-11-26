@@ -1,0 +1,63 @@
+---
+title: Bind Mounts for Development
+chapterSlug: docker-volumes
+duration: 8
+order: 3
+---
+
+## Development Workflow
+
+Bind mounts let you see code changes instantly.
+
+```bash
+# Mount source code
+docker run -v $(pwd):/app -p 3000:3000 myapp
+```
+
+## Rails Development
+
+```bash
+docker run -it --rm \
+  -v $(pwd):/app \
+  -v bundle-cache:/usr/local/bundle \
+  -p 3000:3000 \
+  ruby:3.2 \
+  bash -c "cd /app && bundle install && rails server -b 0.0.0.0"
+```
+
+## Node.js Development
+
+```bash
+docker run -it --rm \
+  -v $(pwd):/app \
+  -v /app/node_modules \
+  -p 3000:3000 \
+  node:18 \
+  npm run dev
+```
+
+Note: `-v /app/node_modules` creates anonymous volume to preserve container's node_modules.
+
+## File Permissions
+
+```bash
+# Run as current user
+docker run -u $(id -u):$(id -g) -v $(pwd):/app myapp
+```
+
+## Docker Compose Example
+
+```yaml
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+      - bundle-cache:/usr/local/bundle
+    ports:
+      - "3000:3000"
+
+volumes:
+  bundle-cache:
+```
+

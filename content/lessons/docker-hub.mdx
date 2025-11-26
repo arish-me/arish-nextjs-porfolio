@@ -1,0 +1,65 @@
+---
+title: Docker Hub
+chapterSlug: docker-registry
+duration: 8
+order: 1
+---
+
+## What is Docker Hub?
+
+Docker Hub is the default public registry for Docker images.
+
+## Logging In
+
+```bash
+docker login
+# Enter username and password
+```
+
+## Pushing Images
+
+```bash
+# Tag for Docker Hub
+docker tag myapp:latest username/myapp:latest
+
+# Push
+docker push username/myapp:latest
+
+# Push all tags
+docker push username/myapp --all-tags
+```
+
+## Pulling Images
+
+```bash
+# Pull from Docker Hub
+docker pull username/myapp:latest
+
+# Pull official image
+docker pull nginx:latest
+```
+
+## Organizations
+
+```bash
+# Push to organization
+docker push myorg/myapp:latest
+```
+
+## Automated Builds
+
+Connect GitHub/GitLab to Docker Hub for automatic builds on push.
+
+## Private Repositories
+
+Docker Hub offers private repos:
+- Free: 1 private repo
+- Pro: Unlimited private repos
+
+## Other Registries
+
+- GitHub Container Registry (ghcr.io)
+- AWS ECR
+- Google Container Registry
+- Azure Container Registry
+

@@ -1,0 +1,67 @@
+---
+title: Container Lifecycle
+chapterSlug: docker-containers
+duration: 8
+order: 1
+---
+
+## Container States
+
+```
+Created → Running → Paused → Stopped → Removed
+```
+
+## Lifecycle Commands
+
+```bash
+# Create (don't start)
+docker create --name mycontainer nginx
+
+# Start
+docker start mycontainer
+
+# Pause
+docker pause mycontainer
+
+# Unpause
+docker unpause mycontainer
+
+# Stop (graceful)
+docker stop mycontainer
+
+# Kill (force)
+docker kill mycontainer
+
+# Remove
+docker rm mycontainer
+```
+
+## Auto-Remove
+
+```bash
+# Remove after exit
+docker run --rm nginx
+```
+
+## Restart Policies
+
+```bash
+# Always restart
+docker run -d --restart=always nginx
+
+# Restart on failure
+docker run -d --restart=on-failure:3 nginx
+
+# Unless stopped manually
+docker run -d --restart=unless-stopped nginx
+```
+
+## Container Resource Limits
+
+```bash
+docker run -d \
+  --memory=512m \
+  --cpus=0.5 \
+  nginx
+```
+

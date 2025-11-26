@@ -1,0 +1,67 @@
+---
+title: Container Logs and Debugging
+chapterSlug: docker-containers
+duration: 8
+order: 2
+---
+
+## Viewing Logs
+
+```bash
+# View logs
+docker logs mycontainer
+
+# Follow logs (live)
+docker logs -f mycontainer
+
+# Last 100 lines
+docker logs --tail 100 mycontainer
+
+# With timestamps
+docker logs -t mycontainer
+
+# Since specific time
+docker logs --since 2024-01-01 mycontainer
+docker logs --since 10m mycontainer
+```
+
+## Executing Commands
+
+```bash
+# Run command in container
+docker exec mycontainer ls /app
+
+# Interactive shell
+docker exec -it mycontainer bash
+docker exec -it mycontainer sh
+
+# As different user
+docker exec -u root mycontainer whoami
+```
+
+## Inspecting Containers
+
+```bash
+# Full inspection
+docker inspect mycontainer
+
+# Get IP address
+docker inspect -f '{{.NetworkSettings.IPAddress}}' mycontainer
+
+# Get mounted volumes
+docker inspect -f '{{.Mounts}}' mycontainer
+```
+
+## Stats and Monitoring
+
+```bash
+# Live resource usage
+docker stats
+
+# Specific container
+docker stats mycontainer
+
+# One-time snapshot
+docker stats --no-stream
+```
+

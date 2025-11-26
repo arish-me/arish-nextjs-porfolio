@@ -1,0 +1,67 @@
+---
+title: Caching Strategies
+chapterSlug: cicd-advanced
+duration: 8
+order: 2
+---
+
+## Bundle Caching
+
+```yaml
+- uses: ruby/setup-ruby@v1
+  with:
+    ruby-version: '3.2'
+    bundler-cache: true  # Automatic caching
+```
+
+## Manual Caching
+
+```yaml
+- name: Cache gems
+  uses: actions/cache@v3
+  with:
+    path: vendor/bundle
+    key: gems-${{ runner.os }}-${{ hashFiles('Gemfile.lock') }}
+    restore-keys: |
+      gems-${{ runner.os }}-
+```
+
+## Node Modules Cache
+
+```yaml
+- name: Cache node modules
+  uses: actions/cache@v3
+  with:
+    path: node_modules
+    key: node-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+```
+
+## Asset Cache
+
+```yaml
+- name: Cache assets
+  uses: actions/cache@v3
+  with:
+    path: |
+      public/assets
+      tmp/cache/assets
+    key: assets-${{ runner.os }}-${{ hashFiles('app/assets/**/*') }}
+```
+
+## Docker Layer Caching
+
+```yaml
+- uses: docker/build-push-action@v5
+  with:
+    cache-from: type=gha
+    cache-to: type=gha,mode=max
+```
+
+## When to Cache
+
+✅ Dependencies (gems, npm)
+✅ Compiled assets
+✅ Docker layers
+❌ Test databases
+❌ Frequently changing files
+

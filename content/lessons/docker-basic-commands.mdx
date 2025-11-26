@@ -1,0 +1,77 @@
+---
+title: Essential Docker Commands
+chapterSlug: docker-getting-started
+duration: 10
+order: 4
+---
+
+## Container Commands
+
+```bash
+# List running containers
+docker ps
+
+# List all containers (including stopped)
+docker ps -a
+
+# Stop a container
+docker stop <container_id>
+
+# Start a stopped container
+docker start <container_id>
+
+# Remove a container
+docker rm <container_id>
+
+# View container logs
+docker logs <container_id>
+
+# Execute command in container
+docker exec -it <container_id> bash
+```
+
+## Image Commands
+
+```bash
+# List images
+docker images
+
+# Pull an image
+docker pull nginx:latest
+
+# Remove an image
+docker rmi nginx:latest
+
+# Search Docker Hub
+docker search python
+```
+
+## System Commands
+
+```bash
+# System info
+docker info
+
+# Disk usage
+docker system df
+
+# Clean up unused resources
+docker system prune
+
+# Remove all stopped containers
+docker container prune
+```
+
+## Quick Reference
+
+```bash
+# Run and remove after exit
+docker run --rm -it ubuntu bash
+
+# Run with environment variable
+docker run -e MY_VAR=value nginx
+
+# Copy files to container
+docker cp file.txt container:/path/
+```
+

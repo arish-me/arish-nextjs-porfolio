@@ -1,0 +1,62 @@
+---
+title: Tagging Images
+chapterSlug: docker-images
+duration: 6
+order: 3
+---
+
+## Image Naming Convention
+
+```
+[registry/]repository[:tag]
+
+docker.io/library/nginx:1.24
+└─────┬─────┘└───┬───┘└─┬─┘└┬┘
+   registry  namespace repo tag
+```
+
+## Tagging Images
+
+```bash
+# Tag an existing image
+docker tag nginx:latest myregistry/nginx:v1.0
+
+# Tag for Docker Hub
+docker tag myapp:latest username/myapp:latest
+
+# Multiple tags
+docker tag myapp:latest myapp:v1.0
+docker tag myapp:latest myapp:stable
+```
+
+## Tagging Best Practices
+
+```bash
+# Version tags
+myapp:1.0.0
+myapp:1.0
+myapp:1
+
+# Environment tags
+myapp:production
+myapp:staging
+
+# Git-based tags
+myapp:abc123f
+myapp:main-abc123f
+```
+
+## Example Workflow
+
+```bash
+# Build with tag
+docker build -t myapp:1.0.0 .
+
+# Also tag as latest
+docker tag myapp:1.0.0 myapp:latest
+
+# Push both
+docker push myapp:1.0.0
+docker push myapp:latest
+```
+

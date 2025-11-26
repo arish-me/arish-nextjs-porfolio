@@ -1,0 +1,52 @@
+---
+title: Understanding Docker Images
+chapterSlug: docker-images
+duration: 8
+order: 1
+---
+
+## What is a Docker Image?
+
+An image is a read-only template with instructions for creating a container.
+
+## Image Layers
+
+Images are built in layers:
+
+```
+┌─────────────────────────────┐
+│    Application Code         │  <- Your code
+├─────────────────────────────┤
+│    Dependencies             │  <- npm, gems, etc.
+├─────────────────────────────┤
+│    Runtime                  │  <- Node, Ruby, etc.
+├─────────────────────────────┤
+│    Base OS                  │  <- Ubuntu, Alpine
+└─────────────────────────────┘
+```
+
+## Viewing Layers
+
+```bash
+docker history nginx
+```
+
+## Image Tags
+
+Images use tags for versioning:
+
+```bash
+nginx:latest
+nginx:1.24
+nginx:1.24-alpine
+ruby:3.2
+ruby:3.2-slim
+ruby:3.2-alpine
+```
+
+## Best Practices
+
+- Use specific tags, not `latest`
+- Use slim/alpine for smaller images
+- Official images are verified
+

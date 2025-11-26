@@ -1,0 +1,73 @@
+---
+title: Environment and Override Files
+chapterSlug: docker-compose-advanced
+duration: 8
+order: 1
+---
+
+## Environment Files
+
+```bash
+# .env file (loaded automatically)
+POSTGRES_PASSWORD=secret
+RAILS_ENV=development
+```
+
+```yaml
+# docker-compose.yml
+services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+```
+
+## Override Files
+
+```yaml
+# docker-compose.yml - base config
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+
+# docker-compose.override.yml - dev overrides (auto-loaded)
+services:
+  web:
+    volumes:
+      - .:/app
+    environment:
+      - RAILS_ENV=development
+```
+
+## Production Config
+
+```yaml
+# docker-compose.prod.yml
+services:
+  web:
+    image: myregistry/myapp:latest
+    environment:
+      - RAILS_ENV=production
+    restart: always
+```
+
+```bash
+# Use production config
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+## Multiple Environments
+
+```bash
+# Development (uses override automatically)
+docker compose up
+
+# Production
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Testing
+docker compose -f docker-compose.yml -f docker-compose.test.yml up
+```
+

@@ -1,0 +1,64 @@
+---
+title: Monitoring Deployments
+chapterSlug: cicd-monitoring
+duration: 8
+order: 1
+---
+
+## Health Checks
+
+```yaml
+- name: Health check
+  run: |
+    for i in {1..30}; do
+      if curl -sf https://myapp.com/health; then
+        echo "App is healthy"
+        exit 0
+      fi
+      echo "Waiting for app... ($i/30)"
+      sleep 10
+    done
+    echo "Health check failed"
+    exit 1
+```
+
+## Slack Notifications
+
+```yaml
+- name: Notify Slack on success
+  if: success()
+  uses: slackapi/slack-github-action@v1
+  with:
+    payload: |
+      {
+        "text": "✅ Deployed ${{ github.repository }} to production"
+      }
+  env:
+    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+- name: Notify Slack on failure
+  if: failure()
+  uses: slackapi/slack-github-action@v1
+  with:
+    payload: |
+      {
+        "text": "❌ Deployment failed for ${{ github.repository }}"
+      }
+  env:
+    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+```
+
+## Deployment Tracking
+
+```yaml
+- name: Create Sentry release
+  uses: getsentry/action-release@v1
+  env:
+    SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+    SENTRY_ORG: myorg
+    SENTRY_PROJECT: myproject
+  with:
+    environment: production
+    version: ${{ github.sha }}
+```
+

@@ -37,7 +37,7 @@ export default function CoursesClient({ initialCourses }: CoursesClientProps) {
   return (
     <div className="py-16 space-y-12">
       <section className="space-y-4">
-        <h1 className="text-5xl font-bold">Mini Courses</h1>
+        <h1 className="text-5xl font-bold">Courses</h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
           Explore our collection of free and premium courses covering Docker, Linux, Vim, and more.
           Learn at your own pace with structured lessons and hands-on examples.

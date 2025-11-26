@@ -1,0 +1,65 @@
+---
+title: Production Configuration
+chapterSlug: docker-production
+duration: 10
+order: 1
+---
+
+## Production Dockerfile
+
+```dockerfile
+# Multi-stage production build
+FROM ruby:3.2-slim AS builder
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle config set deployment true && \
+    bundle config set without 'development test' && \
+    bundle install
+
+COPY . .
+RUN bundle exec rails assets:precompile
+
+# Production image
+FROM ruby:3.2-slim
+
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=builder /app /app
+COPY --from=builder /usr/local/bundle /usr/local/bundle
+
+ENV RAILS_ENV=production \
+    RAILS_LOG_TO_STDOUT=true \
+    RAILS_SERVE_STATIC_FILES=true
+
+EXPOSE 3000
+
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
+```
+
+## Production Compose
+
+```yaml
+services:
+  web:
+    image: ghcr.io/myorg/myapp:latest
+    restart: always
+    environment:
+      - RAILS_ENV=production
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - DATABASE_URL=${DATABASE_URL}
+    ports:
+      - "3000:3000"
+```
+

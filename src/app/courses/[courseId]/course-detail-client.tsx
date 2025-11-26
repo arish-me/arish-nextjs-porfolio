@@ -74,7 +74,7 @@ export default function CourseDetailClient({ course }: CourseDetailClientProps) 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link href="/courses" className="hover:text-foreground transition-colors">
-          Mini Courses
+          Courses
         </Link>
         <ChevronRight className="h-4 w-4" />
         <Link href={`/courses?category=${course.category}`} className="hover:text-foreground transition-colors">

@@ -1,0 +1,71 @@
+---
+title: RuboCop Linting
+chapterSlug: cicd-code-quality
+duration: 8
+order: 1
+---
+
+## RuboCop in CI
+
+```yaml
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      
+      - name: Run RuboCop
+        run: bundle exec rubocop --parallel
+```
+
+## RuboCop Configuration
+
+```yaml
+# .rubocop.yml
+require:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-performance
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+  Exclude:
+    - 'db/**/*'
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'config/routes.rb'
+```
+
+## Auto-Correction
+
+```yaml
+- name: Run RuboCop with auto-correct
+  run: |
+    bundle exec rubocop -A
+    git diff --exit-code || (echo "RuboCop made changes" && exit 1)
+```
+
+## Reviewdog Integration
+
+```yaml
+- uses: reviewdog/action-rubocop@v2
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    reporter: github-pr-review
+```
+

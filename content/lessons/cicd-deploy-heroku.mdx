@@ -1,0 +1,68 @@
+---
+title: Deploying to Heroku
+chapterSlug: cicd-deployment
+duration: 10
+order: 1
+---
+
+## Heroku Deploy Action
+
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.14
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+```
+
+## With Docker
+
+```yaml
+- name: Deploy to Heroku
+  uses: akhileshns/heroku-deploy@v3.12.14
+  with:
+    heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+    heroku_app_name: myapp
+    heroku_email: dev@example.com
+    usedocker: true
+```
+
+## Run Migrations
+
+```yaml
+- name: Deploy and migrate
+  uses: akhileshns/heroku-deploy@v3.12.14
+  with:
+    heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+    heroku_app_name: myapp
+    heroku_email: dev@example.com
+    healthcheck: https://myapp.herokuapp.com/health
+    rollbackonhealthcheckfailed: true
+
+- name: Run migrations
+  run: heroku run rails db:migrate -a myapp
+  env:
+    HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+```
+
+## Review Apps
+
+```yaml
+# Deploy PR to review app
+- name: Create Review App
+  if: github.event_name == 'pull_request'
+  run: |
+    heroku apps:create myapp-pr-${{ github.event.number }} --remote pr
+    git push pr HEAD:main
+```
+

@@ -1,0 +1,65 @@
+---
+title: GitHub Actions Introduction
+chapterSlug: cicd-github-actions
+duration: 10
+order: 1
+---
+
+## What is GitHub Actions?
+
+CI/CD platform built into GitHub. Free for public repos.
+
+## Key Concepts
+
+- **Workflow** - Automated process (YAML file)
+- **Job** - Set of steps that run on same runner
+- **Step** - Individual task in a job
+- **Action** - Reusable unit of code
+- **Runner** - Server that runs workflows
+
+## Your First Workflow
+
+Create `.github/workflows/ci.yml`:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      
+      - name: Run tests
+        run: bundle exec rspec
+```
+
+## Workflow Triggers
+
+```yaml
+on:
+  push:                    # On push
+  pull_request:            # On PR
+  schedule:                # Cron schedule
+    - cron: '0 0 * * *'
+  workflow_dispatch:       # Manual trigger
+```
+
+## Viewing Results
+
+Check Actions tab in your repository for results.
+

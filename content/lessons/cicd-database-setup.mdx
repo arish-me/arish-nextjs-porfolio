@@ -1,0 +1,81 @@
+---
+title: Database Setup in CI
+chapterSlug: cicd-database
+duration: 10
+order: 1
+---
+
+## PostgreSQL Service
+
+```yaml
+services:
+  postgres:
+    image: postgres:15
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test
+    ports:
+      - 5432:5432
+    options: >-
+      --health-cmd pg_isready
+      --health-interval 10s
+      --health-timeout 5s
+      --health-retries 5
+```
+
+## Database Configuration
+
+```yaml
+# config/database.yml
+test:
+  adapter: postgresql
+  encoding: unicode
+  host: <%= ENV.fetch('DB_HOST', 'localhost') %>
+  port: <%= ENV.fetch('DB_PORT', 5432) %>
+  username: <%= ENV.fetch('DB_USER', 'postgres') %>
+  password: <%= ENV.fetch('DB_PASSWORD', 'postgres') %>
+  database: <%= ENV.fetch('DB_NAME', 'myapp_test') %>
+```
+
+## Setup Steps
+
+```yaml
+env:
+  DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
+  RAILS_ENV: test
+
+steps:
+  - name: Setup database
+    run: |
+      bundle exec rails db:create
+      bundle exec rails db:schema:load
+```
+
+## With Migrations
+
+```yaml
+- name: Setup database
+  run: |
+    bundle exec rails db:create
+    bundle exec rails db:migrate
+```
+
+## MySQL Alternative
+
+```yaml
+services:
+  mysql:
+    image: mysql:8
+    env:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test
+    ports:
+      - 3306:3306
+    options: >-
+      --health-cmd="mysqladmin ping"
+      --health-interval=10s
+      --health-timeout=5s
+      --health-retries=3
+```
+

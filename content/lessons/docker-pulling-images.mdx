@@ -1,0 +1,72 @@
+---
+title: Pulling and Managing Images
+chapterSlug: docker-images
+duration: 8
+order: 2
+---
+
+## Pulling Images
+
+```bash
+# Pull latest
+docker pull nginx
+
+# Pull specific version
+docker pull nginx:1.24
+
+# Pull from different registry
+docker pull gcr.io/google-containers/nginx
+```
+
+## Listing Images
+
+```bash
+# List all images
+docker images
+
+# Filter by name
+docker images nginx
+
+# Show image IDs only
+docker images -q
+```
+
+## Removing Images
+
+```bash
+# Remove single image
+docker rmi nginx:1.24
+
+# Remove multiple
+docker rmi nginx redis postgres
+
+# Remove unused images
+docker image prune
+
+# Remove all images
+docker rmi $(docker images -q)
+```
+
+## Image Details
+
+```bash
+# Inspect image
+docker inspect nginx
+
+# View image history
+docker history nginx
+
+# Check image size
+docker images --format "{{.Repository}}:{{.Tag}} {{.Size}}"
+```
+
+## Saving and Loading
+
+```bash
+# Save to file
+docker save nginx > nginx.tar
+
+# Load from file
+docker load < nginx.tar
+```
+

@@ -1,0 +1,69 @@
+---
+title: CI/CD Pipeline Architecture
+chapterSlug: cicd-introduction
+duration: 8
+order: 2
+---
+
+## Pipeline Structure
+
+```yaml
+Stages:
+  1. Setup       → Install Ruby, dependencies
+  2. Test        → RSpec, Minitest
+  3. Lint        → RuboCop, ESLint
+  4. Security    → Brakeman, Bundler Audit
+  5. Build       → Docker image
+  6. Deploy      → Staging → Production
+```
+
+## Parallel vs Sequential
+
+```yaml
+# Sequential (slower)
+test → lint → security → build → deploy
+
+# Parallel (faster)
+┌─ test ────┐
+├─ lint ────┼─→ build → deploy
+└─ security ┘
+```
+
+## Environment Strategy
+
+```
+feature/* → Run tests only
+develop   → Tests + Deploy to staging
+main      → Tests + Deploy to production
+```
+
+## Rails Pipeline Example
+
+```yaml
+name: CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+      - name: Run tests
+        run: bundle exec rspec
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production
+        run: ./deploy.sh
+```
+

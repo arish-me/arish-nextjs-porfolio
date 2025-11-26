@@ -1,0 +1,65 @@
+---
+title: Volume Commands
+chapterSlug: docker-volumes
+duration: 7
+order: 2
+---
+
+## Creating Volumes
+
+```bash
+# Create named volume
+docker volume create app-data
+
+# Create with options
+docker volume create --driver local \
+  --opt type=nfs \
+  --opt o=addr=192.168.1.1,rw \
+  --opt device=:/path/to/dir \
+  nfs-data
+```
+
+## Using Volumes
+
+```bash
+# Named volume
+docker run -v app-data:/var/lib/postgresql/data postgres
+
+# Anonymous volume
+docker run -v /var/lib/postgresql/data postgres
+
+# Read-only
+docker run -v app-data:/app/data:ro nginx
+```
+
+## Managing Volumes
+
+```bash
+# List volumes
+docker volume ls
+
+# Inspect
+docker volume inspect app-data
+
+# Remove unused
+docker volume prune
+
+# Remove specific
+docker volume rm app-data
+
+# Remove all
+docker volume rm $(docker volume ls -q)
+```
+
+## Backup and Restore
+
+```bash
+# Backup
+docker run --rm -v app-data:/data -v $(pwd):/backup \
+  alpine tar cvf /backup/backup.tar /data
+
+# Restore
+docker run --rm -v app-data:/data -v $(pwd):/backup \
+  alpine tar xvf /backup/backup.tar -C /
+```
+

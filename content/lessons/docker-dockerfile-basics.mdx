@@ -1,0 +1,58 @@
+---
+title: Dockerfile Fundamentals
+chapterSlug: docker-dockerfile
+duration: 10
+order: 1
+---
+
+## What is a Dockerfile?
+
+A text file with instructions to build a Docker image.
+
+## Basic Structure
+
+```dockerfile
+# Base image
+FROM ruby:3.2
+
+# Set working directory
+WORKDIR /app
+
+# Copy files
+COPY . .
+
+# Install dependencies
+RUN bundle install
+
+# Expose port
+EXPOSE 3000
+
+# Start command
+CMD ["rails", "server", "-b", "0.0.0.0"]
+```
+
+## Common Instructions
+
+| Instruction | Description |
+|-------------|-------------|
+| `FROM` | Base image |
+| `WORKDIR` | Set working directory |
+| `COPY` | Copy files into image |
+| `ADD` | Copy with extras (URLs, tar) |
+| `RUN` | Execute command |
+| `ENV` | Set environment variable |
+| `EXPOSE` | Document port |
+| `CMD` | Default command |
+| `ENTRYPOINT` | Fixed command |
+
+## Building
+
+```bash
+docker build -t myapp .
+docker build -t myapp:v1.0 -f Dockerfile.prod .
+```
+
+## Build Context
+
+The `.` in `docker build -t myapp .` is the build context - files available during build.
+

@@ -1,0 +1,70 @@
+---
+title: Dockerfile Best Practices
+chapterSlug: docker-best-practices
+duration: 12
+order: 1
+---
+
+## Layer Caching
+
+Order commands from least to most frequently changed:
+
+```dockerfile
+# Good - dependencies cached
+FROM ruby:3.2
+WORKDIR /app
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+COPY . .
+
+# Bad - cache busted every time
+FROM ruby:3.2
+WORKDIR /app
+COPY . .
+RUN bundle install
+```
+
+## Minimize Layers
+
+```dockerfile
+# Bad - multiple layers
+RUN apt-get update
+RUN apt-get install -y git
+RUN apt-get install -y curl
+RUN rm -rf /var/lib/apt/lists/*
+
+# Good - single layer
+RUN apt-get update && \
+    apt-get install -y git curl && \
+    rm -rf /var/lib/apt/lists/*
+```
+
+## Use Specific Tags
+
+```dockerfile
+# Bad
+FROM ruby:latest
+
+# Good
+FROM ruby:3.2.2-slim-bullseye
+```
+
+## Clean Up
+
+```dockerfile
+RUN apt-get update && \
+    apt-get install -y build-essential && \
+    bundle install && \
+    apt-get purge -y build-essential && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+```
+
+## Use .dockerignore
+
+Exclude unnecessary files to reduce build context.
+
+## Multi-Stage Builds
+
+Separate build and runtime for smaller images.
+

@@ -1,0 +1,79 @@
+---
+title: Rollback Strategies
+chapterSlug: cicd-monitoring
+duration: 8
+order: 2
+---
+
+## Manual Rollback
+
+```yaml
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to rollback to'
+        required: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Rollback to version
+        run: |
+          heroku releases:rollback ${{ github.event.inputs.version }}
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+```
+
+## Automatic Rollback
+
+```yaml
+- name: Deploy
+  id: deploy
+  run: ./deploy.sh
+
+- name: Health check
+  id: health
+  run: |
+    sleep 30
+    curl -sf https://myapp.com/health || exit 1
+
+- name: Rollback on failure
+  if: failure() && steps.deploy.outcome == 'success'
+  run: |
+    echo "Deployment unhealthy, rolling back..."
+    heroku releases:rollback
+```
+
+## Blue-Green Deployment
+
+```yaml
+- name: Deploy to green
+  run: ./deploy-green.sh
+
+- name: Test green environment
+  run: curl -sf https://green.myapp.com/health
+
+- name: Switch traffic
+  run: ./switch-to-green.sh
+
+- name: Rollback if needed
+  if: failure()
+  run: ./switch-to-blue.sh
+```
+
+## Database Rollbacks
+
+```bash
+# Rollback last migration
+rails db:rollback
+
+# Rollback specific version
+rails db:migrate:down VERSION=20240101000000
+```
+

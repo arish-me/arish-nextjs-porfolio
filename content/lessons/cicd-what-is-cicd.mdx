@@ -1,0 +1,54 @@
+---
+title: What is CI/CD?
+chapterSlug: cicd-introduction
+duration: 8
+order: 1
+---
+
+## Continuous Integration (CI)
+
+Automatically build and test code on every push.
+
+```
+Code Push → Build → Test → Report
+```
+
+## Continuous Deployment (CD)
+
+Automatically deploy after successful tests.
+
+```
+CI Pass → Deploy Staging → Deploy Production
+```
+
+## Benefits
+
+- **Faster feedback** - Know if code breaks immediately
+- **Reduced risk** - Small, frequent deployments
+- **Consistency** - Same process every time
+- **Quality** - Automated testing catches bugs
+
+## CI/CD for Rails
+
+```
+Push → Install Dependencies → Run Tests → 
+Lint Code → Security Scan → Build Image → Deploy
+```
+
+## Popular Tools
+
+- GitHub Actions (we'll use this)
+- GitLab CI
+- CircleCI
+- Jenkins
+- Travis CI
+
+## What We'll Build
+
+A complete pipeline that:
+1. Runs RSpec tests
+2. Checks code with RuboCop
+3. Scans for security issues
+4. Builds Docker image
+5. Deploys to production
+

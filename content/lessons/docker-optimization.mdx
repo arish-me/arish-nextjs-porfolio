@@ -1,0 +1,73 @@
+---
+title: Image Optimization
+chapterSlug: docker-best-practices
+duration: 10
+order: 2
+---
+
+## Choose Small Base Images
+
+```dockerfile
+# Size comparison
+ruby:3.2          # ~900MB
+ruby:3.2-slim     # ~200MB
+ruby:3.2-alpine   # ~80MB
+```
+
+## Remove Unnecessary Files
+
+```dockerfile
+RUN bundle install && \
+    rm -rf ~/.bundle/cache && \
+    rm -rf /usr/local/bundle/cache/*.gem
+```
+
+## Use Multi-Stage Builds
+
+```dockerfile
+FROM node:18 AS assets
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM ruby:3.2-slim AS production
+COPY --from=assets /app/public/assets public/assets
+# Only production dependencies
+```
+
+## Optimize for Cache
+
+```dockerfile
+# Copy dependency files first
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+COPY package*.json ./
+RUN npm ci
+
+# Then copy source
+COPY . .
+```
+
+## Analyze Image Size
+
+```bash
+# View layers
+docker history myapp:latest
+
+# Detailed analysis with dive
+dive myapp:latest
+```
+
+## BuildKit Features
+
+```bash
+# Enable BuildKit
+DOCKER_BUILDKIT=1 docker build .
+
+# Cache mounts
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
+```
+

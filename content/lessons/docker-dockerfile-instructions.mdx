@@ -1,0 +1,74 @@
+---
+title: Dockerfile Instructions Deep Dive
+chapterSlug: docker-dockerfile
+duration: 12
+order: 2
+---
+
+## FROM
+
+```dockerfile
+# Official image
+FROM ruby:3.2
+
+# Specific version
+FROM ruby:3.2.2-slim-bullseye
+
+# Multi-stage base
+FROM ruby:3.2 AS builder
+```
+
+## WORKDIR
+
+```dockerfile
+WORKDIR /app
+# All following commands run from /app
+```
+
+## COPY vs ADD
+
+```dockerfile
+# COPY - simple copy
+COPY package.json .
+COPY src/ ./src/
+
+# ADD - extra features
+ADD https://example.com/file.tar.gz /tmp/
+ADD archive.tar.gz /app/  # Auto-extracts
+```
+
+Prefer COPY unless you need ADD features.
+
+## RUN
+
+```dockerfile
+# Shell form
+RUN apt-get update && apt-get install -y git
+
+# Exec form
+RUN ["apt-get", "install", "-y", "git"]
+
+# Multi-line
+RUN apt-get update && \
+    apt-get install -y \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+```
+
+## ENV
+
+```dockerfile
+ENV RAILS_ENV=production
+ENV NODE_ENV=production APP_HOME=/app
+```
+
+## ARG
+
+```dockerfile
+ARG RUBY_VERSION=3.2
+FROM ruby:${RUBY_VERSION}
+
+# Build with: docker build --build-arg RUBY_VERSION=3.1 .
+```
+

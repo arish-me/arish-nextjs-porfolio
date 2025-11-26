@@ -1,0 +1,66 @@
+---
+title: Container Communication
+chapterSlug: docker-networking
+duration: 8
+order: 2
+---
+
+## DNS Resolution
+
+On custom networks, Docker provides DNS resolution.
+
+```bash
+# Create network
+docker network create app-net
+
+# Run database
+docker run -d --network app-net --name postgres postgres
+
+# Run app - can connect to 'postgres' by name
+docker run -d --network app-net \
+  -e DATABASE_HOST=postgres \
+  myapp
+```
+
+## Connecting Rails to PostgreSQL
+
+```bash
+# Create network
+docker network create rails-net
+
+# Run PostgreSQL
+docker run -d --network rails-net \
+  --name db \
+  -e POSTGRES_PASSWORD=secret \
+  postgres:15
+
+# Run Rails
+docker run -d --network rails-net \
+  -e DATABASE_URL=postgres://postgres:secret@db/myapp \
+  -p 3000:3000 \
+  myapp
+```
+
+## Multiple Networks
+
+```bash
+# Frontend network
+docker network create frontend
+
+# Backend network  
+docker network create backend
+
+# App on both
+docker run -d --name api myapi
+docker network connect frontend api
+docker network connect backend api
+```
+
+## Host Network Mode
+
+```bash
+# Use host's network stack
+docker run --network host nginx
+# Now available at localhost:80 (no port mapping needed)
+```
+

@@ -1,0 +1,71 @@
+---
+title: CMD and ENTRYPOINT
+chapterSlug: docker-dockerfile
+duration: 8
+order: 3
+---
+
+## CMD - Default Command
+
+```dockerfile
+# Exec form (preferred)
+CMD ["rails", "server", "-b", "0.0.0.0"]
+
+# Shell form
+CMD rails server -b 0.0.0.0
+```
+
+Can be overridden:
+```bash
+docker run myapp rails console
+```
+
+## ENTRYPOINT - Fixed Command
+
+```dockerfile
+ENTRYPOINT ["rails"]
+CMD ["server"]
+```
+
+```bash
+docker run myapp          # rails server
+docker run myapp console  # rails console
+```
+
+## Common Pattern
+
+```dockerfile
+# entrypoint.sh
+COPY entrypoint.sh /usr/bin/
+RUN chmod +x /usr/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["rails", "server"]
+```
+
+```bash
+#!/bin/bash
+# entrypoint.sh
+set -e
+
+# Remove stale pid
+rm -f /app/tmp/pids/server.pid
+
+# Run migrations
+bundle exec rails db:migrate
+
+# Execute CMD
+exec "$@"
+```
+
+## Shell vs Exec Form
+
+```dockerfile
+# Shell form - runs in /bin/sh -c
+CMD rails server
+
+# Exec form - runs directly
+CMD ["rails", "server"]
+```
+
+Exec form is preferred for proper signal handling.
+

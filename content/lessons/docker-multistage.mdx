@@ -1,0 +1,66 @@
+---
+title: Multi-Stage Builds
+chapterSlug: docker-dockerfile
+duration: 10
+order: 4
+---
+
+## Why Multi-Stage?
+
+- Smaller final images
+- Separate build and runtime dependencies
+- Better security
+
+## Basic Multi-Stage
+
+```dockerfile
+# Build stage
+FROM node:18 AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+```
+
+## Rails Example
+
+```dockerfile
+# Build stage
+FROM ruby:3.2 AS builder
+RUN apt-get update && apt-get install -y build-essential
+WORKDIR /app
+COPY Gemfile* ./
+RUN bundle install --deployment
+
+# Production stage
+FROM ruby:3.2-slim
+RUN apt-get update && apt-get install -y libpq5
+WORKDIR /app
+COPY --from=builder /app/vendor/bundle vendor/bundle
+COPY . .
+CMD ["rails", "server"]
+```
+
+## Multiple Build Stages
+
+```dockerfile
+FROM node:18 AS frontend
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci && npm run build
+
+FROM ruby:3.2 AS backend
+WORKDIR /app
+COPY Gemfile* ./
+RUN bundle install
+
+FROM ruby:3.2-slim
+COPY --from=frontend /app/public/assets public/assets
+COPY --from=backend /app/vendor vendor
+```
+

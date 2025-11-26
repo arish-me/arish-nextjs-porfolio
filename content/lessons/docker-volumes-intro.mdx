@@ -1,0 +1,56 @@
+---
+title: Introduction to Volumes
+chapterSlug: docker-volumes
+duration: 8
+order: 1
+---
+
+## Why Volumes?
+
+- Container filesystems are ephemeral
+- Volumes persist data beyond container lifecycle
+- Share data between containers
+
+## Types of Mounts
+
+1. **Volumes** - Docker-managed storage
+2. **Bind Mounts** - Host filesystem paths
+3. **tmpfs** - Memory-only storage
+
+## Named Volumes
+
+```bash
+# Create volume
+docker volume create mydata
+
+# Use volume
+docker run -v mydata:/app/data nginx
+
+# List volumes
+docker volume ls
+
+# Inspect volume
+docker volume inspect mydata
+
+# Remove volume
+docker volume rm mydata
+```
+
+## Bind Mounts
+
+```bash
+# Mount current directory
+docker run -v $(pwd):/app myapp
+
+# Mount specific path
+docker run -v /host/path:/container/path nginx
+```
+
+## Volume vs Bind Mount
+
+| Feature | Volume | Bind Mount |
+|---------|--------|------------|
+| Managed by | Docker | Host |
+| Location | /var/lib/docker/volumes | Anywhere |
+| Best for | Persistence | Development |
+

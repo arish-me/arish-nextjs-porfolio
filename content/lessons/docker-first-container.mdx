@@ -1,0 +1,57 @@
+---
+title: Running Your First Container
+chapterSlug: docker-getting-started
+duration: 8
+order: 3
+---
+
+## Your First Container
+
+```bash
+docker run hello-world
+```
+
+This command:
+1. Checks for image locally
+2. Downloads from Docker Hub if missing
+3. Creates container from image
+4. Runs the container
+5. Outputs message and exits
+
+## Running Interactive Containers
+
+```bash
+# Run Ubuntu interactively
+docker run -it ubuntu bash
+
+# Inside container
+root@abc123:/# ls
+root@abc123:/# cat /etc/os-release
+root@abc123:/# exit
+```
+
+## Running in Background
+
+```bash
+# Run Nginx web server
+docker run -d -p 8080:80 nginx
+
+# Visit http://localhost:8080
+```
+
+## Common Flags
+
+| Flag | Description |
+|------|-------------|
+| `-d` | Detached mode (background) |
+| `-it` | Interactive terminal |
+| `-p` | Port mapping |
+| `--name` | Name the container |
+| `--rm` | Remove after exit |
+
+## Example
+
+```bash
+docker run -d --name my-nginx -p 8080:80 nginx
+```
+

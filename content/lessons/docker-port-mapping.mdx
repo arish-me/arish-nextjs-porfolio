@@ -1,0 +1,62 @@
+---
+title: Port Mapping
+chapterSlug: docker-containers
+duration: 7
+order: 3
+---
+
+## Port Mapping Basics
+
+```bash
+# Map host:container
+docker run -p 8080:80 nginx
+#            │    └── Container port
+#            └─────── Host port
+```
+
+## Multiple Ports
+
+```bash
+docker run -p 8080:80 -p 8443:443 nginx
+```
+
+## All Interfaces vs Specific
+
+```bash
+# All interfaces (0.0.0.0)
+docker run -p 8080:80 nginx
+
+# Specific interface
+docker run -p 127.0.0.1:8080:80 nginx
+
+# Random host port
+docker run -p 80 nginx
+docker port mycontainer  # See assigned port
+```
+
+## UDP Ports
+
+```bash
+docker run -p 53:53/udp dns-server
+```
+
+## View Port Mappings
+
+```bash
+# List all port mappings
+docker port mycontainer
+
+# Specific port
+docker port mycontainer 80
+```
+
+## Expose vs Publish
+
+```dockerfile
+# Dockerfile - document port (no mapping)
+EXPOSE 80
+
+# Run - actually publish
+docker run -p 8080:80 myimage
+```
+

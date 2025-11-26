@@ -1,0 +1,52 @@
+---
+title: What is Docker?
+chapterSlug: docker-getting-started
+duration: 8
+order: 1
+---
+
+## What is Docker?
+
+Docker is a platform for developing, shipping, and running applications in containers.
+
+## Containers vs Virtual Machines
+
+| Feature | Containers | VMs |
+|---------|-----------|-----|
+| Size | Megabytes | Gigabytes |
+| Startup | Seconds | Minutes |
+| OS | Shared kernel | Full OS |
+| Isolation | Process-level | Hardware-level |
+
+## Why Docker?
+
+- **Consistency**: Same environment everywhere
+- **Isolation**: Apps don't interfere with each other
+- **Portability**: Run anywhere Docker runs
+- **Efficiency**: Lightweight and fast
+
+## Docker Architecture
+
+```
+┌─────────────────────────────────────┐
+│           Docker Client             │
+│         (docker commands)           │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│           Docker Daemon             │
+│     (manages containers/images)     │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│         Container Runtime           │
+└─────────────────────────────────────┘
+```
+
+## Key Concepts
+
+- **Image**: Blueprint for containers
+- **Container**: Running instance of an image
+- **Registry**: Storage for images (Docker Hub)
+- **Dockerfile**: Instructions to build an image
+

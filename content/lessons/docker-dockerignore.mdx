@@ -1,0 +1,77 @@
+---
+title: .dockerignore File
+chapterSlug: docker-dockerfile
+duration: 5
+order: 5
+---
+
+## What is .dockerignore?
+
+Excludes files from build context, similar to .gitignore.
+
+## Example .dockerignore
+
+```
+# Git
+.git
+.gitignore
+
+# Dependencies
+node_modules
+vendor/bundle
+
+# Logs
+*.log
+log/
+
+# Temp files
+tmp/
+.cache/
+
+# IDE
+.idea/
+.vscode/
+
+# Docker
+Dockerfile*
+docker-compose*
+.docker/
+
+# Environment
+.env*
+!.env.example
+
+# Test
+coverage/
+spec/
+test/
+
+# Documentation
+README.md
+docs/
+```
+
+## Benefits
+
+- Faster builds
+- Smaller context sent to Docker daemon
+- Prevents sensitive files from being included
+
+## Rails .dockerignore
+
+```
+.git
+.gitignore
+node_modules
+tmp/
+log/
+storage/
+.env*
+docker-compose*
+Dockerfile*
+spec/
+test/
+coverage/
+.rspec
+```
+

@@ -1,0 +1,61 @@
+---
+title: Docker Networking Basics
+chapterSlug: docker-networking
+duration: 8
+order: 1
+---
+
+## Network Types
+
+1. **bridge** - Default, isolated network
+2. **host** - Use host's network directly
+3. **none** - No networking
+4. **overlay** - Multi-host (Swarm)
+
+## Default Bridge Network
+
+```bash
+# Containers can communicate via IP
+docker run -d --name web nginx
+docker run -d --name api myapi
+
+# Get IP
+docker inspect web | grep IPAddress
+```
+
+## Network Commands
+
+```bash
+# List networks
+docker network ls
+
+# Create network
+docker network create mynetwork
+
+# Inspect
+docker network inspect mynetwork
+
+# Connect container
+docker network connect mynetwork web
+
+# Disconnect
+docker network disconnect mynetwork web
+```
+
+## Custom Bridge Network
+
+```bash
+# Create
+docker network create --driver bridge app-network
+
+# Run containers on network
+docker run -d --network app-network --name db postgres
+docker run -d --network app-network --name web myapp
+```
+
+On custom networks, containers can communicate by name:
+```bash
+# From web container
+ping db  # Works!
+```
+

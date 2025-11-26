@@ -1,0 +1,67 @@
+---
+title: Docker Security Fundamentals
+chapterSlug: docker-security
+duration: 10
+order: 1
+---
+
+## Non-Root User
+
+```dockerfile
+# Create user
+RUN addgroup --system app && adduser --system --group app
+
+# Set ownership
+RUN chown -R app:app /app
+
+# Switch to non-root
+USER app
+
+CMD ["rails", "server"]
+```
+
+## Read-Only Filesystem
+
+```yaml
+services:
+  web:
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/tmp
+```
+
+## Security Scanning
+
+```bash
+# Scan image for vulnerabilities
+docker scout quickview myapp:latest
+docker scout cves myapp:latest
+
+# Using Trivy
+trivy image myapp:latest
+```
+
+## Secrets Management
+
+```yaml
+# Docker secrets (Swarm)
+services:
+  web:
+    secrets:
+      - db_password
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+```
+
+## Best Practices
+
+1. Use minimal base images (alpine, slim)
+2. Don't run as root
+3. Scan images regularly
+4. Keep images updated
+5. Use multi-stage builds
+6. Don't store secrets in images
+

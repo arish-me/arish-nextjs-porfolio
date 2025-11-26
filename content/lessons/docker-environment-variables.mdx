@@ -1,0 +1,54 @@
+---
+title: Environment Variables
+chapterSlug: docker-containers
+duration: 7
+order: 4
+---
+
+## Setting Environment Variables
+
+```bash
+# Single variable
+docker run -e DATABASE_URL=postgres://localhost/db nginx
+
+# Multiple variables
+docker run \
+  -e DATABASE_URL=postgres://localhost/db \
+  -e REDIS_URL=redis://localhost \
+  -e SECRET_KEY=abc123 \
+  myapp
+```
+
+## Using .env File
+
+```bash
+# .env file
+DATABASE_URL=postgres://localhost/db
+REDIS_URL=redis://localhost
+SECRET_KEY=abc123
+
+# Use with --env-file
+docker run --env-file .env myapp
+```
+
+## From Host Environment
+
+```bash
+# Pass existing variable
+export DATABASE_URL=postgres://localhost/db
+docker run -e DATABASE_URL myapp
+```
+
+## View Container Environment
+
+```bash
+docker exec mycontainer env
+docker exec mycontainer printenv DATABASE_URL
+```
+
+## Security Notes
+
+- Don't put secrets in Dockerfile
+- Use Docker secrets or vault for sensitive data
+- Use .env files (not committed to git)
+

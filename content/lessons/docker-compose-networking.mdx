@@ -1,0 +1,70 @@
+---
+title: Compose Networking
+chapterSlug: docker-compose-advanced
+duration: 7
+order: 2
+---
+
+## Default Network
+
+Compose creates a default network automatically.
+
+```yaml
+services:
+  web:
+    # Can reach 'db' by hostname
+    environment:
+      - DATABASE_HOST=db
+  db:
+    image: postgres
+```
+
+## Custom Networks
+
+```yaml
+services:
+  web:
+    networks:
+      - frontend
+      - backend
+
+  api:
+    networks:
+      - backend
+
+  db:
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
+```
+
+## External Networks
+
+```yaml
+networks:
+  existing-network:
+    external: true
+
+services:
+  web:
+    networks:
+      - existing-network
+```
+
+## Network Aliases
+
+```yaml
+services:
+  db:
+    networks:
+      backend:
+        aliases:
+          - database
+          - postgres
+```
+
+Now reachable as `db`, `database`, or `postgres`.
+

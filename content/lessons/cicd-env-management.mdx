@@ -1,0 +1,83 @@
+---
+title: Environment Management
+chapterSlug: cicd-environments
+duration: 10
+order: 1
+---
+
+## GitHub Environments
+
+Configure in Settings → Environments.
+
+```yaml
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - run: echo "Deploy to staging"
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production  # Requires approval
+    needs: deploy-staging
+    steps:
+      - run: echo "Deploy to production"
+```
+
+## Environment Secrets
+
+Each environment can have its own secrets:
+
+```yaml
+jobs:
+  deploy:
+    environment: production
+    steps:
+      - run: ./deploy.sh
+        env:
+          # Uses production-specific secrets
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          API_KEY: ${{ secrets.API_KEY }}
+```
+
+## Protection Rules
+
+- Required reviewers
+- Wait timer
+- Branch restrictions
+- Custom deployment branches
+
+## Environment Variables
+
+```yaml
+jobs:
+  deploy:
+    environment: 
+      name: production
+      url: https://myapp.com
+    steps:
+      - run: echo "Deployed to ${{ env.URL }}"
+```
+
+## Multi-Environment Workflow
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps: [...]
+
+  deploy-staging:
+    needs: test
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    steps: [...]
+
+  deploy-production:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps: [...]
+```
+

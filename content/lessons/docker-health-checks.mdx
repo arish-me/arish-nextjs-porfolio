@@ -1,0 +1,58 @@
+---
+title: Health Checks
+chapterSlug: docker-production
+duration: 7
+order: 2
+---
+
+## Dockerfile Health Check
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+```
+
+## Compose Health Check
+
+```yaml
+services:
+  web:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: postgres:15
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+```
+
+## Rails Health Endpoint
+
+```ruby
+# config/routes.rb
+get '/health', to: 'health#show'
+
+# app/controllers/health_controller.rb
+class HealthController < ApplicationController
+  def show
+    ActiveRecord::Base.connection.execute('SELECT 1')
+    render json: { status: 'ok' }, status: :ok
+  rescue StandardError => e
+    render json: { status: 'error', message: e.message }, status: :service_unavailable
+  end
+end
+```
+
+## Checking Health
+
+```bash
+docker inspect --format='{{.State.Health.Status}}' container_name
+```
+
