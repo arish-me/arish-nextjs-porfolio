@@ -1,0 +1,171 @@
+---
+title: Git and GitHub Project - Task 2
+chapterSlug: git-remote-command
+duration: 10
+order: 3
+---
+
+## Project Task 2: Working with Remotes
+
+Continue building your portfolio project by mastering remote management.
+
+## Objective
+
+Configure multiple remotes and understand different URL formats.
+
+## Prerequisites
+
+You should have completed Task 1 with your portfolio project.
+
+## Instructions
+
+### Step 1: Verify Current Remote
+
+```bash
+cd portfolio-project
+
+# Check current remote
+git remote -v
+
+# Should show:
+# origin  https://github.com/username/portfolio-project.git (fetch)
+# origin  https://github.com/username/portfolio-project.git (push)
+```
+
+### Step 2: View Remote Details
+
+```bash
+git remote show origin
+
+# Note the information displayed:
+# - Fetch/Push URLs
+# - HEAD branch
+# - Remote branches
+```
+
+### Step 3: Add SSH Remote (Alternative Access)
+
+```bash
+# Add same repo with SSH URL as alternate
+git remote add github-ssh git@github.com:username/portfolio-project.git
+
+# Verify both
+git remote -v
+
+# Output:
+# github-ssh  git@github.com:username/portfolio-project.git (fetch)
+# github-ssh  git@github.com:username/portfolio-project.git (push)
+# origin      https://github.com/username/portfolio-project.git (fetch)
+# origin      https://github.com/username/portfolio-project.git (push)
+```
+
+### Step 4: Understand When to Use Each
+
+**HTTPS (`origin`):**
+- Works through firewalls
+- Requires credentials/token
+- Good for beginners
+
+**SSH (`github-ssh`):**
+- No password prompts
+- Requires SSH key setup
+- Preferred for regular use
+
+### Step 5: Switch Primary Remote to SSH
+
+If you've set up SSH keys:
+
+```bash
+# Change origin to SSH
+git remote set-url origin git@github.com:username/portfolio-project.git
+
+# Remove the extra remote
+git remote remove github-ssh
+
+# Verify
+git remote -v
+```
+
+### Step 6: Make and Push Changes
+
+```bash
+# Add new section to index.html
+cat >> index.html << 'EOF'
+        <section id="projects">
+            <h2>My Projects</h2>
+            <ul>
+                <li>Portfolio Website</li>
+                <li>More coming soon...</li>
+            </ul>
+        </section>
+EOF
+
+# Stage and commit
+git add index.html
+git commit -m "Add projects section"
+
+# Push to remote
+git push origin main
+```
+
+### Step 7: Verify on GitHub
+
+1. Visit your repository on GitHub
+2. Check that the new commit appears
+3. View the updated index.html file
+
+## Bonus: Add a Mirror Remote
+
+For backup purposes, you can push to multiple remotes:
+
+```bash
+# Add a GitLab mirror (optional)
+# First create repo on GitLab, then:
+git remote add gitlab https://gitlab.com/username/portfolio-project.git
+
+# Push to both
+git push origin main
+git push gitlab main
+```
+
+## Verification Checklist
+
+- [ ] Remote shows correct URL
+- [ ] Can view remote details with `git remote show`
+- [ ] Changes pushed successfully
+- [ ] Commits visible on GitHub
+
+## Common Issues
+
+### Authentication Failed
+
+```bash
+# For HTTPS, use a Personal Access Token
+# GitHub → Settings → Developer Settings → Personal Access Tokens
+
+# Or switch to SSH
+git remote set-url origin git@github.com:username/repo.git
+```
+
+### Remote Already Exists
+
+```bash
+# Remove and re-add
+git remote remove origin
+git remote add origin <correct-url>
+
+# Or just update URL
+git remote set-url origin <correct-url>
+```
+
+## Summary
+
+In Task 2, you learned:
+
+- ✅ How to view remote details
+- ✅ HTTPS vs SSH remotes
+- ✅ How to change remote URLs
+- ✅ Pushing changes to remotes
+
+Next: Learn about push and pull commands in detail!
+

@@ -1,0 +1,244 @@
+---
+title: Add SSH Key to GitHub Account
+chapterSlug: git-introduction
+duration: 10
+order: 8
+---
+
+## SSH Keys for GitHub
+
+SSH keys allow you to connect to GitHub without entering your username and password every time.
+
+## Why Use SSH?
+
+| Method | Pros | Cons |
+|--------|------|------|
+| HTTPS | Easy setup | Enter credentials often |
+| SSH | No passwords, secure | Initial setup required |
+
+## Step 1: Check for Existing SSH Keys
+
+```bash
+# List existing SSH keys
+ls -la ~/.ssh
+
+# Look for files like:
+# id_ed25519 / id_ed25519.pub
+# id_rsa / id_rsa.pub
+```
+
+If you see existing keys, you can skip to Step 3.
+
+## Step 2: Generate a New SSH Key
+
+### Using Ed25519 (Recommended)
+
+```bash
+ssh-keygen -t ed25519 -C "your.email@example.com"
+```
+
+### Using RSA (If Ed25519 not supported)
+
+```bash
+ssh-keygen -t rsa -b 4096 -C "your.email@example.com"
+```
+
+### Prompts
+
+```
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/home/you/.ssh/id_ed25519): [Press Enter]
+Enter passphrase (empty for no passphrase): [Type passphrase or Enter]
+Enter same passphrase again: [Confirm passphrase]
+```
+
+**Tip**: A passphrase adds extra security but is optional.
+
+### Output
+
+```
+Your identification has been saved in /home/you/.ssh/id_ed25519
+Your public key has been saved in /home/you/.ssh/id_ed25519.pub
+The key fingerprint is:
+SHA256:abc123... your.email@example.com
+```
+
+## Step 3: Add SSH Key to SSH Agent
+
+### Start the SSH Agent
+
+```bash
+# Mac/Linux
+eval "$(ssh-agent -s)"
+# Output: Agent pid 12345
+
+# Windows (Git Bash)
+eval "$(ssh-agent -s)"
+```
+
+### Add Your Key
+
+```bash
+# Mac
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+
+# Linux/Windows
+ssh-add ~/.ssh/id_ed25519
+```
+
+## Step 4: Copy the Public Key
+
+### Mac
+
+```bash
+pbcopy < ~/.ssh/id_ed25519.pub
+```
+
+### Linux
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+# Then manually copy the output
+```
+
+### Windows (Git Bash)
+
+```bash
+clip < ~/.ssh/id_ed25519.pub
+```
+
+The public key looks like:
+
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH... your.email@example.com
+```
+
+## Step 5: Add Key to GitHub
+
+1. Go to [github.com](https://github.com) and log in
+2. Click your **profile picture** → **Settings**
+3. Click **SSH and GPG keys** in the sidebar
+4. Click **New SSH key**
+5. Fill in the form:
+   - **Title**: "My Laptop" (or any descriptive name)
+   - **Key type**: Authentication Key
+   - **Key**: Paste your public key
+6. Click **Add SSH key**
+7. Confirm with your GitHub password if prompted
+
+## Step 6: Test the Connection
+
+```bash
+ssh -T git@github.com
+```
+
+### First Time Connection
+
+```
+The authenticity of host 'github.com (IP ADDRESS)' can't be established.
+ED25519 key fingerprint is SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+```
+
+Type `yes` and press Enter.
+
+### Successful Connection
+
+```
+Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+🎉 You're connected!
+
+## Using SSH with Git
+
+### Clone with SSH
+
+```bash
+git clone git@github.com:username/repository.git
+```
+
+### Change Existing Remote to SSH
+
+```bash
+# Check current remote
+git remote -v
+
+# Change from HTTPS to SSH
+git remote set-url origin git@github.com:username/repository.git
+
+# Verify
+git remote -v
+```
+
+## Managing Multiple SSH Keys
+
+If you have multiple GitHub accounts:
+
+### Create Config File
+
+```bash
+# Create or edit ~/.ssh/config
+nano ~/.ssh/config
+```
+
+### Add Configurations
+
+```
+# Personal GitHub
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_personal
+
+# Work GitHub
+Host github-work
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_work
+```
+
+### Clone with Specific Key
+
+```bash
+# Personal
+git clone git@github.com:personal/repo.git
+
+# Work
+git clone git@github-work:company/repo.git
+```
+
+## Troubleshooting
+
+### Permission Denied (publickey)
+
+```bash
+# Check if SSH agent has your key
+ssh-add -l
+
+# If empty, add your key
+ssh-add ~/.ssh/id_ed25519
+
+# Verify the key is on GitHub
+ssh -T git@github.com
+```
+
+### Wrong Key Being Used
+
+```bash
+# Test with specific key
+ssh -i ~/.ssh/id_ed25519 -T git@github.com
+```
+
+## Summary
+
+You've learned how to:
+
+- ✅ Generate SSH keys
+- ✅ Add keys to SSH agent
+- ✅ Add public key to GitHub
+- ✅ Test the connection
+- ✅ Use SSH for Git operations
+
+SSH authentication is now set up for secure, password-free Git operations!
+

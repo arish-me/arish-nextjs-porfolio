@@ -1,0 +1,254 @@
+---
+title: How to Commit Changes
+chapterSlug: git-committing
+duration: 10
+order: 1
+---
+
+## Committing Changes
+
+A commit is a snapshot of your project at a specific point in time. It's the fundamental unit of change in Git.
+
+## Basic Commit
+
+```bash
+# Stage changes
+git add filename.js
+
+# Commit with message
+git commit -m "Add user authentication feature"
+```
+
+## Commit Messages
+
+### Writing Good Commit Messages
+
+Good commit messages are crucial for project history:
+
+```bash
+# Good examples
+git commit -m "Add password reset functionality"
+git commit -m "Fix login button not responding on mobile"
+git commit -m "Update user profile validation rules"
+
+# Bad examples
+git commit -m "fix"
+git commit -m "update"
+git commit -m "changes"
+git commit -m "asdfasdf"
+```
+
+### Commit Message Format
+
+```
+<type>: <subject>
+
+<body>
+
+<footer>
+```
+
+### Example with Full Format
+
+```bash
+git commit -m "feat: Add user authentication
+
+- Implement login/logout functionality
+- Add password hashing with bcrypt
+- Create session management
+
+Closes #123"
+```
+
+### Common Commit Types
+
+| Type | Description |
+|------|-------------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation |
+| `style` | Formatting (no code change) |
+| `refactor` | Code restructuring |
+| `test` | Adding tests |
+| `chore` | Maintenance tasks |
+
+## Commit Options
+
+### Commit All Tracked Changes
+
+```bash
+# Skip staging, commit all modified tracked files
+git commit -a -m "Update all configuration files"
+
+# Or combined
+git commit -am "Update all configuration files"
+```
+
+**Note**: This doesn't include untracked (new) files!
+
+### Multi-line Commit Message
+
+```bash
+# Opens your default editor
+git commit
+
+# In the editor, write:
+# First line: Subject (50 chars or less)
+# Blank line
+# Body: Detailed explanation
+```
+
+### Amend Last Commit
+
+```bash
+# Fix the last commit message
+git commit --amend -m "Corrected commit message"
+
+# Add forgotten files to last commit
+git add forgotten-file.js
+git commit --amend --no-edit
+```
+
+**Warning**: Don't amend commits that have been pushed!
+
+## Viewing Commits
+
+### View Commit History
+
+```bash
+# Full log
+git log
+
+# Compact log
+git log --oneline
+
+# With graph
+git log --oneline --graph --all
+
+# Last N commits
+git log -5
+```
+
+### View Specific Commit
+
+```bash
+# Show commit details
+git show abc1234
+
+# Show files changed
+git show --name-only abc1234
+```
+
+## Commit Best Practices
+
+### 1. Commit Often
+
+Make small, frequent commits:
+
+```bash
+# Good: Logical units of work
+git commit -m "Add user model"
+git commit -m "Add user controller"
+git commit -m "Add user routes"
+
+# Bad: Everything at once
+git commit -m "Add entire user module"
+```
+
+### 2. Commit Related Changes
+
+Group related changes together:
+
+```bash
+# Good: Related changes
+git add src/auth/login.js src/auth/logout.js
+git commit -m "Add authentication functions"
+
+# Bad: Unrelated changes
+git add login.js styles.css docs/readme.md
+git commit -m "Various updates"
+```
+
+### 3. Don't Commit Half-Done Work
+
+Each commit should be a complete unit:
+
+```bash
+# Make sure code works before committing
+npm test
+git commit -m "Add search functionality"
+```
+
+### 4. Test Before Committing
+
+```bash
+# Run tests
+npm test
+
+# If tests pass, commit
+git commit -m "Add feature with passing tests"
+```
+
+## Undo Commits
+
+### Undo Last Commit (Keep Changes)
+
+```bash
+# Move changes back to staging
+git reset --soft HEAD~1
+
+# Move changes back to working directory
+git reset HEAD~1
+# or
+git reset --mixed HEAD~1
+```
+
+### Undo Last Commit (Discard Changes)
+
+```bash
+# Dangerous! Loses changes
+git reset --hard HEAD~1
+```
+
+### Revert a Commit (Safe for Shared History)
+
+```bash
+# Create a new commit that undoes changes
+git revert abc1234
+```
+
+## Commit Workflow Example
+
+```bash
+# 1. Make changes
+echo "New feature" >> feature.js
+
+# 2. Check what changed
+git status
+git diff
+
+# 3. Stage specific files
+git add feature.js
+
+# 4. Review staged changes
+git diff --staged
+
+# 5. Commit with descriptive message
+git commit -m "feat: Add new feature functionality"
+
+# 6. Verify commit
+git log -1
+```
+
+## Summary
+
+Committing in Git:
+
+- ✅ Creates a snapshot of your project
+- ✅ Requires meaningful commit messages
+- ✅ Should be done frequently
+- ✅ Groups related changes together
+- ✅ Can be amended or reverted
+
+Practice committing in the next exercise!
+

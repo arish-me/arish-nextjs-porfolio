@@ -1,0 +1,183 @@
+---
+title: Installing Git on Windows
+chapterSlug: git-introduction
+duration: 5
+order: 4
+---
+
+## Installing Git on Windows
+
+Let's install Git on Windows step by step.
+
+## Download Git for Windows
+
+1. Go to [git-scm.com/download/win](https://git-scm.com/download/win)
+2. The download should start automatically
+3. If not, click the download link
+
+## Run the Installer
+
+1. **Run** the downloaded `.exe` file
+2. **Accept** the license agreement
+3. Choose installation options (defaults are fine for most users)
+
+### Key Installation Options
+
+#### Select Components
+- ✅ Git Bash Here
+- ✅ Git GUI Here
+- ✅ Associate .git* configuration files with the default text editor
+
+#### Default Editor
+Choose your preferred editor:
+- VS Code (recommended)
+- Notepad++
+- Vim
+
+#### PATH Environment
+Select: **Git from the command line and also from 3rd-party software**
+
+This allows you to use Git in Command Prompt, PowerShell, and Git Bash.
+
+#### Line Ending Conversions
+Select: **Checkout Windows-style, commit Unix-style line endings**
+
+This is the recommended option for Windows users.
+
+## Verify Installation
+
+Open a new terminal (Command Prompt, PowerShell, or Git Bash):
+
+```bash
+git --version
+# Output: git version 2.43.0.windows.1
+```
+
+## Configure Git
+
+Set your identity:
+
+```bash
+# Set your name
+git config --global user.name "Your Name"
+
+# Set your email
+git config --global user.email "your.email@example.com"
+```
+
+### Verify Configuration
+
+```bash
+git config --list
+```
+
+## Git Bash vs Command Prompt
+
+### Git Bash
+
+Git Bash provides a Unix-like terminal experience on Windows:
+
+```bash
+# Unix commands work in Git Bash
+ls -la
+pwd
+mkdir new-folder
+```
+
+### Command Prompt / PowerShell
+
+Standard Windows terminals also work with Git:
+
+```cmd
+# Windows commands
+dir
+cd
+mkdir new-folder
+```
+
+**Recommendation**: Use Git Bash for a consistent experience with tutorials and documentation.
+
+## Set Default Editor
+
+```bash
+# For VS Code
+git config --global core.editor "code --wait"
+
+# For Notepad++
+git config --global core.editor "'C:/Program Files/Notepad++/notepad++.exe' -multiInst -notabbar -nosession -noPlugin"
+```
+
+## Set Default Branch Name
+
+```bash
+git config --global init.defaultBranch main
+```
+
+## Test Your Installation
+
+```bash
+# Create a test folder
+mkdir git-test
+cd git-test
+
+# Initialize a repository
+git init
+
+# Create a test file
+echo "Hello Git" > test.txt
+
+# Stage and commit
+git add test.txt
+git commit -m "Initial commit"
+
+# Success!
+```
+
+## Windows Credential Manager
+
+Git for Windows includes a credential manager that securely stores your GitHub credentials:
+
+```bash
+# Check credential helper
+git config --global credential.helper
+
+# Should output: manager-core (or manager)
+```
+
+## Troubleshooting
+
+### 'git' is not recognized
+
+If Command Prompt doesn't recognize `git`:
+
+1. Close and reopen Command Prompt
+2. Verify PATH includes Git: `echo %PATH%`
+3. Reinstall Git and ensure "Add to PATH" is selected
+
+### Line Ending Issues
+
+If you see warnings about line endings:
+
+```bash
+git config --global core.autocrlf true
+```
+
+### SSL Certificate Issues
+
+If you encounter SSL errors:
+
+```bash
+git config --global http.sslVerify true
+```
+
+## Summary
+
+You've installed Git on Windows! Remember:
+
+1. **Git Bash** provides a Unix-like experience
+2. **Command Prompt** works too
+3. **Configure** your name and email
+4. **Test** with a sample repository
+
+Next, let's install Git on Linux!
+

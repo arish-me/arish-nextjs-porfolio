@@ -1,0 +1,303 @@
+---
+title: Exercise - Committing Changes
+chapterSlug: git-committing
+duration: 10
+order: 2
+---
+
+## Exercise: Committing Changes
+
+Practice making commits with good practices.
+
+## Setup
+
+```bash
+mkdir commit-practice
+cd commit-practice
+git init
+
+echo "# Commit Practice" > README.md
+git add README.md
+git commit -m "Initial commit"
+```
+
+---
+
+## Exercise 1: Basic Commit
+
+### Task
+
+Create a file and commit it with a descriptive message.
+
+### Steps
+
+```bash
+# Create a file
+echo "function hello() { return 'Hello World'; }" > app.js
+
+# Stage it
+git add app.js
+
+# Commit with descriptive message
+git commit -m "Add hello function to app.js"
+
+# Verify
+git log --oneline
+```
+
+---
+
+## Exercise 2: Commit Multiple Files
+
+### Task
+
+Create multiple related files and commit them together.
+
+### Steps
+
+```bash
+# Create related files
+echo "export function login() {}" > auth.js
+echo "export function logout() {}" >> auth.js
+echo ".auth-container { padding: 20px; }" > auth.css
+echo "<!DOCTYPE html><html>Auth Page</html>" > auth.html
+
+# Stage all auth files
+git add auth.js auth.css auth.html
+
+# Commit together
+git commit -m "Add authentication module with styles and template"
+
+# Verify
+git log --oneline
+```
+
+---
+
+## Exercise 3: Use Commit Types
+
+### Task
+
+Make commits using conventional commit types.
+
+### Steps
+
+```bash
+# Feature commit
+echo "function newFeature() {}" >> app.js
+git add app.js
+git commit -m "feat: Add newFeature function"
+
+# Fix commit
+echo "// Fixed bug" >> app.js
+git add app.js
+git commit -m "fix: Resolve function scope issue"
+
+# Documentation commit
+echo "# App Documentation" > DOCS.md
+git add DOCS.md
+git commit -m "docs: Add initial documentation"
+
+# View history
+git log --oneline
+```
+
+---
+
+## Exercise 4: Amend a Commit
+
+### Task
+
+Make a commit, then amend it to add a forgotten file.
+
+### Steps
+
+```bash
+# Make a commit
+echo "const config = {};" > config.js
+git add config.js
+git commit -m "Add configuration file"
+
+# Oops! Forgot to add the config documentation
+echo "# Configuration Guide" > CONFIG.md
+
+# Add the forgotten file and amend
+git add CONFIG.md
+git commit --amend --no-edit
+
+# Verify the amended commit includes both files
+git show --name-only HEAD
+```
+
+---
+
+## Exercise 5: Fix Commit Message
+
+### Task
+
+Make a commit with a typo, then fix it.
+
+### Steps
+
+```bash
+# Make a commit with typo
+echo "utils" > utils.js
+git add utils.js
+git commit -m "Add utls file"  # Typo!
+
+# Fix the message
+git commit --amend -m "Add utils file"
+
+# Verify
+git log --oneline -1
+```
+
+---
+
+## Exercise 6: Commit All Tracked Files
+
+### Task
+
+Use `-a` flag to commit all modified tracked files.
+
+### Steps
+
+```bash
+# Modify multiple tracked files
+echo "// Updated" >> app.js
+echo "// Updated" >> auth.js
+echo "// Updated" >> utils.js
+
+# Commit all with -a flag
+git commit -am "Update all JavaScript files with comments"
+
+# Verify
+git log --oneline -1
+git show --name-only HEAD
+```
+
+---
+
+## Exercise 7: View Commit Details
+
+### Task
+
+Explore different ways to view commit information.
+
+### Steps
+
+```bash
+# View full log
+git log
+
+# View compact log
+git log --oneline
+
+# View with stats
+git log --stat
+
+# View specific commit
+git show HEAD
+
+# View only file names in commit
+git show --name-only HEAD
+
+# View last 3 commits
+git log -3 --oneline
+```
+
+---
+
+## Exercise 8: Undo a Commit
+
+### Task
+
+Make a commit, then undo it while keeping changes.
+
+### Steps
+
+```bash
+# Make a commit
+echo "This will be undone" > temp.js
+git add temp.js
+git commit -m "Add temporary file"
+
+# Verify commit exists
+git log --oneline -1
+
+# Undo the commit (keep changes staged)
+git reset --soft HEAD~1
+
+# Verify
+git status
+# Changes to be committed: new file: temp.js
+
+# The commit is gone
+git log --oneline -1
+```
+
+---
+
+## Challenge: Complete Feature Workflow
+
+### Task
+
+Simulate developing a feature with multiple commits.
+
+### Steps
+
+```bash
+# 1. Start feature
+git checkout -b feature/user-profile
+
+# 2. Add model
+echo "class User {}" > models/user.js
+mkdir -p models
+echo "class User {}" > models/user.js
+git add models/
+git commit -m "feat: Add User model"
+
+# 3. Add controller
+mkdir -p controllers
+echo "class UserController {}" > controllers/user.js
+git add controllers/
+git commit -m "feat: Add User controller"
+
+# 4. Add route
+mkdir -p routes
+echo "router.get('/user')" > routes/user.js
+git add routes/
+git commit -m "feat: Add User routes"
+
+# 5. Add tests
+mkdir -p tests
+echo "test('user')" > tests/user.test.js
+git add tests/
+git commit -m "test: Add User tests"
+
+# View the feature commits
+git log --oneline
+```
+
+---
+
+## Self-Check Questions
+
+1. What flag lets you commit all modified tracked files?
+2. How do you amend the last commit message?
+3. How do you undo a commit but keep the changes?
+4. What makes a good commit message?
+
+## Summary
+
+You've practiced:
+
+- ✅ Making basic commits
+- ✅ Using descriptive messages
+- ✅ Conventional commit types
+- ✅ Amending commits
+- ✅ Viewing commit history
+- ✅ Undoing commits
+
+Great work on committing!
+

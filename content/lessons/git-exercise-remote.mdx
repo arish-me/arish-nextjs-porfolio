@@ -1,0 +1,266 @@
+---
+title: Exercise - Adding a Remote
+chapterSlug: git-remote-command
+duration: 10
+order: 2
+---
+
+## Exercise: Adding a Remote
+
+Practice working with remote repositories.
+
+## Setup
+
+Use the portfolio project from Task 1, or create a new one:
+
+```bash
+mkdir remote-practice
+cd remote-practice
+git init
+echo "# Remote Practice" > README.md
+git add README.md
+git commit -m "Initial commit"
+```
+
+---
+
+## Exercise 1: View Existing Remotes
+
+### Task
+
+Check if any remotes are configured.
+
+### Steps
+
+```bash
+# List remotes
+git remote
+
+# If empty, no output
+
+# List with URLs
+git remote -v
+
+# Also empty if no remotes
+```
+
+---
+
+## Exercise 2: Add a Remote
+
+### Task
+
+Add a remote called `origin`.
+
+### Steps
+
+```bash
+# Add remote (use your own GitHub URL)
+git remote add origin https://github.com/your-username/remote-practice.git
+
+# Verify
+git remote -v
+
+# Output:
+# origin  https://github.com/your-username/remote-practice.git (fetch)
+# origin  https://github.com/your-username/remote-practice.git (push)
+```
+
+---
+
+## Exercise 3: Add a Second Remote
+
+### Task
+
+Add a backup remote pointing to GitLab.
+
+### Steps
+
+```bash
+# Add backup remote
+git remote add backup https://gitlab.com/your-username/remote-practice.git
+
+# View all remotes
+git remote -v
+
+# Output:
+# backup  https://gitlab.com/your-username/remote-practice.git (fetch)
+# backup  https://gitlab.com/your-username/remote-practice.git (push)
+# origin  https://github.com/your-username/remote-practice.git (fetch)
+# origin  https://github.com/your-username/remote-practice.git (push)
+```
+
+---
+
+## Exercise 4: Rename a Remote
+
+### Task
+
+Rename `origin` to `github`.
+
+### Steps
+
+```bash
+# Rename remote
+git remote rename origin github
+
+# Verify
+git remote -v
+
+# Output now shows 'github' instead of 'origin'
+```
+
+---
+
+## Exercise 5: Change Remote URL
+
+### Task
+
+Change the `github` remote from HTTPS to SSH.
+
+### Steps
+
+```bash
+# Current URL (HTTPS)
+git remote -v
+# github  https://github.com/... (fetch)
+
+# Change to SSH
+git remote set-url github git@github.com:your-username/remote-practice.git
+
+# Verify
+git remote -v
+# github  git@github.com:your-username/remote-practice.git (fetch)
+```
+
+---
+
+## Exercise 6: View Remote Details
+
+### Task
+
+See detailed information about a remote.
+
+### Steps
+
+```bash
+# Show remote details
+git remote show github
+
+# Output includes:
+# - Fetch/Push URLs
+# - HEAD branch
+# - Remote branches
+# - Tracking info
+```
+
+---
+
+## Exercise 7: Remove a Remote
+
+### Task
+
+Remove the `backup` remote.
+
+### Steps
+
+```bash
+# Remove remote
+git remote remove backup
+
+# Verify it's gone
+git remote -v
+
+# Only 'github' remains
+```
+
+---
+
+## Exercise 8: Reset to Standard Setup
+
+### Task
+
+Rename `github` back to `origin` (standard convention).
+
+### Steps
+
+```bash
+# Rename back to origin
+git remote rename github origin
+
+# Verify
+git remote -v
+
+# Standard setup:
+# origin  git@github.com:your-username/remote-practice.git
+```
+
+---
+
+## Challenge: Fork Workflow Setup
+
+### Task
+
+Set up a typical fork workflow with `origin` (your fork) and `upstream` (original).
+
+### Steps
+
+```bash
+# Assuming you forked a repo and cloned your fork
+# Your fork is already set as origin
+
+# Add the original repo as upstream
+git remote add upstream https://github.com/original-author/original-repo.git
+
+# Verify both remotes
+git remote -v
+
+# Output:
+# origin    https://github.com/your-user/forked-repo.git (fetch)
+# origin    https://github.com/your-user/forked-repo.git (push)
+# upstream  https://github.com/original-author/original-repo.git (fetch)
+# upstream  https://github.com/original-author/original-repo.git (push)
+```
+
+### Typical Fork Workflow
+
+```bash
+# Fetch from upstream (original repo)
+git fetch upstream
+
+# Merge upstream changes
+git merge upstream/main
+
+# Push to your fork
+git push origin main
+```
+
+---
+
+## Self-Check Questions
+
+1. What command lists all remotes?
+2. How do you add a new remote?
+3. How do you change a remote's URL?
+4. What's the difference between `origin` and `upstream`?
+
+## Answers
+
+1. `git remote` or `git remote -v`
+2. `git remote add <name> <url>`
+3. `git remote set-url <name> <new-url>`
+4. `origin` is your repo, `upstream` is the original (for forks)
+
+## Summary
+
+You've practiced:
+
+- ✅ Viewing remotes
+- ✅ Adding remotes
+- ✅ Renaming remotes
+- ✅ Changing remote URLs
+- ✅ Removing remotes
+- ✅ Fork workflow setup
+
+Continue to Project Task 2!
+

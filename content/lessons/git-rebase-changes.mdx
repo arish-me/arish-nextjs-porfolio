@@ -1,0 +1,254 @@
+---
+title: How to Rebase Changes
+chapterSlug: git-advanced-branching
+duration: 12
+order: 2
+---
+
+## Rebasing in Git
+
+Rebase is an alternative to merge that creates a linear history by replaying commits.
+
+## What is Rebase?
+
+Rebase moves your branch's commits to start from a different point:
+
+```
+Before rebase:
+main:    A ─ B ─ C ─ D
+              \
+feature:       E ─ F
+
+After rebase:
+main:    A ─ B ─ C ─ D
+                      \
+feature:               E' ─ F'
+```
+
+Your commits (E, F) are replayed as new commits (E', F') on top of main.
+
+## Basic Rebase
+
+```bash
+# Switch to feature branch
+git checkout feature-branch
+
+# Rebase onto main
+git rebase main
+```
+
+## Rebase vs Merge
+
+### Merge
+
+```
+A ─ B ─ C ─────── M
+     \           /
+      D ─ E ────
+```
+
+- Preserves history
+- Creates merge commit
+- Shows branch existed
+
+### Rebase
+
+```
+A ─ B ─ C ─ D' ─ E'
+```
+
+- Linear history
+- No merge commits
+- Cleaner log
+
+## When to Use Rebase
+
+### ✅ Good for Rebase
+
+- Updating feature branch with main
+- Cleaning up local commits
+- Before merging to main
+
+### ❌ Avoid Rebase
+
+- On shared/public branches
+- After pushing commits
+- When history matters
+
+## Interactive Rebase
+
+Edit, squash, or reorder commits:
+
+```bash
+git rebase -i HEAD~3  # Last 3 commits
+```
+
+### Interactive Options
+
+```
+pick abc1234 First commit
+pick def5678 Second commit
+pick ghi9012 Third commit
+
+# Commands:
+# p, pick = use commit
+# r, reword = edit message
+# e, edit = stop for amending
+# s, squash = combine with previous
+# f, fixup = squash, discard message
+# d, drop = remove commit
+```
+
+### Squash Commits
+
+```bash
+git rebase -i HEAD~3
+```
+
+Change to:
+```
+pick abc1234 First commit
+squash def5678 Second commit
+squash ghi9012 Third commit
+```
+
+Result: Three commits become one.
+
+### Reword Commit Message
+
+```
+reword abc1234 First commit
+pick def5678 Second commit
+```
+
+Editor opens to change the message.
+
+## Rebase Workflow
+
+### Update Feature Branch
+
+```bash
+# On feature branch
+git checkout feature/my-feature
+
+# Fetch latest main
+git fetch origin main
+
+# Rebase onto main
+git rebase origin/main
+
+# If conflicts, resolve and continue
+git add .
+git rebase --continue
+
+# Force push (required after rebase)
+git push --force-with-lease origin feature/my-feature
+```
+
+### Clean Up Before PR
+
+```bash
+# Squash WIP commits
+git rebase -i main
+
+# Make commit history clean
+# Then push
+git push --force-with-lease
+```
+
+## Handling Rebase Conflicts
+
+```bash
+git rebase main
+# CONFLICT: Resolve in file.txt
+```
+
+### Resolution Steps
+
+```bash
+# 1. Fix conflicts in the file
+# 2. Stage the fix
+git add file.txt
+
+# 3. Continue rebase
+git rebase --continue
+
+# 4. Or abort if needed
+git rebase --abort
+```
+
+## The Golden Rule of Rebasing
+
+> **Never rebase commits that have been pushed to a shared repository**
+
+Why? Rebase rewrites history. If others have based work on your commits, their history diverges.
+
+### Safe Rebase
+
+```bash
+# Your own feature branch (not shared)
+git checkout my-feature
+git rebase main
+git push --force-with-lease  # OK - your branch
+```
+
+### Dangerous Rebase
+
+```bash
+# Never do this on shared branches!
+git checkout main
+git rebase feature  # ❌ Don't rebase main!
+```
+
+## Force Push After Rebase
+
+Rebase changes commit hashes, so you need force push:
+
+```bash
+# Regular force (dangerous)
+git push --force
+
+# Safer: fails if remote has new commits
+git push --force-with-lease
+```
+
+Always use `--force-with-lease` to avoid overwriting others' work.
+
+## Rebase Best Practices
+
+### 1. Rebase Feature Branches Regularly
+
+```bash
+# Keep feature branch updated
+git fetch origin
+git rebase origin/main
+```
+
+### 2. Squash Before Merging
+
+```bash
+# Clean up WIP commits
+git rebase -i main
+# Squash related commits together
+```
+
+### 3. Don't Rebase Public History
+
+If commits are shared, use merge instead.
+
+### 4. Use Meaningful Commit Messages
+
+After squashing, write a good combined message.
+
+## Summary
+
+| Command | Description |
+|---------|-------------|
+| `git rebase main` | Rebase onto main |
+| `git rebase -i HEAD~n` | Interactive rebase |
+| `git rebase --continue` | Continue after conflict |
+| `git rebase --abort` | Cancel rebase |
+| `git push --force-with-lease` | Safe force push |
+
+Rebase creates cleaner history but requires care with shared branches!
+

@@ -1,0 +1,250 @@
+---
+title: GitHub Pull Requests
+chapterSlug: github-features
+duration: 10
+order: 2
+---
+
+## GitHub Pull Requests
+
+Pull Requests (PRs) are how you propose changes and get them reviewed before merging into the main codebase.
+
+## What is a Pull Request?
+
+A PR lets you:
+
+1. Show your changes to others
+2. Get feedback through reviews
+3. Discuss implementation
+4. Run automated tests
+5. Merge when approved
+
+## Creating a Pull Request
+
+### Step 1: Push Your Branch
+
+```bash
+git checkout -b feature/new-feature
+# Make changes
+git add .
+git commit -m "Add new feature"
+git push -u origin feature/new-feature
+```
+
+### Step 2: Open PR on GitHub
+
+1. Go to your repository
+2. Click **Pull requests** tab
+3. Click **New pull request**
+4. Select branches:
+   - Base: `main` (merge into)
+   - Compare: `feature/new-feature` (your changes)
+5. Click **Create pull request**
+
+### Step 3: Fill PR Details
+
+- **Title**: Brief description
+- **Description**: 
+  - What changes were made
+  - Why they were needed
+  - How to test
+  - Related issues
+
+### PR Description Example
+
+```markdown
+## Description
+Add user authentication with email/password login.
+
+## Changes
+- Add login form component
+- Implement authentication logic
+- Add session management
+- Update navigation for logged-in state
+
+## How to Test
+1. Go to /login
+2. Enter credentials
+3. Verify redirect to dashboard
+
+## Screenshots
+[Before/After images]
+
+## Related Issues
+Closes #42
+Relates to #38
+
+## Checklist
+- [x] Tests pass
+- [x] Code reviewed locally
+- [x] Documentation updated
+```
+
+## PR Review Process
+
+### Requesting Reviews
+
+1. Click **Reviewers** in sidebar
+2. Select team members
+3. They'll be notified
+
+### Reviewing a PR
+
+As a reviewer:
+
+1. Go to **Files changed** tab
+2. Review the diff
+3. Add comments by clicking `+` on lines
+4. Submit review:
+   - **Comment** - General feedback
+   - **Approve** - Ready to merge
+   - **Request changes** - Needs work
+
+### Review Comments
+
+```
+# Inline comment
+This function could be simplified using map().
+
+# Suggestion
+```suggestion
+const result = items.map(item => item.value);
+```
+```
+
+The author can apply suggestions directly!
+
+## PR Status Checks
+
+### Automated Checks
+
+- CI/CD tests (GitHub Actions)
+- Code quality (linters)
+- Security scans
+- Coverage reports
+
+### Required Checks
+
+Configure in Settings → Branches:
+- Require status checks to pass
+- Require reviews before merging
+
+## Updating a PR
+
+### Add More Commits
+
+```bash
+# On your feature branch
+git add .
+git commit -m "Address review feedback"
+git push
+# PR automatically updates
+```
+
+### Respond to Reviews
+
+- Reply to comments
+- Mark conversations as resolved
+- Request re-review after changes
+
+## Merging a Pull Request
+
+### Merge Options
+
+1. **Create merge commit**
+   - Preserves all commits
+   - Adds merge commit
+
+2. **Squash and merge**
+   - Combines all commits into one
+   - Cleaner history
+
+3. **Rebase and merge**
+   - Linear history
+   - Replays commits on base
+
+### After Merging
+
+1. Delete the feature branch
+2. Pull latest main locally:
+   ```bash
+   git checkout main
+   git pull origin main
+   git branch -d feature/new-feature
+   ```
+
+## PR Best Practices
+
+### 1. Keep PRs Small
+
+```
+# Good: Focused PR
+Add user login form (200 lines)
+
+# Bad: Too large
+Add entire auth system (2000 lines)
+```
+
+### 2. One PR = One Purpose
+
+Don't mix unrelated changes.
+
+### 3. Write Good Descriptions
+
+Explain what, why, and how.
+
+### 4. Include Tests
+
+```bash
+# Run tests before pushing
+npm test
+```
+
+### 5. Respond Promptly
+
+- Address feedback quickly
+- Keep the PR moving
+
+### 6. Use Draft PRs
+
+For work in progress:
+
+1. Create PR
+2. Convert to draft
+3. Mark ready when done
+
+## PR Templates
+
+Create `.github/pull_request_template.md`:
+
+```markdown
+## Description
+Brief description of changes.
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Testing
+How to test the changes.
+
+## Checklist
+- [ ] Code follows style guidelines
+- [ ] Tests pass
+- [ ] Documentation updated
+```
+
+## Summary
+
+Pull Requests enable:
+
+- ✅ Code review before merging
+- ✅ Discussion and collaboration
+- ✅ Automated testing
+- ✅ Clean merge history
+- ✅ Documentation of changes
+
+Practice creating PRs in Project Task 4!
+

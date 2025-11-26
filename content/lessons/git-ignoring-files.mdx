@@ -1,0 +1,283 @@
+---
+title: How to Ignore Files in Git
+chapterSlug: git-ignoring
+duration: 8
+order: 1
+---
+
+## Ignoring Files in Git
+
+Some files shouldn't be tracked by Git: build outputs, dependencies, secrets, IDE settings. The `.gitignore` file tells Git which files to ignore.
+
+## Creating .gitignore
+
+Create a `.gitignore` file in your repository root:
+
+```bash
+# Create .gitignore
+touch .gitignore
+
+# Add patterns
+echo "node_modules/" >> .gitignore
+echo ".env" >> .gitignore
+```
+
+## .gitignore Patterns
+
+### Basic Patterns
+
+```gitignore
+# Ignore a specific file
+secret.txt
+
+# Ignore all files with extension
+*.log
+*.tmp
+
+# Ignore a directory
+node_modules/
+dist/
+build/
+```
+
+### Pattern Syntax
+
+```gitignore
+# Comments start with #
+# This is a comment
+
+# Ignore file in root only
+/config.local.js
+
+# Ignore file anywhere
+config.local.js
+
+# Ignore directory
+logs/
+
+# Wildcard - any characters
+*.log
+temp_*
+
+# Single character wildcard
+file?.txt  # file1.txt, fileA.txt, etc.
+
+# Negation - don't ignore
+*.log
+!important.log
+
+# Double asterisk - match directories
+**/logs     # logs anywhere
+logs/**     # everything inside logs
+**/logs/**  # logs anywhere with contents
+```
+
+## Common .gitignore Examples
+
+### Node.js Project
+
+```gitignore
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+```
+
+### Python Project
+
+```gitignore
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+```
+
+### General Web Project
+
+```gitignore
+# Dependencies
+node_modules/
+vendor/
+
+# Build
+dist/
+build/
+.cache/
+
+# Environment
+.env
+.env.local
+
+# IDE/Editor
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+```
+
+## Ignoring Already Tracked Files
+
+If a file is already tracked, adding it to `.gitignore` won't work:
+
+```bash
+# Remove from tracking (keep the file)
+git rm --cached filename
+
+# For directories
+git rm -r --cached directory/
+
+# Then commit
+git commit -m "Stop tracking filename"
+```
+
+### Example
+
+```bash
+# Accidentally committed node_modules
+git rm -r --cached node_modules
+echo "node_modules/" >> .gitignore
+git commit -m "Remove node_modules from tracking"
+```
+
+## Global .gitignore
+
+Set up patterns to ignore across all repositories:
+
+```bash
+# Create global gitignore
+touch ~/.gitignore_global
+
+# Configure Git to use it
+git config --global core.excludesfile ~/.gitignore_global
+```
+
+### Global Patterns
+
+```gitignore
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-*
+
+# Editor backups
+*~
+*.swp
+*.swo
+```
+
+## Check If File is Ignored
+
+```bash
+# Check why a file is ignored
+git check-ignore -v filename
+
+# Output: .gitignore:5:*.log    debug.log
+#         (file:line:pattern   filename)
+```
+
+## Template .gitignore Files
+
+GitHub provides templates for different project types:
+
+- [github.com/github/gitignore](https://github.com/github/gitignore)
+
+Or use:
+
+```bash
+# Using npx (Node.js)
+npx gitignore node
+
+# Creates .gitignore for Node.js projects
+```
+
+## Best Practices
+
+### 1. Create .gitignore First
+
+Before making your first commit:
+
+```bash
+git init
+echo "node_modules/" > .gitignore
+echo ".env" >> .gitignore
+git add .gitignore
+git commit -m "Add .gitignore"
+```
+
+### 2. Don't Ignore Important Files
+
+Never ignore:
+- Source code
+- Configuration templates
+- Documentation
+- Package manifests (package.json, requirements.txt)
+
+### 3. Use Templates
+
+Start with a template for your project type and customize.
+
+## Summary
+
+The `.gitignore` file:
+
+- ✅ Prevents unwanted files from being tracked
+- ✅ Uses pattern matching syntax
+- ✅ Can be global or per-repository
+- ✅ Should be created early in the project
+
+Practice creating `.gitignore` files in the next exercise!
+

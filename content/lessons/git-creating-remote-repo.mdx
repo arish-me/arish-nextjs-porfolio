@@ -1,0 +1,198 @@
+---
+title: Creating a Remote Repository
+chapterSlug: git-setup-remote
+duration: 8
+order: 1
+---
+
+## Creating a Remote Repository
+
+Let's create your first repository on GitHub.
+
+## Method 1: Create on GitHub Website
+
+### Step 1: Go to GitHub
+
+1. Log in to [github.com](https://github.com)
+2. Click the **+** icon in the top right
+3. Select **New repository**
+
+### Step 2: Fill Repository Details
+
+- **Repository name**: `my-first-repo`
+- **Description**: (optional) "My first Git repository"
+- **Visibility**: Public or Private
+- **Initialize**: You can optionally add:
+  - README file
+  - .gitignore template
+  - License
+
+### Step 3: Create Repository
+
+Click **Create repository**.
+
+### Step 4: Connect Local Repository
+
+GitHub shows you commands to connect:
+
+```bash
+# For a new local repository
+echo "# my-first-repo" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/username/my-first-repo.git
+git push -u origin main
+
+# For existing local repository
+git remote add origin https://github.com/username/my-first-repo.git
+git branch -M main
+git push -u origin main
+```
+
+## Method 2: Using GitHub CLI
+
+### Install GitHub CLI
+
+```bash
+# Mac
+brew install gh
+
+# Windows
+winget install --id GitHub.cli
+
+# Linux
+sudo apt install gh
+```
+
+### Authenticate
+
+```bash
+gh auth login
+```
+
+### Create Repository
+
+```bash
+# Create public repo
+gh repo create my-project --public
+
+# Create private repo
+gh repo create my-project --private
+
+# Create from current directory
+gh repo create --source=. --public
+```
+
+## Complete Workflow: New Project
+
+### 1. Create Local Project
+
+```bash
+mkdir my-project
+cd my-project
+git init
+echo "# My Project" > README.md
+git add README.md
+git commit -m "Initial commit"
+```
+
+### 2. Create Remote on GitHub
+
+Go to github.com → New repository → Create
+
+### 3. Connect and Push
+
+```bash
+git remote add origin https://github.com/username/my-project.git
+git push -u origin main
+```
+
+### 4. Verify
+
+```bash
+# Check remote is set
+git remote -v
+
+# Output:
+origin  https://github.com/username/my-project.git (fetch)
+origin  https://github.com/username/my-project.git (push)
+```
+
+## Complete Workflow: Existing Project
+
+### 1. Navigate to Project
+
+```bash
+cd existing-project
+```
+
+### 2. Initialize Git (if needed)
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+```
+
+### 3. Create Remote and Connect
+
+```bash
+# Create on GitHub first, then:
+git remote add origin https://github.com/username/existing-project.git
+git push -u origin main
+```
+
+## Repository Settings
+
+### Visibility
+
+- **Public**: Anyone can see (free)
+- **Private**: Only you and collaborators (free for personal)
+
+### Branch Protection
+
+In Settings → Branches:
+- Require pull request reviews
+- Require status checks
+- Restrict who can push
+
+### Collaborators
+
+In Settings → Collaborators:
+- Add team members by username or email
+
+## SSH vs HTTPS
+
+### Using HTTPS
+
+```bash
+git remote add origin https://github.com/username/repo.git
+# Will prompt for credentials
+```
+
+### Using SSH
+
+```bash
+git remote add origin git@github.com:username/repo.git
+# Uses SSH key (no password prompts)
+```
+
+### Switch from HTTPS to SSH
+
+```bash
+git remote set-url origin git@github.com:username/repo.git
+```
+
+## Summary
+
+Creating a remote repository:
+
+1. **Create on GitHub** (website or CLI)
+2. **Initialize locally** (if needed)
+3. **Add remote**: `git remote add origin URL`
+4. **Push**: `git push -u origin main`
+
+Practice this in the project task!
+

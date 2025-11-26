@@ -1,0 +1,239 @@
+---
+title: Merging Pull Requests
+chapterSlug: github-ui
+duration: 8
+order: 2
+---
+
+## Merging Pull Requests
+
+Learn the different ways to merge PRs and when to use each method.
+
+## Merge Options
+
+GitHub offers three merge methods:
+
+### 1. Create a Merge Commit
+
+```
+Before:
+main:    A ─ B ─ C
+              \
+feature:       D ─ E
+
+After merge commit:
+main:    A ─ B ─ C ─────── M
+              \           /
+feature:       D ─ E ────
+```
+
+**Characteristics:**
+- Preserves complete history
+- Creates merge commit (M)
+- Shows branch existed
+
+**When to use:**
+- Want full history
+- Team prefers seeing branch structure
+
+### 2. Squash and Merge
+
+```
+Before:
+main:    A ─ B ─ C
+              \
+feature:       D ─ E ─ F
+
+After squash:
+main:    A ─ B ─ C ─ DEF
+```
+
+**Characteristics:**
+- Combines all commits into one
+- Clean, linear history
+- Loses individual commit details
+
+**When to use:**
+- Feature had many WIP commits
+- Want clean history
+- Individual commits aren't important
+
+### 3. Rebase and Merge
+
+```
+Before:
+main:    A ─ B ─ C
+              \
+feature:       D ─ E
+
+After rebase:
+main:    A ─ B ─ C ─ D' ─ E'
+```
+
+**Characteristics:**
+- Linear history
+- Preserves individual commits
+- Rewrites commit hashes
+
+**When to use:**
+- Want linear history
+- Each commit is meaningful
+- No merge commits needed
+
+## How to Merge
+
+### Basic Merge
+
+1. Open PR
+2. Verify all checks pass (green ✓)
+3. Click **Merge pull request**
+4. Choose merge method
+5. Click **Confirm merge**
+6. Click **Delete branch** (optional but recommended)
+
+### Merge Requirements
+
+Configure in Settings → Branches:
+
+```
+Branch protection rules:
+☑ Require pull request reviews (1 approval)
+☑ Require status checks to pass
+☑ Require linear history
+☑ Include administrators
+```
+
+## Handling Merge Conflicts
+
+### When Conflicts Occur
+
+GitHub shows: "This branch has conflicts that must be resolved"
+
+### Resolve on GitHub
+
+1. Click **Resolve conflicts**
+2. Edit the file in the web editor
+3. Remove conflict markers
+4. Click **Mark as resolved**
+5. Click **Commit merge**
+
+### Resolve Locally
+
+```bash
+# Update your branch
+git checkout feature-branch
+git pull origin main
+
+# Resolve conflicts in your editor
+# Edit files, remove conflict markers
+
+# Stage resolved files
+git add .
+
+# Complete the merge
+git commit -m "Resolve merge conflicts with main"
+
+# Push updated branch
+git push origin feature-branch
+```
+
+## After Merging
+
+### Delete Branch
+
+```bash
+# On GitHub: Click "Delete branch" button
+
+# Locally:
+git checkout main
+git pull origin main
+git branch -d feature-branch
+git fetch --prune
+```
+
+### Verify Merge
+
+1. Check main branch has the changes
+2. Verify deployment (if auto-deploy enabled)
+3. Confirm issue is closed (if linked)
+
+## Merge Best Practices
+
+### 1. Always Review Before Merging
+
+Even if you're the only reviewer:
+- Check the diff
+- Ensure tests pass
+- Verify it works
+
+### 2. Use Consistent Merge Strategy
+
+Pick a strategy and stick with it:
+
+| Team Preference | Strategy |
+|-----------------|----------|
+| Full history | Merge commit |
+| Clean history | Squash |
+| Linear history | Rebase |
+
+### 3. Delete Branches After Merge
+
+Keep repository clean:
+
+```bash
+# Configure auto-delete on GitHub
+Settings → General → Automatically delete head branches ☑
+```
+
+### 4. Write Good Merge Commit Messages
+
+For squash merges:
+
+```
+Add user authentication (#42)
+
+- Implement login/logout
+- Add session management
+- Create login form UI
+
+Co-authored-by: Partner <partner@email.com>
+```
+
+### 5. Don't Force Merge
+
+If checks fail, fix them:
+
+```
+# Bad: Bypassing required checks
+# Good: Fix the issue, then merge
+```
+
+## Reverting a Merge
+
+If something goes wrong:
+
+### Via GitHub
+
+1. Go to PR (even after merged)
+2. Click **Revert**
+3. Creates new PR to undo changes
+4. Merge the revert PR
+
+### Via Command Line
+
+```bash
+git checkout main
+git revert -m 1 <merge-commit-hash>
+git push origin main
+```
+
+## Summary
+
+| Method | History | When to Use |
+|--------|---------|-------------|
+| Merge commit | Complete | Want to see branches |
+| Squash | Clean | Many WIP commits |
+| Rebase | Linear | Each commit matters |
+
+Choose based on your team's preferences and project needs!
+

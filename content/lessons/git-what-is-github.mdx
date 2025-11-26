@@ -1,0 +1,223 @@
+---
+title: What is GitHub?
+chapterSlug: git-remote-repos
+duration: 8
+order: 2
+---
+
+## What is GitHub?
+
+GitHub is a web-based platform for hosting Git repositories. It's the world's largest code hosting platform with over 100 million developers.
+
+## Git vs GitHub
+
+| Git | GitHub |
+|-----|--------|
+| Version control system | Hosting platform |
+| Installed on your computer | Accessed via web |
+| Command-line tool | Web interface + API |
+| Created by Linus Torvalds | Created by Tom Preston-Werner |
+| Free and open source | Freemium service |
+
+**Key Point**: Git is the tool, GitHub is a service that hosts Git repositories.
+
+## GitHub Features
+
+### 1. Repository Hosting
+
+Store your code in the cloud:
+
+```
+github.com/username/repository-name
+```
+
+### 2. Pull Requests
+
+Propose changes and review code:
+
+```
+1. Create branch
+2. Make changes
+3. Open Pull Request
+4. Review & discuss
+5. Merge
+```
+
+### 3. Issues
+
+Track bugs, features, and tasks:
+
+```
+Issue #42: Fix login bug
+- Assigned to: @developer
+- Labels: bug, high-priority
+- Milestone: v1.0.0
+```
+
+### 4. Actions (CI/CD)
+
+Automate workflows:
+
+```yaml
+# .github/workflows/test.yml
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: npm test
+```
+
+### 5. Pages
+
+Host websites for free:
+
+```
+username.github.io/repository
+```
+
+### 6. Discussions
+
+Community Q&A and conversations.
+
+### 7. Projects
+
+Kanban-style project management.
+
+## GitHub Account Types
+
+| Type | Features |
+|------|----------|
+| **Free** | Unlimited public/private repos, 2000 Actions minutes/month |
+| **Pro** | Advanced features, more Actions minutes |
+| **Team** | Organization features, team management |
+| **Enterprise** | Advanced security, compliance |
+
+## Creating a GitHub Account
+
+1. Go to [github.com](https://github.com)
+2. Click "Sign up"
+3. Enter email, password, username
+4. Verify your email
+5. Complete the setup wizard
+
+## GitHub Terminology
+
+### Repository (Repo)
+
+A project container with code, issues, and settings.
+
+### Fork
+
+A copy of someone else's repository in your account.
+
+### Star
+
+Bookmark a repository you like.
+
+### Watch
+
+Get notifications for repository activity.
+
+### Clone
+
+Download a repository to your computer.
+
+### Fork vs Clone
+
+```
+Fork: Copy on GitHub (your account)
+Clone: Copy on your computer
+```
+
+## Your GitHub Profile
+
+Your profile shows:
+
+- **Repositories**: Your projects
+- **Contributions**: Your activity graph
+- **Followers/Following**: Your network
+- **Bio**: About you
+- **README**: Custom profile page
+
+### Profile README
+
+Create a repository named `username/username` with a README.md for a custom profile.
+
+## GitHub URLs
+
+```
+# User profile
+github.com/username
+
+# Repository
+github.com/username/repository
+
+# Specific file
+github.com/username/repository/blob/main/file.js
+
+# Specific line
+github.com/username/repository/blob/main/file.js#L42
+
+# Pull request
+github.com/username/repository/pull/123
+
+# Issue
+github.com/username/repository/issues/456
+```
+
+## GitHub for Open Source
+
+### Contributing to Projects
+
+1. **Find a project** you want to contribute to
+2. **Fork** the repository
+3. **Clone** your fork
+4. **Create a branch** for your changes
+5. **Make changes** and commit
+6. **Push** to your fork
+7. **Open a Pull Request** to the original repo
+
+### Popular Open Source on GitHub
+
+- Linux
+- React
+- VS Code
+- Kubernetes
+- TensorFlow
+
+## GitHub CLI
+
+Install the GitHub CLI for terminal access:
+
+```bash
+# Install (Mac)
+brew install gh
+
+# Login
+gh auth login
+
+# Create repo
+gh repo create my-project
+
+# Create issue
+gh issue create
+
+# Create PR
+gh pr create
+```
+
+## Summary
+
+GitHub provides:
+
+- ✅ Free repository hosting
+- ✅ Collaboration features (PRs, Issues)
+- ✅ CI/CD with Actions
+- ✅ Project management tools
+- ✅ Community features
+- ✅ Free website hosting
+
+Next, let's create your first remote repository!
+

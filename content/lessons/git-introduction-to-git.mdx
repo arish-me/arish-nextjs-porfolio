@@ -1,0 +1,141 @@
+---
+title: Introduction to Git
+chapterSlug: git-introduction
+duration: 8
+order: 1
+---
+
+## What is Git?
+
+Git is a **distributed version control system** that tracks changes in your code over time. It was created by Linus Torvalds in 2005 for developing the Linux kernel.
+
+## Why Use Git?
+
+### 1. Track Changes
+
+Git keeps a complete history of every change made to your code:
+
+```bash
+# See the history of changes
+git log
+
+# Output shows all commits with dates and authors
+commit a1b2c3d4e5f6...
+Author: John Doe <john@example.com>
+Date:   Mon Jan 15 10:30:00 2024
+
+    Added user authentication feature
+```
+
+### 2. Collaborate with Others
+
+Multiple developers can work on the same project:
+
+```bash
+# Get changes from teammates
+git pull
+
+# Share your changes
+git push
+```
+
+### 3. Experiment Safely
+
+Create branches to try new ideas without affecting the main code:
+
+```bash
+# Create a new branch for experiments
+git checkout -b experiment-feature
+
+# If it works, merge it. If not, delete it!
+```
+
+### 4. Recover from Mistakes
+
+Made a mistake? Git lets you go back:
+
+```bash
+# Undo the last commit
+git revert HEAD
+
+# Go back to a specific point in time
+git checkout a1b2c3d
+```
+
+## Git vs Other Version Control Systems
+
+| Feature | Git | SVN | CVS |
+|---------|-----|-----|-----|
+| Distributed | ✅ | ❌ | ❌ |
+| Branching | Fast | Slow | Slow |
+| Offline Work | ✅ | ❌ | ❌ |
+| Speed | Fast | Medium | Slow |
+
+## Key Concepts
+
+### Repository (Repo)
+
+A repository is a folder tracked by Git. It contains:
+
+- Your project files
+- A hidden `.git` folder with history
+
+### Commit
+
+A commit is a snapshot of your code at a specific point in time:
+
+```bash
+git commit -m "Added login feature"
+```
+
+### Branch
+
+A branch is an independent line of development:
+
+```
+main ──●──●──●──●──●
+              \
+feature        ●──●──●
+```
+
+### Remote
+
+A remote is a copy of your repository on a server (like GitHub):
+
+```bash
+git remote add origin https://github.com/user/repo.git
+```
+
+## The Git Workflow
+
+1. **Modify** files in your working directory
+2. **Stage** changes you want to commit
+3. **Commit** staged changes to your local repository
+4. **Push** commits to a remote repository
+
+```
+Working Directory → Staging Area → Local Repo → Remote Repo
+      (edit)         (git add)    (git commit)   (git push)
+```
+
+## Who Uses Git?
+
+Git is used by:
+
+- 🏢 Tech giants (Google, Microsoft, Facebook)
+- 🚀 Startups
+- 📦 Open source projects
+- 👩‍💻 Individual developers
+- 📚 Students learning to code
+
+## Summary
+
+Git is essential for modern software development because it:
+
+- Tracks all changes to your code
+- Enables collaboration
+- Provides safety through branching
+- Allows recovery from mistakes
+
+In the next lesson, we'll explore the Git workflow in more detail.
+

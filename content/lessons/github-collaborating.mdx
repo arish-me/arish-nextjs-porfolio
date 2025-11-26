@@ -1,0 +1,91 @@
+---
+title: Allowing Access to Your Repository
+chapterSlug: github-collaborating
+duration: 8
+order: 1
+---
+
+## Collaborating on GitHub
+
+Learn how to give others access to your repositories.
+
+## Adding Collaborators
+
+### Personal Repository
+
+1. Go to repository **Settings**
+2. Click **Collaborators** in sidebar
+3. Click **Add people**
+4. Enter username or email
+5. Select permission level
+6. Click **Add**
+
+They'll receive an invitation to accept.
+
+## Permission Levels
+
+### Personal Repos
+
+| Level | Permissions |
+|-------|-------------|
+| Read | View and clone |
+| Write | Push, create branches |
+| Admin | Full access, settings |
+
+### Organization Repos
+
+| Level | Permissions |
+|-------|-------------|
+| Read | View and clone |
+| Triage | Manage issues (no code) |
+| Write | Push code |
+| Maintain | Manage without admin |
+| Admin | Full control |
+
+## Working with Teams
+
+### Creating a Team
+
+1. Go to Organization → Teams
+2. Click **New team**
+3. Name and describe
+4. Add members
+5. Add repositories
+
+### Team Permissions
+
+Assign entire team to repositories:
+
+```
+frontend-team → repo-name (Write)
+backend-team → repo-name (Write)
+```
+
+## Fork Workflow
+
+For open source or external contributors:
+
+```
+1. Contributor forks your repo
+2. Makes changes in their fork
+3. Opens PR to your repo
+4. You review and merge
+```
+
+No direct access needed!
+
+## Best Practices
+
+1. **Least Privilege** - Give minimum needed access
+2. **Use Teams** - Easier management
+3. **Review Access Regularly** - Remove when not needed
+4. **Use Branch Protection** - Require reviews
+5. **Document Workflow** - CONTRIBUTING.md file
+
+## Summary
+
+- Add collaborators via Settings
+- Choose appropriate permission levels
+- Use teams for organizations
+- Fork workflow for external contributors
+

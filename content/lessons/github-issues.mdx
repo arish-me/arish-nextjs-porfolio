@@ -1,0 +1,235 @@
+---
+title: GitHub Issues
+chapterSlug: github-features
+duration: 8
+order: 1
+---
+
+## GitHub Issues
+
+Issues are GitHub's way to track bugs, features, tasks, and discussions for your project.
+
+## Creating an Issue
+
+### Via GitHub Website
+
+1. Go to your repository
+2. Click **Issues** tab
+3. Click **New issue**
+4. Fill in:
+   - **Title**: Brief summary
+   - **Description**: Details, steps to reproduce, etc.
+5. Click **Submit new issue**
+
+### Issue Example
+
+```
+Title: Login button not working on mobile
+
+Description:
+## Bug Description
+The login button doesn't respond to taps on mobile devices.
+
+## Steps to Reproduce
+1. Open the site on a mobile device
+2. Click the login button
+3. Nothing happens
+
+## Expected Behavior
+Login modal should appear
+
+## Device Info
+- iPhone 13
+- iOS 16
+- Safari browser
+
+## Screenshots
+[Attach if available]
+```
+
+## Issue Components
+
+### Labels
+
+Categorize issues with labels:
+
+| Label | Use |
+|-------|-----|
+| `bug` | Something isn't working |
+| `enhancement` | New feature request |
+| `documentation` | Documentation updates |
+| `good first issue` | Good for newcomers |
+| `help wanted` | Extra attention needed |
+| `priority: high` | Urgent issues |
+
+### Assignees
+
+Assign issues to team members:
+
+- Click **Assignees** on the right
+- Select team members
+- They'll be notified
+
+### Milestones
+
+Group issues into milestones:
+
+- Create milestone (e.g., "v1.0.0 Release")
+- Assign issues to milestone
+- Track progress toward the goal
+
+### Projects
+
+Link issues to project boards for Kanban-style tracking.
+
+## Issue Templates
+
+Create templates for consistent issues:
+
+### Bug Report Template
+
+Create `.github/ISSUE_TEMPLATE/bug_report.md`:
+
+```markdown
+---
+name: Bug Report
+about: Report a bug
+labels: bug
+---
+
+## Bug Description
+A clear description of the bug.
+
+## Steps to Reproduce
+1. Go to '...'
+2. Click on '...'
+3. See error
+
+## Expected Behavior
+What should happen.
+
+## Screenshots
+If applicable.
+
+## Environment
+- OS:
+- Browser:
+- Version:
+```
+
+### Feature Request Template
+
+Create `.github/ISSUE_TEMPLATE/feature_request.md`:
+
+```markdown
+---
+name: Feature Request
+about: Suggest an idea
+labels: enhancement
+---
+
+## Problem
+What problem does this solve?
+
+## Proposed Solution
+How should it work?
+
+## Alternatives
+Other solutions considered.
+
+## Additional Context
+Any other information.
+```
+
+## Working with Issues
+
+### Reference Issues in Commits
+
+```bash
+# Reference an issue
+git commit -m "Fix mobile login bug #42"
+
+# Close an issue automatically
+git commit -m "Fix login button - closes #42"
+```
+
+Keywords that close issues:
+- `closes #42`
+- `fixes #42`
+- `resolves #42`
+
+### Link Issues to Pull Requests
+
+In PR description:
+
+```
+Closes #42
+Fixes #43
+```
+
+### Search Issues
+
+```
+# In search bar
+is:issue is:open label:bug
+is:issue author:username
+is:issue assignee:me
+```
+
+## Issue Best Practices
+
+### 1. Be Specific
+
+```
+# Bad
+Title: It's broken
+
+# Good
+Title: Login form validation fails for email addresses with + symbol
+```
+
+### 2. Include Context
+
+- Steps to reproduce
+- Expected vs actual behavior
+- Environment details
+- Screenshots/videos
+
+### 3. Use Labels Consistently
+
+Define a labeling system and stick to it.
+
+### 4. Keep Issues Focused
+
+One issue = one problem or feature.
+
+### 5. Update Issues
+
+- Add comments with progress
+- Close when resolved
+- Reference related issues
+
+## Issue Commands (Comments)
+
+In issue comments, you can use:
+
+```
+/assign @username      - Assign to user
+/label bug             - Add label
+/milestone v1.0.0      - Add to milestone
+/close                 - Close issue
+/reopen                - Reopen issue
+```
+
+## Summary
+
+GitHub Issues help you:
+
+- ✅ Track bugs and feature requests
+- ✅ Organize work with labels and milestones
+- ✅ Collaborate with assignees
+- ✅ Link to commits and PRs
+- ✅ Maintain project documentation
+
+Next: Learn about Pull Requests!
+
