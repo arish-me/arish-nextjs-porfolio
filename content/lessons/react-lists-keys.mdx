@@ -1,0 +1,306 @@
+---
+title: Lists and Keys
+chapterSlug: react-fundamentals
+duration: 10
+order: 4
+---
+
+## Rendering Lists in React
+
+Lists are a fundamental part of most applications. React makes it easy to render dynamic lists of data.
+
+## Basic List Rendering
+
+Use `map()` to transform arrays into elements:
+
+```jsx
+function NumberList() {
+  const numbers = [1, 2, 3, 4, 5]
+  
+  return (
+    <ul>
+      {numbers.map((number) => (
+        <li key={number}>{number}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+## The Key Prop
+
+Keys help React identify which items have changed, been added, or removed:
+
+```jsx
+// ✅ Good - unique, stable key
+const users = [
+  { id: 1, name: 'Alice' },
+  { id: 2, name: 'Bob' },
+  { id: 3, name: 'Charlie' }
+]
+
+function UserList() {
+  return (
+    <ul>
+      {users.map((user) => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+### Key Rules
+
+```jsx
+// ✅ Use unique IDs from your data
+{items.map(item => <Item key={item.id} {...item} />)}
+
+// ⚠️ Index as key (only when items won't reorder)
+{items.map((item, index) => <Item key={index} {...item} />)}
+
+// ❌ Don't use random values
+{items.map(item => <Item key={Math.random()} {...item} />)}
+
+// ❌ Don't use non-unique values
+{items.map(item => <Item key={item.name} {...item} />)} // Names might duplicate
+```
+
+### Why Keys Matter
+
+```jsx
+// Without proper keys, React can't optimize re-renders
+
+// Initial list:
+<li key="1">Apple</li>
+<li key="2">Banana</li>
+<li key="3">Cherry</li>
+
+// After adding "Date" at start:
+<li key="0">Date</li>    // New
+<li key="1">Apple</li>   // Same key, React knows it's the same item
+<li key="2">Banana</li>  // Same key
+<li key="3">Cherry</li>  // Same key
+
+// With index as key (bad for insertions):
+<li key="0">Date</li>    // Key 0 had Apple, React thinks content changed
+<li key="1">Apple</li>   // Key 1 had Banana, React re-renders
+<li key="2">Banana</li>  // Key 2 had Cherry, React re-renders
+<li key="3">Cherry</li>  // New key, new element
+```
+
+## Extracting List Components
+
+```jsx
+// List item component
+function TodoItem({ todo, onToggle, onDelete }) {
+  return (
+    <li className={todo.completed ? 'completed' : ''}>
+      <span onClick={() => onToggle(todo.id)}>
+        {todo.text}
+      </span>
+      <button onClick={() => onDelete(todo.id)}>Delete</button>
+    </li>
+  )
+}
+
+// List component
+function TodoList({ todos, onToggle, onDelete }) {
+  return (
+    <ul>
+      {todos.map((todo) => (
+        <TodoItem 
+          key={todo.id}
+          todo={todo}
+          onToggle={onToggle}
+          onDelete={onDelete}
+        />
+      ))}
+    </ul>
+  )
+}
+```
+
+## Empty States
+
+Handle empty lists gracefully:
+
+```jsx
+function ProductList({ products }) {
+  if (products.length === 0) {
+    return <p>No products found.</p>
+  }
+  
+  return (
+    <ul>
+      {products.map((product) => (
+        <li key={product.id}>{product.name}</li>
+      ))}
+    </ul>
+  )
+}
+
+// Or inline
+function ProductList({ products }) {
+  return (
+    <div>
+      {products.length === 0 ? (
+        <p>No products found.</p>
+      ) : (
+        <ul>
+          {products.map((product) => (
+            <li key={product.id}>{product.name}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+```
+
+## Filtering Lists
+
+```jsx
+function FilteredList() {
+  const [filter, setFilter] = useState('')
+  const items = ['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry']
+  
+  const filteredItems = items.filter(item =>
+    item.toLowerCase().includes(filter.toLowerCase())
+  )
+  
+  return (
+    <div>
+      <input
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        placeholder="Filter items..."
+      />
+      
+      <ul>
+        {filteredItems.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+      
+      {filteredItems.length === 0 && (
+        <p>No items match "{filter}"</p>
+      )}
+    </div>
+  )
+}
+```
+
+## Sorting Lists
+
+```jsx
+function SortableList() {
+  const [sortOrder, setSortOrder] = useState('asc')
+  const items = [
+    { id: 1, name: 'Banana', price: 1.5 },
+    { id: 2, name: 'Apple', price: 2.0 },
+    { id: 3, name: 'Cherry', price: 3.5 }
+  ]
+  
+  const sortedItems = [...items].sort((a, b) => {
+    if (sortOrder === 'asc') {
+      return a.name.localeCompare(b.name)
+    }
+    return b.name.localeCompare(a.name)
+  })
+  
+  return (
+    <div>
+      <button onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
+        Sort {sortOrder === 'asc' ? '↓' : '↑'}
+      </button>
+      
+      <ul>
+        {sortedItems.map((item) => (
+          <li key={item.id}>
+            {item.name} - ${item.price}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+```
+
+## Nested Lists
+
+```jsx
+function NestedList() {
+  const categories = [
+    {
+      id: 1,
+      name: 'Fruits',
+      items: ['Apple', 'Banana', 'Cherry']
+    },
+    {
+      id: 2,
+      name: 'Vegetables',
+      items: ['Carrot', 'Broccoli', 'Spinach']
+    }
+  ]
+  
+  return (
+    <div>
+      {categories.map((category) => (
+        <div key={category.id}>
+          <h3>{category.name}</h3>
+          <ul>
+            {category.items.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+## Keys Must Be Unique Among Siblings
+
+Keys only need to be unique among siblings, not globally:
+
+```jsx
+function App() {
+  return (
+    <div>
+      {/* These can have the same keys */}
+      <ul>
+        {items1.map(item => <li key={item.id}>{item.name}</li>)}
+      </ul>
+      
+      <ul>
+        {items2.map(item => <li key={item.id}>{item.name}</li>)}
+      </ul>
+    </div>
+  )
+}
+```
+
+## Generating Keys
+
+When your data doesn't have IDs:
+
+```jsx
+// Option 1: Use a counter (careful with SSR)
+let nextId = 0
+function generateId() {
+  return nextId++
+}
+
+// Option 2: UUID library
+import { v4 as uuidv4 } from 'uuid'
+const newItem = { id: uuidv4(), name: 'New Item' }
+
+// Option 3: Use a hash of the content
+import { hash } from 'some-hash-library'
+const key = hash(item.content)
+```
+
+Lists and keys are essential for building dynamic React applications!
+

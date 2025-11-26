@@ -1,0 +1,242 @@
+---
+title: Higher Order Components
+chapterSlug: react-advanced-patterns
+duration: 15
+order: 1
+---
+
+## Higher Order Components (HOC)
+
+A Higher Order Component is a function that takes a component and returns a new enhanced component.
+
+## Basic HOC Pattern
+
+```jsx
+// HOC that adds loading state
+function withLoading(WrappedComponent) {
+  return function WithLoadingComponent({ isLoading, ...props }) {
+    if (isLoading) {
+      return <div className="spinner">Loading...</div>
+    }
+    
+    return <WrappedComponent {...props} />
+  }
+}
+
+// Usage
+function UserList({ users }) {
+  return (
+    <ul>
+      {users.map(user => <li key={user.id}>{user.name}</li>)}
+    </ul>
+  )
+}
+
+const UserListWithLoading = withLoading(UserList)
+
+// In parent
+<UserListWithLoading isLoading={loading} users={users} />
+```
+
+## HOC with Authentication
+
+```jsx
+function withAuth(WrappedComponent) {
+  return function WithAuthComponent(props) {
+    const { user, loading } = useAuth()
+    const navigate = useNavigate()
+    
+    useEffect(() => {
+      if (!loading && !user) {
+        navigate('/login')
+      }
+    }, [user, loading, navigate])
+    
+    if (loading) {
+      return <LoadingSpinner />
+    }
+    
+    if (!user) {
+      return null
+    }
+    
+    return <WrappedComponent {...props} user={user} />
+  }
+}
+
+// Usage
+function Dashboard({ user }) {
+  return <h1>Welcome, {user.name}!</h1>
+}
+
+const ProtectedDashboard = withAuth(Dashboard)
+```
+
+## HOC with Data Fetching
+
+```jsx
+function withData(WrappedComponent, fetchData) {
+  return function WithDataComponent(props) {
+    const [data, setData] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+    
+    useEffect(() => {
+      const load = async () => {
+        try {
+          const result = await fetchData(props)
+          setData(result)
+        } catch (err) {
+          setError(err.message)
+        } finally {
+          setLoading(false)
+        }
+      }
+      
+      load()
+    }, [])
+    
+    if (loading) return <Loading />
+    if (error) return <Error message={error} />
+    
+    return <WrappedComponent {...props} data={data} />
+  }
+}
+
+// Usage
+function UserProfile({ data }) {
+  return <div>{data.name}</div>
+}
+
+const UserProfileWithData = withData(
+  UserProfile,
+  (props) => fetch(`/api/users/${props.userId}`).then(r => r.json())
+)
+```
+
+## HOC with Theme
+
+```jsx
+function withTheme(WrappedComponent) {
+  return function WithThemeComponent(props) {
+    const theme = useTheme()
+    
+    return <WrappedComponent {...props} theme={theme} />
+  }
+}
+
+// Or using forwardRef for refs
+function withTheme(WrappedComponent) {
+  const WithTheme = React.forwardRef((props, ref) => {
+    const theme = useTheme()
+    return <WrappedComponent {...props} ref={ref} theme={theme} />
+  })
+  
+  WithTheme.displayName = `WithTheme(${WrappedComponent.displayName || WrappedComponent.name})`
+  
+  return WithTheme
+}
+```
+
+## Composing HOCs
+
+```jsx
+// Multiple HOCs
+const EnhancedComponent = withAuth(withTheme(withLoading(MyComponent)))
+
+// Or using a compose utility
+function compose(...fns) {
+  return (component) => fns.reduceRight((acc, fn) => fn(acc), component)
+}
+
+const enhance = compose(
+  withAuth,
+  withTheme,
+  withLoading
+)
+
+const EnhancedComponent = enhance(MyComponent)
+```
+
+## HOC Best Practices
+
+### Pass Through Props
+
+```jsx
+function withHOC(WrappedComponent) {
+  return function HOCComponent(props) {
+    const additionalProps = { /* ... */ }
+    
+    // ✅ Pass all props through
+    return <WrappedComponent {...props} {...additionalProps} />
+  }
+}
+```
+
+### Copy Static Methods
+
+```jsx
+import hoistNonReactStatics from 'hoist-non-react-statics'
+
+function withHOC(WrappedComponent) {
+  function HOCComponent(props) {
+    return <WrappedComponent {...props} />
+  }
+  
+  // Copy static methods
+  hoistNonReactStatics(HOCComponent, WrappedComponent)
+  
+  return HOCComponent
+}
+```
+
+### Display Name for Debugging
+
+```jsx
+function withHOC(WrappedComponent) {
+  function HOCComponent(props) {
+    return <WrappedComponent {...props} />
+  }
+  
+  HOCComponent.displayName = `WithHOC(${
+    WrappedComponent.displayName || WrappedComponent.name || 'Component'
+  })`
+  
+  return HOCComponent
+}
+```
+
+## HOC vs Hooks
+
+Most HOC patterns can be replaced with hooks:
+
+```jsx
+// HOC
+const UserListWithLoading = withLoading(UserList)
+
+// Hook equivalent
+function UserList() {
+  const { data, loading } = useFetch('/api/users')
+  
+  if (loading) return <Loading />
+  
+  return <ul>{data.map(user => ...)}</ul>
+}
+```
+
+### When to use HOCs
+
+- Wrapping with providers
+- Adding lifecycle methods
+- Injecting props from external sources
+- Creating reusable wrappers
+
+### When to use Hooks
+
+- Sharing stateful logic
+- Side effects
+- Context consumption
+- Most new code (preferred approach)
+
+HOCs are a powerful pattern for component composition!
+

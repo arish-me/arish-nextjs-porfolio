@@ -1,0 +1,359 @@
+---
+title: Event Handling
+chapterSlug: react-fundamentals
+duration: 12
+order: 3
+---
+
+## Event Handling in React
+
+React provides a synthetic event system that wraps native browser events, providing consistent behavior across all browsers.
+
+## Basic Event Handling
+
+```jsx
+function Button() {
+  const handleClick = () => {
+    console.log('Button clicked!')
+  }
+  
+  return <button onClick={handleClick}>Click me</button>
+}
+
+// Inline handler (for simple cases)
+function Button() {
+  return (
+    <button onClick={() => console.log('Clicked!')}>
+      Click me
+    </button>
+  )
+}
+```
+
+## Common Events
+
+### Mouse Events
+
+```jsx
+function MouseEvents() {
+  return (
+    <div
+      onClick={() => console.log('clicked')}
+      onDoubleClick={() => console.log('double clicked')}
+      onMouseEnter={() => console.log('mouse entered')}
+      onMouseLeave={() => console.log('mouse left')}
+      onMouseMove={(e) => console.log(e.clientX, e.clientY)}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        console.log('right clicked')
+      }}
+    >
+      Hover and click me
+    </div>
+  )
+}
+```
+
+### Keyboard Events
+
+```jsx
+function KeyboardEvents() {
+  const handleKeyDown = (e) => {
+    console.log('Key pressed:', e.key)
+    
+    if (e.key === 'Enter') {
+      console.log('Enter pressed!')
+    }
+    
+    if (e.key === 'Escape') {
+      console.log('Escape pressed!')
+    }
+    
+    // Check for modifier keys
+    if (e.ctrlKey && e.key === 's') {
+      e.preventDefault()
+      console.log('Save shortcut!')
+    }
+  }
+  
+  return (
+    <input
+      onKeyDown={handleKeyDown}
+      onKeyUp={(e) => console.log('Key released:', e.key)}
+      placeholder="Type something..."
+    />
+  )
+}
+```
+
+### Form Events
+
+```jsx
+function FormEvents() {
+  const [value, setValue] = useState('')
+  
+  const handleSubmit = (e) => {
+    e.preventDefault()  // Prevent page reload
+    console.log('Form submitted:', value)
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onFocus={() => console.log('Input focused')}
+        onBlur={() => console.log('Input blurred')}
+      />
+      <button type="submit">Submit</button>
+    </form>
+  )
+}
+```
+
+### Focus Events
+
+```jsx
+function FocusEvents() {
+  return (
+    <input
+      onFocus={() => console.log('Focused')}
+      onBlur={() => console.log('Blurred')}
+    />
+  )
+}
+```
+
+## The Event Object
+
+React events receive a SyntheticEvent object:
+
+```jsx
+function EventObject() {
+  const handleClick = (event) => {
+    // Event properties
+    console.log(event.type)         // 'click'
+    console.log(event.target)       // The DOM element
+    console.log(event.currentTarget)// The element with the handler
+    console.log(event.timeStamp)    // When it happened
+    
+    // Mouse position
+    console.log(event.clientX)      // X relative to viewport
+    console.log(event.clientY)      // Y relative to viewport
+    console.log(event.pageX)        // X relative to page
+    console.log(event.pageY)        // Y relative to page
+    
+    // Modifier keys
+    console.log(event.altKey)       // Alt pressed?
+    console.log(event.ctrlKey)      // Ctrl pressed?
+    console.log(event.shiftKey)     // Shift pressed?
+    console.log(event.metaKey)      // Cmd/Win pressed?
+    
+    // Prevent default behavior
+    event.preventDefault()
+    
+    // Stop propagation
+    event.stopPropagation()
+  }
+  
+  return <button onClick={handleClick}>Click me</button>
+}
+```
+
+## Passing Arguments to Handlers
+
+```jsx
+function ItemList() {
+  const items = ['Apple', 'Banana', 'Cherry']
+  
+  // Method 1: Arrow function
+  const handleClick = (item) => {
+    console.log('Clicked:', item)
+  }
+  
+  return (
+    <ul>
+      {items.map((item, index) => (
+        <li key={index} onClick={() => handleClick(item)}>
+          {item}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+// With event object
+function Button() {
+  const handleClick = (id, event) => {
+    console.log('ID:', id)
+    console.log('Event:', event.type)
+  }
+  
+  return (
+    <button onClick={(e) => handleClick(123, e)}>
+      Click me
+    </button>
+  )
+}
+```
+
+## Preventing Default Behavior
+
+```jsx
+function PreventDefault() {
+  const handleSubmit = (e) => {
+    e.preventDefault()  // Don't reload page
+    console.log('Form submitted!')
+  }
+  
+  const handleLinkClick = (e) => {
+    e.preventDefault()  // Don't navigate
+    console.log('Link clicked!')
+  }
+  
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <button type="submit">Submit</button>
+      </form>
+      
+      <a href="https://example.com" onClick={handleLinkClick}>
+        Click me (won't navigate)
+      </a>
+    </div>
+  )
+}
+```
+
+## Event Propagation
+
+```jsx
+function EventBubbling() {
+  const handleParentClick = () => {
+    console.log('Parent clicked')
+  }
+  
+  const handleChildClick = (e) => {
+    e.stopPropagation()  // Prevent bubbling to parent
+    console.log('Child clicked')
+  }
+  
+  return (
+    <div onClick={handleParentClick} style={{ padding: '20px', background: 'lightblue' }}>
+      Parent
+      <button onClick={handleChildClick}>
+        Child (click won't bubble)
+      </button>
+    </div>
+  )
+}
+```
+
+## Input Events
+
+```jsx
+function InputEvents() {
+  const [text, setText] = useState('')
+  
+  return (
+    <div>
+      {/* Controlled input */}
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      
+      {/* Different input types */}
+      <input
+        type="checkbox"
+        onChange={(e) => console.log(e.target.checked)}
+      />
+      
+      <select onChange={(e) => console.log(e.target.value)}>
+        <option value="a">Option A</option>
+        <option value="b">Option B</option>
+      </select>
+      
+      <input
+        type="file"
+        onChange={(e) => console.log(e.target.files[0])}
+      />
+    </div>
+  )
+}
+```
+
+## Event Handler Patterns
+
+### Handler as Prop
+
+```jsx
+function Button({ onClick, children }) {
+  return (
+    <button onClick={onClick} className="btn">
+      {children}
+    </button>
+  )
+}
+
+function App() {
+  const handleSave = () => console.log('Saved!')
+  const handleDelete = () => console.log('Deleted!')
+  
+  return (
+    <div>
+      <Button onClick={handleSave}>Save</Button>
+      <Button onClick={handleDelete}>Delete</Button>
+    </div>
+  )
+}
+```
+
+### Named Event Handlers
+
+```jsx
+function Form() {
+  const [form, setForm] = useState({ name: '', email: '' })
+  
+  // Named handler for each field
+  const handleNameChange = (e) => {
+    setForm({ ...form, name: e.target.value })
+  }
+  
+  const handleEmailChange = (e) => {
+    setForm({ ...form, email: e.target.value })
+  }
+  
+  // Or single handler for all fields
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm({ ...form, [name]: value })
+  }
+  
+  return (
+    <form>
+      <input name="name" value={form.name} onChange={handleChange} />
+      <input name="email" value={form.email} onChange={handleChange} />
+    </form>
+  )
+}
+```
+
+## Touch Events (Mobile)
+
+```jsx
+function TouchEvents() {
+  return (
+    <div
+      onTouchStart={() => console.log('Touch started')}
+      onTouchMove={(e) => console.log(e.touches[0].clientX)}
+      onTouchEnd={() => console.log('Touch ended')}
+    >
+      Touch me
+    </div>
+  )
+}
+```
+
+Event handling is how you make React applications interactive!
+

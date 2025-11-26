@@ -1,0 +1,267 @@
+---
+title: Code Splitting and Lazy Loading
+chapterSlug: react-performance
+duration: 12
+order: 2
+---
+
+## Code Splitting
+
+Code splitting lets you split your bundle into smaller chunks that load on demand.
+
+## React.lazy
+
+Load components only when needed:
+
+```jsx
+import { lazy, Suspense } from 'react'
+
+// Instead of static import
+// import Dashboard from './Dashboard'
+
+// Use lazy loading
+const Dashboard = lazy(() => import('./Dashboard'))
+const Settings = lazy(() => import('./Settings'))
+const Profile = lazy(() => import('./Profile'))
+
+function App() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/profile" element={<Profile />} />
+      </Routes>
+    </Suspense>
+  )
+}
+```
+
+## Suspense Boundaries
+
+Control loading states with Suspense:
+
+```jsx
+function App() {
+  return (
+    <div>
+      {/* Global fallback */}
+      <Suspense fallback={<FullPageLoader />}>
+        <Header />
+        
+        {/* Section-specific fallback */}
+        <Suspense fallback={<SidebarSkeleton />}>
+          <Sidebar />
+        </Suspense>
+        
+        <main>
+          <Suspense fallback={<ContentSkeleton />}>
+            <MainContent />
+          </Suspense>
+        </main>
+      </Suspense>
+    </div>
+  )
+}
+```
+
+## Route-Based Splitting
+
+The most common pattern:
+
+```jsx
+import { lazy, Suspense } from 'react'
+import { Routes, Route } from 'react-router-dom'
+
+// Lazy load all route components
+const Home = lazy(() => import('./pages/Home'))
+const Products = lazy(() => import('./pages/Products'))
+const ProductDetail = lazy(() => import('./pages/ProductDetail'))
+const Cart = lazy(() => import('./pages/Cart'))
+const Checkout = lazy(() => import('./pages/Checkout'))
+const Admin = lazy(() => import('./pages/Admin'))
+
+function App() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/admin/*" element={<Admin />} />
+      </Routes>
+    </Suspense>
+  )
+}
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+    </div>
+  )
+}
+```
+
+## Named Exports
+
+For components with named exports:
+
+```jsx
+// Component with named export
+export function Dashboard() { ... }
+
+// Lazy load with named export
+const Dashboard = lazy(() =>
+  import('./Dashboard').then(module => ({
+    default: module.Dashboard
+  }))
+)
+```
+
+## Preloading Components
+
+Load before user needs them:
+
+```jsx
+const Dashboard = lazy(() => import('./Dashboard'))
+
+// Preload on hover
+function NavLink() {
+  const preload = () => {
+    import('./Dashboard')
+  }
+  
+  return (
+    <Link to="/dashboard" onMouseEnter={preload}>
+      Dashboard
+    </Link>
+  )
+}
+
+// Preload after initial render
+useEffect(() => {
+  const timer = setTimeout(() => {
+    import('./Dashboard')
+    import('./Settings')
+  }, 2000)
+  
+  return () => clearTimeout(timer)
+}, [])
+```
+
+## Heavy Libraries
+
+Split large dependencies:
+
+```jsx
+// ❌ Loads chart library with initial bundle
+import { Chart } from 'chart.js'
+
+// ✅ Load only when needed
+const ChartComponent = lazy(() => import('./ChartComponent'))
+
+function Dashboard() {
+  const [showChart, setShowChart] = useState(false)
+  
+  return (
+    <div>
+      <button onClick={() => setShowChart(true)}>Show Chart</button>
+      
+      {showChart && (
+        <Suspense fallback={<ChartSkeleton />}>
+          <ChartComponent />
+        </Suspense>
+      )}
+    </div>
+  )
+}
+```
+
+## Modal Lazy Loading
+
+```jsx
+const Modal = lazy(() => import('./Modal'))
+
+function App() {
+  const [showModal, setShowModal] = useState(false)
+  
+  return (
+    <div>
+      <button onClick={() => setShowModal(true)}>Open Modal</button>
+      
+      {showModal && (
+        <Suspense fallback={null}>
+          <Modal onClose={() => setShowModal(false)} />
+        </Suspense>
+      )}
+    </div>
+  )
+}
+```
+
+## Error Boundaries
+
+Handle loading failures:
+
+```jsx
+class ErrorBoundary extends React.Component {
+  state = { hasError: false }
+  
+  static getDerivedStateFromError(error) {
+    return { hasError: true }
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div>
+          <h2>Failed to load component</h2>
+          <button onClick={() => window.location.reload()}>
+            Reload page
+          </button>
+        </div>
+      )
+    }
+    
+    return this.props.children
+  }
+}
+
+// Usage
+<ErrorBoundary>
+  <Suspense fallback={<Loading />}>
+    <LazyComponent />
+  </Suspense>
+</ErrorBoundary>
+```
+
+## Bundle Analysis
+
+Analyze your bundle size:
+
+```bash
+npm install -D source-map-explorer
+
+# Add to package.json scripts
+"analyze": "source-map-explorer 'build/static/js/*.js'"
+```
+
+## Vite Dynamic Imports
+
+Vite automatically code-splits on dynamic imports:
+
+```jsx
+// Vite splits this into a separate chunk
+const Component = lazy(() => import('./Component'))
+
+// Named chunks for better debugging
+const Dashboard = lazy(() =>
+  import(/* webpackChunkName: "dashboard" */ './Dashboard')
+)
+```
+
+Code splitting dramatically improves initial load time!
+

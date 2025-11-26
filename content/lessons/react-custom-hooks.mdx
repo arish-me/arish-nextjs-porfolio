@@ -1,0 +1,394 @@
+---
+title: Custom Hooks
+chapterSlug: react-hooks
+duration: 18
+order: 6
+---
+
+## Custom Hooks
+
+Custom hooks let you extract component logic into reusable functions. They're just functions that use other hooks.
+
+## Creating Custom Hooks
+
+Custom hook names must start with `use`:
+
+```jsx
+// useCounter.js
+import { useState } from 'react'
+
+function useCounter(initialValue = 0) {
+  const [count, setCount] = useState(initialValue)
+  
+  const increment = () => setCount(c => c + 1)
+  const decrement = () => setCount(c => c - 1)
+  const reset = () => setCount(initialValue)
+  
+  return { count, increment, decrement, reset }
+}
+
+// Usage
+function Counter() {
+  const { count, increment, decrement, reset } = useCounter(10)
+  
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={increment}>+</button>
+      <button onClick={decrement}>-</button>
+      <button onClick={reset}>Reset</button>
+    </div>
+  )
+}
+```
+
+## Common Custom Hooks
+
+### useToggle
+
+```jsx
+function useToggle(initialValue = false) {
+  const [value, setValue] = useState(initialValue)
+  
+  const toggle = useCallback(() => setValue(v => !v), [])
+  const setTrue = useCallback(() => setValue(true), [])
+  const setFalse = useCallback(() => setValue(false), [])
+  
+  return { value, toggle, setTrue, setFalse }
+}
+
+// Usage
+function Modal() {
+  const { value: isOpen, toggle, setFalse: close } = useToggle()
+  
+  return (
+    <>
+      <button onClick={toggle}>Toggle Modal</button>
+      {isOpen && (
+        <div className="modal">
+          <button onClick={close}>Close</button>
+        </div>
+      )}
+    </>
+  )
+}
+```
+
+### useLocalStorage
+
+```jsx
+function useLocalStorage(key, initialValue) {
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialValue
+    } catch (error) {
+      return initialValue
+    }
+  })
+  
+  const setValue = useCallback((value) => {
+    try {
+      const valueToStore = value instanceof Function ? value(storedValue) : value
+      setStoredValue(valueToStore)
+      localStorage.setItem(key, JSON.stringify(valueToStore))
+    } catch (error) {
+      console.error(error)
+    }
+  }, [key, storedValue])
+  
+  return [storedValue, setValue]
+}
+
+// Usage
+function Settings() {
+  const [theme, setTheme] = useLocalStorage('theme', 'light')
+  
+  return (
+    <button onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+      Current theme: {theme}
+    </button>
+  )
+}
+```
+
+### useFetch
+
+```jsx
+function useFetch(url) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
+  useEffect(() => {
+    const controller = new AbortController()
+    
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const response = await fetch(url, { signal: controller.signal })
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        
+        const json = await response.json()
+        setData(json)
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setError(err.message)
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+    
+    return () => controller.abort()
+  }, [url])
+  
+  return { data, loading, error }
+}
+
+// Usage
+function UserProfile({ userId }) {
+  const { data: user, loading, error } = useFetch(`/api/users/${userId}`)
+  
+  if (loading) return <p>Loading...</p>
+  if (error) return <p>Error: {error}</p>
+  
+  return <h1>{user.name}</h1>
+}
+```
+
+### useDebounce
+
+```jsx
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+    
+    return () => clearTimeout(timer)
+  }, [value, delay])
+  
+  return debouncedValue
+}
+
+// Usage
+function Search() {
+  const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounce(query, 500)
+  
+  useEffect(() => {
+    if (debouncedQuery) {
+      // Perform search
+      searchAPI(debouncedQuery)
+    }
+  }, [debouncedQuery])
+  
+  return (
+    <input 
+      value={query}
+      onChange={e => setQuery(e.target.value)}
+      placeholder="Search..."
+    />
+  )
+}
+```
+
+### useWindowSize
+
+```jsx
+function useWindowSize() {
+  const [size, setSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  })
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+  
+  return size
+}
+
+// Usage
+function ResponsiveComponent() {
+  const { width } = useWindowSize()
+  
+  return (
+    <div>
+      {width < 768 ? <MobileLayout /> : <DesktopLayout />}
+    </div>
+  )
+}
+```
+
+### useOnClickOutside
+
+```jsx
+function useOnClickOutside(ref, handler) {
+  useEffect(() => {
+    const listener = (event) => {
+      if (!ref.current || ref.current.contains(event.target)) {
+        return
+      }
+      handler(event)
+    }
+    
+    document.addEventListener('mousedown', listener)
+    document.addEventListener('touchstart', listener)
+    
+    return () => {
+      document.removeEventListener('mousedown', listener)
+      document.removeEventListener('touchstart', listener)
+    }
+  }, [ref, handler])
+}
+
+// Usage
+function Dropdown() {
+  const [isOpen, setIsOpen] = useState(false)
+  const ref = useRef(null)
+  
+  useOnClickOutside(ref, () => setIsOpen(false))
+  
+  return (
+    <div ref={ref}>
+      <button onClick={() => setIsOpen(!isOpen)}>Menu</button>
+      {isOpen && <ul className="dropdown">...</ul>}
+    </div>
+  )
+}
+```
+
+### useForm
+
+```jsx
+function useForm(initialValues, validate) {
+  const [values, setValues] = useState(initialValues)
+  const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setValues(prev => ({ ...prev, [name]: value }))
+  }
+  
+  const handleBlur = (e) => {
+    const { name } = e.target
+    setTouched(prev => ({ ...prev, [name]: true }))
+    
+    if (validate) {
+      const validationErrors = validate(values)
+      setErrors(validationErrors)
+    }
+  }
+  
+  const handleSubmit = (onSubmit) => async (e) => {
+    e.preventDefault()
+    
+    const validationErrors = validate ? validate(values) : {}
+    setErrors(validationErrors)
+    setTouched(Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}))
+    
+    if (Object.keys(validationErrors).length === 0) {
+      setIsSubmitting(true)
+      await onSubmit(values)
+      setIsSubmitting(false)
+    }
+  }
+  
+  const reset = () => {
+    setValues(initialValues)
+    setErrors({})
+    setTouched({})
+  }
+  
+  return {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    reset
+  }
+}
+
+// Usage
+function LoginForm() {
+  const validate = (values) => {
+    const errors = {}
+    if (!values.email) errors.email = 'Required'
+    if (!values.password) errors.password = 'Required'
+    return errors
+  }
+  
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit } = 
+    useForm({ email: '', password: '' }, validate)
+  
+  return (
+    <form onSubmit={handleSubmit(async (data) => {
+      await loginUser(data)
+    })}>
+      <input
+        name="email"
+        value={values.email}
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+      {touched.email && errors.email && <span>{errors.email}</span>}
+      
+      <input
+        name="password"
+        type="password"
+        value={values.password}
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+      {touched.password && errors.password && <span>{errors.password}</span>}
+      
+      <button type="submit">Login</button>
+    </form>
+  )
+}
+```
+
+## Rules for Custom Hooks
+
+1. Name must start with `use`
+2. Can call other hooks
+3. Follow all hook rules (top level only, etc.)
+4. Each component using the hook gets its own state
+
+```jsx
+// Each component gets separate state
+function ComponentA() {
+  const counter = useCounter()  // Has its own count
+}
+
+function ComponentB() {
+  const counter = useCounter()  // Has its own count
+}
+```
+
+Custom hooks are the best way to share logic between components!
+

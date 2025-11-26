@@ -1,0 +1,351 @@
+---
+title: Advanced Interview Questions
+chapterSlug: react-interview-questions
+duration: 30
+order: 3
+---
+
+## Advanced React Interview Questions
+
+Questions for senior React developers.
+
+---
+
+## Q1: Explain React Fiber Architecture
+
+**Answer:** Fiber is React's reconciliation algorithm (React 16+) that enables incremental rendering.
+
+Key features:
+- **Incremental Rendering:** Work can be split into chunks
+- **Pause & Resume:** Work can be paused and resumed
+- **Priority:** Different priorities for different updates
+- **Concurrent Mode:** Multiple state updates without blocking
+
+Fiber is a unit of work. Each fiber represents a component instance with:
+- Type, key, props
+- State, memoized output
+- Links to parent, child, sibling fibers
+
+---
+
+## Q2: What is Concurrent Mode and Suspense?
+
+**Answer:**
+
+**Concurrent Mode** allows React to work on multiple tasks simultaneously, keeping the app responsive.
+
+```jsx
+// Concurrent features
+import { startTransition, useTransition, useDeferredValue } from 'react'
+
+function Search() {
+  const [query, setQuery] = useState('')
+  const [isPending, startTransition] = useTransition()
+  
+  const handleChange = (e) => {
+    // Urgent: update input
+    setQuery(e.target.value)
+    
+    // Non-urgent: update results
+    startTransition(() => {
+      setSearchResults(e.target.value)
+    })
+  }
+}
+```
+
+**Suspense** lets components wait for something before rendering:
+
+```jsx
+import { Suspense } from 'react'
+
+function App() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <LazyComponent />
+    </Suspense>
+  )
+}
+```
+
+---
+
+## Q3: How would you implement a design system in React?
+
+**Answer:**
+
+1. **Token-based theming**
+```tsx
+const theme = {
+  colors: { primary: '#007bff', secondary: '#6c757d' },
+  spacing: { sm: '0.5rem', md: '1rem', lg: '2rem' },
+  typography: { fontFamily: 'Inter', sizes: { sm: '0.875rem' } }
+}
+```
+
+2. **Compound Components**
+```tsx
+<Card>
+  <Card.Header>Title</Card.Header>
+  <Card.Body>Content</Card.Body>
+  <Card.Footer>Actions</Card.Footer>
+</Card>
+```
+
+3. **Polymorphic Components**
+```tsx
+<Button as="a" href="/home">Link Button</Button>
+<Button as="button">Regular Button</Button>
+```
+
+4. **Variant-based styling**
+```tsx
+<Button variant="primary" size="lg" />
+```
+
+5. **Documentation with Storybook**
+
+---
+
+## Q4: Explain React Server Components
+
+**Answer:** React Server Components render on the server and send HTML to the client, reducing JavaScript bundle size.
+
+```tsx
+// Server Component (default in Next.js 13+)
+async function ProductPage({ id }) {
+  const product = await db.products.findById(id)  // Direct DB access
+  return <ProductDetails product={product} />
+}
+
+// Client Component
+'use client'
+function AddToCart({ productId }) {
+  const [adding, setAdding] = useState(false)
+  // Interactive logic
+}
+```
+
+Benefits:
+- Zero JavaScript shipped for server components
+- Direct database/API access
+- Better initial load performance
+- Automatic code splitting
+
+---
+
+## Q5: How do you handle state management at scale?
+
+**Answer:**
+
+1. **Local State** - Component-specific UI state
+2. **Lifted State** - Shared between siblings
+3. **Context** - App-wide, infrequently changing
+4. **External Libraries** - Complex, frequently changing
+
+Architecture pattern:
+```
+┌─────────────────────────────────────┐
+│          Server State               │
+│    (React Query, SWR, Apollo)       │
+├─────────────────────────────────────┤
+│          Global UI State            │
+│    (Zustand, Redux Toolkit)         │
+├─────────────────────────────────────┤
+│          Form State                 │
+│    (React Hook Form, Formik)        │
+├─────────────────────────────────────┤
+│          Local State                │
+│         (useState, useReducer)      │
+└─────────────────────────────────────┘
+```
+
+---
+
+## Q6: What are the common security concerns in React?
+
+**Answer:**
+
+1. **XSS (Cross-Site Scripting)**
+```jsx
+// React escapes by default
+<div>{userInput}</div>  // Safe
+
+// ❌ Dangerous
+<div dangerouslySetInnerHTML={{ __html: userInput }} />
+
+// ✅ Sanitize if needed
+import DOMPurify from 'dompurify'
+<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userInput) }} />
+```
+
+2. **Injection via URLs**
+```jsx
+// ❌ Dangerous
+<a href={userProvidedUrl}>Link</a>
+
+// ✅ Validate
+const safeUrl = userUrl.startsWith('https://') ? userUrl : '#'
+```
+
+3. **Sensitive data in state**
+- Don't store tokens in localStorage (XSS vulnerable)
+- Use httpOnly cookies for auth tokens
+- Clear sensitive state on logout
+
+4. **Dependency vulnerabilities**
+- Regular `npm audit`
+- Keep dependencies updated
+
+---
+
+## Q7: How do you test complex React applications?
+
+**Answer:**
+
+**Testing Pyramid:**
+```
+       E2E Tests (Cypress, Playwright)
+      /                              \
+     /    Integration Tests (RTL)     \
+    /                                  \
+   /________Unit Tests (Jest)___________\
+```
+
+**Unit Tests** - Individual functions/hooks
+```tsx
+test('useCounter increments', () => {
+  const { result } = renderHook(() => useCounter())
+  act(() => result.current.increment())
+  expect(result.current.count).toBe(1)
+})
+```
+
+**Integration Tests** - Component behavior
+```tsx
+test('form submits correctly', async () => {
+  const handleSubmit = jest.fn()
+  render(<Form onSubmit={handleSubmit} />)
+  
+  await userEvent.type(screen.getByLabelText('Email'), 'test@test.com')
+  await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+  
+  expect(handleSubmit).toHaveBeenCalledWith({ email: 'test@test.com' })
+})
+```
+
+**E2E Tests** - Full user flows
+```ts
+test('user can checkout', async ({ page }) => {
+  await page.goto('/products')
+  await page.click('text=Add to Cart')
+  await page.click('text=Checkout')
+  await expect(page).toHaveURL('/checkout')
+})
+```
+
+---
+
+## Q8: How would you handle internationalization (i18n)?
+
+**Answer:**
+
+Using react-i18next:
+
+```tsx
+// i18n.ts
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+
+i18n.use(initReactI18next).init({
+  resources: {
+    en: { translation: { welcome: 'Welcome' } },
+    es: { translation: { welcome: 'Bienvenido' } }
+  },
+  lng: 'en',
+  fallbackLng: 'en'
+})
+
+// Component
+import { useTranslation } from 'react-i18next'
+
+function Welcome() {
+  const { t, i18n } = useTranslation()
+  
+  return (
+    <div>
+      <h1>{t('welcome')}</h1>
+      <button onClick={() => i18n.changeLanguage('es')}>
+        Español
+      </button>
+    </div>
+  )
+}
+```
+
+Considerations:
+- RTL support
+- Date/number formatting
+- Pluralization
+- Dynamic content
+
+---
+
+## Q9: Explain React's batching behavior
+
+**Answer:** React batches multiple state updates into a single re-render for performance.
+
+```jsx
+// React 18 - automatic batching everywhere
+function handleClick() {
+  setCount(c => c + 1)  // Batched
+  setFlag(f => !f)      // Batched
+  // Only ONE re-render
+}
+
+// Even in async code (React 18+)
+async function handleClick() {
+  await someAsyncOperation()
+  setCount(c => c + 1)  // Batched
+  setFlag(f => !f)      // Batched
+  // Only ONE re-render
+}
+
+// Opt out of batching
+import { flushSync } from 'react-dom'
+
+function handleClick() {
+  flushSync(() => setCount(c => c + 1))  // Re-renders immediately
+  flushSync(() => setFlag(f => !f))      // Re-renders immediately
+}
+```
+
+---
+
+## Q10: How do you architect a large React application?
+
+**Answer:**
+
+**Directory Structure:**
+```
+src/
+├── app/                 # Routes/pages
+├── components/
+│   ├── ui/             # Generic UI components
+│   └── features/       # Feature-specific components
+├── hooks/              # Custom hooks
+├── lib/                # Utilities, API clients
+├── stores/             # State management
+├── types/              # TypeScript types
+└── constants/          # App constants
+```
+
+**Key Principles:**
+1. **Separation of concerns** - UI vs logic
+2. **Colocation** - Keep related code together
+3. **Feature-based organization** - Not type-based
+4. **Dependency direction** - Features depend on shared, not vice versa
+5. **Testing strategy** - Unit, integration, E2E
+
+These questions test deep React knowledge!
+

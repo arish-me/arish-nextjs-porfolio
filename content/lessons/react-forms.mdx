@@ -1,0 +1,393 @@
+---
+title: Forms and Controlled Components
+chapterSlug: react-component-patterns
+duration: 18
+order: 2
+---
+
+## Forms in React
+
+Forms are essential for collecting user input. React handles forms differently than traditional HTML through controlled components.
+
+## Controlled vs Uncontrolled
+
+### Controlled Components
+
+React state is the "single source of truth":
+
+```jsx
+function ControlledInput() {
+  const [value, setValue] = useState('')
+  
+  return (
+    <input 
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+    />
+  )
+}
+```
+
+### Uncontrolled Components
+
+DOM maintains its own state:
+
+```jsx
+function UncontrolledInput() {
+  const inputRef = useRef(null)
+  
+  const handleSubmit = () => {
+    console.log(inputRef.current.value)
+  }
+  
+  return (
+    <>
+      <input ref={inputRef} defaultValue="initial" />
+      <button onClick={handleSubmit}>Submit</button>
+    </>
+  )
+}
+```
+
+## Basic Form Elements
+
+### Text Input
+
+```jsx
+function TextInput() {
+  const [name, setName] = useState('')
+  
+  return (
+    <div>
+      <label htmlFor="name">Name:</label>
+      <input
+        id="name"
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Enter your name"
+      />
+      <p>Hello, {name || 'stranger'}!</p>
+    </div>
+  )
+}
+```
+
+### Textarea
+
+```jsx
+function TextArea() {
+  const [bio, setBio] = useState('')
+  
+  return (
+    <div>
+      <label htmlFor="bio">Bio:</label>
+      <textarea
+        id="bio"
+        value={bio}
+        onChange={(e) => setBio(e.target.value)}
+        rows={4}
+        placeholder="Tell us about yourself"
+      />
+      <p>{bio.length}/500 characters</p>
+    </div>
+  )
+}
+```
+
+### Select Dropdown
+
+```jsx
+function SelectInput() {
+  const [country, setCountry] = useState('')
+  
+  return (
+    <div>
+      <label htmlFor="country">Country:</label>
+      <select
+        id="country"
+        value={country}
+        onChange={(e) => setCountry(e.target.value)}
+      >
+        <option value="">Select a country</option>
+        <option value="us">United States</option>
+        <option value="uk">United Kingdom</option>
+        <option value="ca">Canada</option>
+      </select>
+    </div>
+  )
+}
+```
+
+### Checkbox
+
+```jsx
+function Checkbox() {
+  const [agreed, setAgreed] = useState(false)
+  
+  return (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+        />
+        I agree to the terms
+      </label>
+    </div>
+  )
+}
+
+// Multiple checkboxes
+function MultiCheckbox() {
+  const [selected, setSelected] = useState([])
+  
+  const toggleOption = (option) => {
+    setSelected(prev => 
+      prev.includes(option)
+        ? prev.filter(o => o !== option)
+        : [...prev, option]
+    )
+  }
+  
+  return (
+    <div>
+      {['React', 'Vue', 'Angular'].map(option => (
+        <label key={option}>
+          <input
+            type="checkbox"
+            checked={selected.includes(option)}
+            onChange={() => toggleOption(option)}
+          />
+          {option}
+        </label>
+      ))}
+    </div>
+  )
+}
+```
+
+### Radio Buttons
+
+```jsx
+function RadioGroup() {
+  const [size, setSize] = useState('medium')
+  
+  return (
+    <div>
+      {['small', 'medium', 'large'].map(option => (
+        <label key={option}>
+          <input
+            type="radio"
+            name="size"
+            value={option}
+            checked={size === option}
+            onChange={(e) => setSize(e.target.value)}
+          />
+          {option.charAt(0).toUpperCase() + option.slice(1)}
+        </label>
+      ))}
+    </div>
+  )
+}
+```
+
+## Complete Form Example
+
+```jsx
+function RegistrationForm() {
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    country: '',
+    newsletter: false
+  })
+  const [errors, setErrors] = useState({})
+  
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+  }
+  
+  const validate = () => {
+    const newErrors = {}
+    
+    if (!form.firstName.trim()) {
+      newErrors.firstName = 'First name is required'
+    }
+    
+    if (!form.email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      newErrors.email = 'Email is invalid'
+    }
+    
+    if (!form.password) {
+      newErrors.password = 'Password is required'
+    } else if (form.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+  
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    
+    if (validate()) {
+      console.log('Form submitted:', form)
+      // Submit to API
+    }
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label htmlFor="firstName">First Name</label>
+        <input
+          id="firstName"
+          name="firstName"
+          value={form.firstName}
+          onChange={handleChange}
+        />
+        {errors.firstName && <span className="error">{errors.firstName}</span>}
+      </div>
+      
+      <div>
+        <label htmlFor="lastName">Last Name</label>
+        <input
+          id="lastName"
+          name="lastName"
+          value={form.lastName}
+          onChange={handleChange}
+        />
+      </div>
+      
+      <div>
+        <label htmlFor="email">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          value={form.email}
+          onChange={handleChange}
+        />
+        {errors.email && <span className="error">{errors.email}</span>}
+      </div>
+      
+      <div>
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          value={form.password}
+          onChange={handleChange}
+        />
+        {errors.password && <span className="error">{errors.password}</span>}
+      </div>
+      
+      <div>
+        <label htmlFor="country">Country</label>
+        <select
+          id="country"
+          name="country"
+          value={form.country}
+          onChange={handleChange}
+        >
+          <option value="">Select country</option>
+          <option value="us">United States</option>
+          <option value="uk">United Kingdom</option>
+        </select>
+      </div>
+      
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            name="newsletter"
+            checked={form.newsletter}
+            onChange={handleChange}
+          />
+          Subscribe to newsletter
+        </label>
+      </div>
+      
+      <button type="submit">Register</button>
+    </form>
+  )
+}
+```
+
+## File Input
+
+```jsx
+function FileUpload() {
+  const [file, setFile] = useState(null)
+  const [preview, setPreview] = useState('')
+  
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0]
+    setFile(selectedFile)
+    
+    // Create preview for images
+    if (selectedFile?.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onloadend = () => setPreview(reader.result)
+      reader.readAsDataURL(selectedFile)
+    }
+  }
+  
+  return (
+    <div>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+      />
+      {preview && <img src={preview} alt="Preview" width={200} />}
+      {file && <p>Selected: {file.name}</p>}
+    </div>
+  )
+}
+```
+
+## Form Reset
+
+```jsx
+function ResettableForm() {
+  const initialState = { name: '', email: '' }
+  const [form, setForm] = useState(initialState)
+  
+  const handleReset = () => {
+    setForm(initialState)
+  }
+  
+  return (
+    <form>
+      <input
+        name="name"
+        value={form.name}
+        onChange={e => setForm({...form, name: e.target.value})}
+      />
+      <input
+        name="email"
+        value={form.email}
+        onChange={e => setForm({...form, email: e.target.value})}
+      />
+      <button type="button" onClick={handleReset}>Reset</button>
+      <button type="submit">Submit</button>
+    </form>
+  )
+}
+```
+
+Forms are the primary way users interact with your React applications!
+

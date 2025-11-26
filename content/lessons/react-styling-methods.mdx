@@ -1,0 +1,336 @@
+---
+title: Styling Methods in React
+chapterSlug: react-styling
+duration: 15
+order: 1
+---
+
+## Styling Methods in React
+
+React offers many ways to style components. Let's explore the most popular approaches.
+
+## Inline Styles
+
+JavaScript objects for styles:
+
+```jsx
+function Button() {
+  const styles = {
+    backgroundColor: 'blue',
+    color: 'white',
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  }
+  
+  return <button style={styles}>Click me</button>
+}
+
+// Dynamic styles
+function Box({ isActive }) {
+  return (
+    <div style={{
+      backgroundColor: isActive ? 'green' : 'gray',
+      opacity: isActive ? 1 : 0.5
+    }}>
+      Box
+    </div>
+  )
+}
+```
+
+## CSS Stylesheets
+
+Traditional CSS files:
+
+```css
+/* Button.css */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: blue;
+  color: white;
+}
+
+.btn-danger {
+  background-color: red;
+  color: white;
+}
+```
+
+```jsx
+import './Button.css'
+
+function Button({ variant = 'primary', children }) {
+  return (
+    <button className={`btn btn-${variant}`}>
+      {children}
+    </button>
+  )
+}
+```
+
+## CSS Modules
+
+Scoped CSS to prevent conflicts:
+
+```css
+/* Button.module.css */
+.button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+}
+
+.primary {
+  background-color: blue;
+  color: white;
+}
+
+.danger {
+  background-color: red;
+  color: white;
+}
+```
+
+```jsx
+import styles from './Button.module.css'
+
+function Button({ variant = 'primary', children }) {
+  return (
+    <button className={`${styles.button} ${styles[variant]}`}>
+      {children}
+    </button>
+  )
+}
+
+// Classes become unique: Button_button__abc123
+```
+
+## Tailwind CSS
+
+Utility-first CSS framework:
+
+```jsx
+function Card({ title, children }) {
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+      <h2 className="text-xl font-bold text-gray-800 mb-4">{title}</h2>
+      <div className="text-gray-600">{children}</div>
+    </div>
+  )
+}
+
+// Conditional classes
+function Button({ variant, disabled, children }) {
+  return (
+    <button
+      className={`
+        px-4 py-2 rounded-md font-medium
+        ${variant === 'primary' ? 'bg-blue-500 text-white hover:bg-blue-600' : ''}
+        ${variant === 'secondary' ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : ''}
+        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+      `}
+      disabled={disabled}
+    >
+      {children}
+    </button>
+  )
+}
+```
+
+### clsx/classnames Library
+
+```jsx
+import clsx from 'clsx'
+
+function Button({ variant, size, disabled, children }) {
+  return (
+    <button
+      className={clsx(
+        'rounded-md font-medium',
+        {
+          'bg-blue-500 text-white': variant === 'primary',
+          'bg-gray-200 text-gray-800': variant === 'secondary',
+          'px-2 py-1 text-sm': size === 'small',
+          'px-4 py-2': size === 'medium',
+          'px-6 py-3 text-lg': size === 'large',
+          'opacity-50 cursor-not-allowed': disabled
+        }
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+```
+
+## Styled Components
+
+CSS-in-JS library:
+
+```bash
+npm install styled-components
+```
+
+```jsx
+import styled from 'styled-components'
+
+const Button = styled.button`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: ${props => props.primary ? 'blue' : 'gray'};
+  color: white;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`
+
+const Card = styled.div`
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+`
+
+const Title = styled.h2`
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+`
+
+// Usage
+function App() {
+  return (
+    <Card>
+      <Title>Hello World</Title>
+      <Button primary>Primary</Button>
+      <Button>Secondary</Button>
+    </Card>
+  )
+}
+```
+
+### Extending Styles
+
+```jsx
+const Button = styled.button`
+  padding: 10px 20px;
+  border-radius: 4px;
+`
+
+const PrimaryButton = styled(Button)`
+  background: blue;
+  color: white;
+`
+
+const DangerButton = styled(Button)`
+  background: red;
+  color: white;
+`
+```
+
+## Emotion
+
+Another CSS-in-JS library:
+
+```bash
+npm install @emotion/react @emotion/styled
+```
+
+```jsx
+/** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react'
+import styled from '@emotion/styled'
+
+// css prop
+function Button({ children }) {
+  return (
+    <button
+      css={css`
+        padding: 10px 20px;
+        background: blue;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        
+        &:hover {
+          background: darkblue;
+        }
+      `}
+    >
+      {children}
+    </button>
+  )
+}
+
+// styled API
+const Card = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+`
+```
+
+## CSS Variables with React
+
+```jsx
+// Define in CSS
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2ecc71;
+  --text-color: #333;
+}
+
+// Use in components
+function ThemedButton() {
+  return (
+    <button style={{ backgroundColor: 'var(--primary-color)' }}>
+      Themed Button
+    </button>
+  )
+}
+
+// Dynamic theme switching
+function ThemeProvider({ theme, children }) {
+  return (
+    <div
+      style={{
+        '--primary-color': theme.primary,
+        '--secondary-color': theme.secondary,
+        '--text-color': theme.text
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+```
+
+## Comparison
+
+| Method | Scoped | Dynamic | Bundle Size | DX |
+|--------|--------|---------|-------------|-----|
+| Inline | ✅ | ✅ | None | OK |
+| CSS Files | ❌ | ❌ | Small | Good |
+| CSS Modules | ✅ | ❌ | Small | Good |
+| Tailwind | ✅ | ✅ | Varies | Great |
+| Styled Components | ✅ | ✅ | ~12KB | Great |
+| Emotion | ✅ | ✅ | ~7KB | Great |
+
+Choose based on your team's preferences and project needs!
+

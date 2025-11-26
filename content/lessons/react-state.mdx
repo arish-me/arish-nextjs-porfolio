@@ -1,0 +1,327 @@
+---
+title: State in React
+chapterSlug: react-fundamentals
+duration: 15
+order: 2
+---
+
+## State in React
+
+State is data that changes over time within a component. Unlike props, state is managed internally by the component and can be updated.
+
+## useState Hook
+
+The `useState` hook is how you add state to function components:
+
+```jsx
+import { useState } from 'react'
+
+function Counter() {
+  // Declare state variable 'count' with initial value 0
+  const [count, setCount] = useState(0)
+  
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+    </div>
+  )
+}
+```
+
+## useState Syntax
+
+```jsx
+const [stateValue, setterFunction] = useState(initialValue)
+
+// Examples
+const [count, setCount] = useState(0)
+const [name, setName] = useState('')
+const [isOpen, setIsOpen] = useState(false)
+const [user, setUser] = useState(null)
+const [items, setItems] = useState([])
+const [form, setForm] = useState({ email: '', password: '' })
+```
+
+## Updating State
+
+### Simple Updates
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  const increment = () => setCount(count + 1)
+  const decrement = () => setCount(count - 1)
+  const reset = () => setCount(0)
+  
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={increment}>+</button>
+      <button onClick={decrement}>-</button>
+      <button onClick={reset}>Reset</button>
+    </div>
+  )
+}
+```
+
+### Functional Updates
+
+When new state depends on previous state, use a function:
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  // ❌ Might not work correctly with rapid clicks
+  const increment = () => setCount(count + 1)
+  
+  // ✅ Always correct - uses previous state
+  const increment = () => setCount(prev => prev + 1)
+  
+  // Multiple increments
+  const incrementBy3 = () => {
+    setCount(prev => prev + 1)
+    setCount(prev => prev + 1)
+    setCount(prev => prev + 1)
+  }
+  
+  return <button onClick={increment}>{count}</button>
+}
+```
+
+## State with Different Types
+
+### String State
+
+```jsx
+function NameInput() {
+  const [name, setName] = useState('')
+  
+  return (
+    <div>
+      <input 
+        value={name} 
+        onChange={(e) => setName(e.target.value)} 
+        placeholder="Enter name"
+      />
+      <p>Hello, {name || 'stranger'}!</p>
+    </div>
+  )
+}
+```
+
+### Boolean State
+
+```jsx
+function Toggle() {
+  const [isOn, setIsOn] = useState(false)
+  
+  return (
+    <button onClick={() => setIsOn(prev => !prev)}>
+      {isOn ? 'ON' : 'OFF'}
+    </button>
+  )
+}
+
+function Modal() {
+  const [isOpen, setIsOpen] = useState(false)
+  
+  return (
+    <>
+      <button onClick={() => setIsOpen(true)}>Open Modal</button>
+      
+      {isOpen && (
+        <div className="modal">
+          <h2>Modal Content</h2>
+          <button onClick={() => setIsOpen(false)}>Close</button>
+        </div>
+      )}
+    </>
+  )
+}
+```
+
+### Array State
+
+```jsx
+function TodoList() {
+  const [todos, setTodos] = useState([])
+  const [input, setInput] = useState('')
+  
+  const addTodo = () => {
+    if (input.trim()) {
+      setTodos([...todos, { id: Date.now(), text: input, done: false }])
+      setInput('')
+    }
+  }
+  
+  const toggleTodo = (id) => {
+    setTodos(todos.map(todo =>
+      todo.id === id ? { ...todo, done: !todo.done } : todo
+    ))
+  }
+  
+  const deleteTodo = (id) => {
+    setTodos(todos.filter(todo => todo.id !== id))
+  }
+  
+  return (
+    <div>
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={addTodo}>Add</button>
+      
+      <ul>
+        {todos.map(todo => (
+          <li key={todo.id}>
+            <span 
+              style={{ textDecoration: todo.done ? 'line-through' : 'none' }}
+              onClick={() => toggleTodo(todo.id)}
+            >
+              {todo.text}
+            </span>
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+```
+
+### Object State
+
+```jsx
+function Form() {
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: ''
+  })
+  
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+  
+  return (
+    <form>
+      <input 
+        name="firstName"
+        value={form.firstName}
+        onChange={handleChange}
+        placeholder="First Name"
+      />
+      <input 
+        name="lastName"
+        value={form.lastName}
+        onChange={handleChange}
+        placeholder="Last Name"
+      />
+      <input 
+        name="email"
+        value={form.email}
+        onChange={handleChange}
+        placeholder="Email"
+      />
+      <p>Hello, {form.firstName} {form.lastName}</p>
+    </form>
+  )
+}
+```
+
+## Multiple State Variables
+
+```jsx
+function UserProfile() {
+  const [name, setName] = useState('')
+  const [age, setAge] = useState(0)
+  const [isEditing, setIsEditing] = useState(false)
+  const [errors, setErrors] = useState([])
+  
+  // Each state updates independently
+}
+```
+
+## State vs Props
+
+| State | Props |
+|-------|-------|
+| Managed inside component | Passed from parent |
+| Can be changed | Read-only |
+| Triggers re-render when changed | Triggers re-render when parent updates |
+| Component's own data | Component's configuration |
+
+## Lazy Initial State
+
+For expensive initial computations:
+
+```jsx
+// ❌ Runs on every render
+const [items, setItems] = useState(expensiveComputation())
+
+// ✅ Only runs once
+const [items, setItems] = useState(() => expensiveComputation())
+```
+
+## State Batching
+
+React batches multiple state updates for performance:
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  const handleClick = () => {
+    setCount(count + 1)
+    setCount(count + 1)
+    setCount(count + 1)
+    // count only increases by 1, not 3!
+    // All updates see the same 'count' value
+  }
+  
+  const handleClickCorrect = () => {
+    setCount(prev => prev + 1)
+    setCount(prev => prev + 1)
+    setCount(prev => prev + 1)
+    // count increases by 3 ✅
+  }
+}
+```
+
+## Don't Mutate State
+
+Always create new objects/arrays:
+
+```jsx
+// ❌ Wrong - mutating state directly
+const handleClick = () => {
+  user.name = 'New Name'  // Mutation!
+  setUser(user)
+}
+
+// ✅ Correct - creating new object
+const handleClick = () => {
+  setUser({ ...user, name: 'New Name' })
+}
+
+// ❌ Wrong - mutating array
+const addItem = () => {
+  items.push(newItem)  // Mutation!
+  setItems(items)
+}
+
+// ✅ Correct - creating new array
+const addItem = () => {
+  setItems([...items, newItem])
+}
+```
+
+State is what makes React components interactive and dynamic!
+

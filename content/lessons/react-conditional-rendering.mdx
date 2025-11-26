@@ -1,0 +1,311 @@
+---
+title: Conditional Rendering
+chapterSlug: react-component-patterns
+duration: 12
+order: 1
+---
+
+## Conditional Rendering
+
+React lets you render different UI based on conditions. There are several patterns for conditional rendering.
+
+## If Statements
+
+Use regular JavaScript if statements:
+
+```jsx
+function Greeting({ isLoggedIn }) {
+  if (isLoggedIn) {
+    return <h1>Welcome back!</h1>
+  }
+  return <h1>Please sign in</h1>
+}
+```
+
+### Early Returns
+
+Clean pattern for handling special cases:
+
+```jsx
+function UserProfile({ user, loading, error }) {
+  if (loading) {
+    return <Spinner />
+  }
+  
+  if (error) {
+    return <ErrorMessage message={error} />
+  }
+  
+  if (!user) {
+    return <p>No user found</p>
+  }
+  
+  // Main render
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+    </div>
+  )
+}
+```
+
+## Ternary Operator
+
+For inline conditional rendering:
+
+```jsx
+function Greeting({ isLoggedIn }) {
+  return (
+    <div>
+      {isLoggedIn ? (
+        <UserDashboard />
+      ) : (
+        <LoginForm />
+      )}
+    </div>
+  )
+}
+
+// Simple values
+function Status({ isOnline }) {
+  return (
+    <span className={isOnline ? 'online' : 'offline'}>
+      {isOnline ? 'Online' : 'Offline'}
+    </span>
+  )
+}
+```
+
+## Logical AND (&&)
+
+Render something OR nothing:
+
+```jsx
+function Notifications({ messages }) {
+  return (
+    <div>
+      {messages.length > 0 && (
+        <span className="badge">{messages.length} new</span>
+      )}
+    </div>
+  )
+}
+
+// ⚠️ Beware of falsy values
+function Counter({ count }) {
+  // ❌ Bug: renders "0" when count is 0
+  return <div>{count && <span>Count: {count}</span>}</div>
+  
+  // ✅ Fix: use comparison
+  return <div>{count > 0 && <span>Count: {count}</span>}</div>
+}
+```
+
+## Logical OR (||) and Nullish Coalescing (??)
+
+Default values:
+
+```jsx
+function Welcome({ name }) {
+  // Show default if name is falsy
+  return <h1>Hello, {name || 'Guest'}!</h1>
+}
+
+function Profile({ user }) {
+  // Only use default if null/undefined (not for empty string/0)
+  return <p>Age: {user.age ?? 'Unknown'}</p>
+}
+```
+
+## Switch Case Pattern
+
+For multiple conditions:
+
+```jsx
+function StatusBadge({ status }) {
+  switch (status) {
+    case 'pending':
+      return <span className="badge yellow">Pending</span>
+    case 'approved':
+      return <span className="badge green">Approved</span>
+    case 'rejected':
+      return <span className="badge red">Rejected</span>
+    default:
+      return <span className="badge gray">Unknown</span>
+  }
+}
+```
+
+## Object Mapping
+
+Cleaner alternative to switch:
+
+```jsx
+const STATUS_COMPONENTS = {
+  pending: <PendingIcon />,
+  approved: <ApprovedIcon />,
+  rejected: <RejectedIcon />,
+}
+
+function StatusIcon({ status }) {
+  return STATUS_COMPONENTS[status] || <DefaultIcon />
+}
+
+// With styles
+const STATUS_STYLES = {
+  pending: { color: 'yellow', text: 'Pending' },
+  approved: { color: 'green', text: 'Approved' },
+  rejected: { color: 'red', text: 'Rejected' },
+}
+
+function StatusBadge({ status }) {
+  const config = STATUS_STYLES[status] || { color: 'gray', text: 'Unknown' }
+  
+  return (
+    <span style={{ backgroundColor: config.color }}>
+      {config.text}
+    </span>
+  )
+}
+```
+
+## Rendering Lists Conditionally
+
+```jsx
+function ProductList({ products, isLoading }) {
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
+  
+  if (products.length === 0) {
+    return <EmptyState message="No products found" />
+  }
+  
+  return (
+    <ul>
+      {products.map(product => (
+        <ProductItem key={product.id} product={product} />
+      ))}
+    </ul>
+  )
+}
+```
+
+## Conditional Props
+
+```jsx
+function Button({ isLoading, children, ...props }) {
+  return (
+    <button 
+      disabled={isLoading}
+      className={isLoading ? 'loading' : ''}
+      {...props}
+    >
+      {isLoading ? 'Loading...' : children}
+    </button>
+  )
+}
+
+// Conditional attributes
+function Link({ href, isExternal, children }) {
+  return (
+    <a 
+      href={href}
+      {...(isExternal && { target: '_blank', rel: 'noopener noreferrer' })}
+    >
+      {children}
+    </a>
+  )
+}
+```
+
+## Conditional Classes
+
+```jsx
+function NavItem({ isActive, children }) {
+  // String concatenation
+  return (
+    <li className={`nav-item ${isActive ? 'active' : ''}`}>
+      {children}
+    </li>
+  )
+}
+
+// Using classnames library
+import clsx from 'clsx'
+
+function NavItem({ isActive, isDisabled, children }) {
+  return (
+    <li className={clsx('nav-item', {
+      'active': isActive,
+      'disabled': isDisabled,
+    })}>
+      {children}
+    </li>
+  )
+}
+```
+
+## Conditional Wrapper
+
+```jsx
+function ConditionalWrapper({ condition, wrapper, children }) {
+  return condition ? wrapper(children) : children
+}
+
+// Usage
+function Link({ href, isExternal, children }) {
+  return (
+    <ConditionalWrapper
+      condition={isExternal}
+      wrapper={(children) => (
+        <a href={href} target="_blank" rel="noopener">
+          {children}
+        </a>
+      )}
+    >
+      {isExternal ? children : <a href={href}>{children}</a>}
+    </ConditionalWrapper>
+  )
+}
+```
+
+## Rendering null
+
+To render nothing:
+
+```jsx
+function WarningBanner({ warning }) {
+  if (!warning) {
+    return null  // Renders nothing
+  }
+  
+  return <div className="warning">{warning}</div>
+}
+```
+
+## Complex Conditions
+
+Extract complex logic into variables or functions:
+
+```jsx
+function Dashboard({ user, subscription, features }) {
+  const canAccessPremium = subscription.plan === 'premium' && subscription.isActive
+  const hasNewFeatures = features.some(f => f.isNew && f.enabled)
+  const showUpgradeBanner = !canAccessPremium && user.trialEnded
+  
+  return (
+    <div>
+      {showUpgradeBanner && <UpgradeBanner />}
+      
+      {canAccessPremium && <PremiumContent />}
+      
+      {hasNewFeatures && <NewFeaturesAnnouncement />}
+    </div>
+  )
+}
+```
+
+Conditional rendering is fundamental to building dynamic React UIs!
+

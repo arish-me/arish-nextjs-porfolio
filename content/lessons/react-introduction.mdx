@@ -1,0 +1,178 @@
+---
+title: Introduction to React
+chapterSlug: react-getting-started
+duration: 8
+order: 1
+---
+
+## What is React?
+
+React is a JavaScript library for building user interfaces, created by Facebook (Meta) in 2013. It's the most popular frontend library in the world, used by companies like Netflix, Airbnb, Instagram, and thousands of others.
+
+## Why React?
+
+### Component-Based Architecture
+
+React lets you build UIs from small, reusable pieces called components:
+
+```jsx
+// A simple component
+function Welcome() {
+  return <h1>Hello, World!</h1>
+}
+
+// Components can be composed together
+function App() {
+  return (
+    <div>
+      <Welcome />
+      <Welcome />
+      <Welcome />
+    </div>
+  )
+}
+```
+
+### Declarative UI
+
+You describe what you want to see, and React figures out how to make it happen:
+
+```jsx
+// Declarative - describe the UI
+function Counter({ count }) {
+  return <span>Count: {count}</span>
+}
+
+// React automatically updates the DOM when count changes
+```
+
+### Virtual DOM
+
+React uses a virtual representation of the DOM to efficiently update only what's changed:
+
+```
+┌─────────────────┐
+│   Your Code     │
+│  (Components)   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   Virtual DOM   │ ← React compares old vs new
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│    Real DOM     │ ← Only updates what changed
+└─────────────────┘
+```
+
+## React vs Other Frameworks
+
+| Feature | React | Vue | Angular |
+|---------|-------|-----|---------|
+| Type | Library | Framework | Framework |
+| Learning Curve | Medium | Easy | Steep |
+| Size | ~42KB | ~33KB | ~143KB |
+| Flexibility | High | Medium | Low |
+| Corporate Backing | Meta | Community | Google |
+
+## Core Concepts
+
+### 1. Components
+
+Everything in React is a component. Components are like JavaScript functions that return HTML:
+
+```jsx
+function Greeting({ name }) {
+  return <h1>Hello, {name}!</h1>
+}
+```
+
+### 2. JSX
+
+JSX is a syntax extension that lets you write HTML-like code in JavaScript:
+
+```jsx
+// JSX
+const element = <h1 className="title">Hello</h1>
+
+// Compiles to
+const element = React.createElement('h1', { className: 'title' }, 'Hello')
+```
+
+### 3. Props
+
+Props are how you pass data from parent to child components:
+
+```jsx
+function Parent() {
+  return <Child name="John" age={25} />
+}
+
+function Child({ name, age }) {
+  return <p>{name} is {age} years old</p>
+}
+```
+
+### 4. State
+
+State is data that changes over time within a component:
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      Clicked {count} times
+    </button>
+  )
+}
+```
+
+## The React Ecosystem
+
+React has a rich ecosystem of tools and libraries:
+
+- **Create React App / Vite** - Project setup
+- **React Router** - Navigation
+- **Redux / Zustand** - State management
+- **React Query** - Data fetching
+- **Next.js** - Server-side rendering
+- **React Native** - Mobile apps
+
+## When to Use React
+
+React is great for:
+- Single Page Applications (SPAs)
+- Complex, interactive UIs
+- Applications that need frequent updates
+- Large teams (component-based architecture helps)
+- Projects that might need mobile apps (React Native)
+
+## Your First React App
+
+Here's what a simple React app looks like:
+
+```jsx
+import { useState } from 'react'
+
+function App() {
+  const [message, setMessage] = useState('Hello, React!')
+  
+  return (
+    <div>
+      <h1>{message}</h1>
+      <button onClick={() => setMessage('You clicked!')}>
+        Click me
+      </button>
+    </div>
+  )
+}
+
+export default App
+```
+
+In the next lesson, we'll set up our development environment and create our first React project!
+

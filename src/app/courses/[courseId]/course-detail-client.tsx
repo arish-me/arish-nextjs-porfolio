@@ -16,9 +16,17 @@ interface CourseDetailClientProps {
 
 export default function CourseDetailClient({ course }: CourseDetailClientProps) {
   const [progress, setProgress] = useState<Record<string, boolean>>({})
+  const [mounted, setMounted] = useState(false)
+  const [completedLessons, setCompletedLessons] = useState(0)
+  const [progressPercentage, setProgressPercentage] = useState(0)
 
-  // Load progress from localStorage
+  const totalChapters = course.chapters.length
+  const totalLessons = course.chapters.reduce((sum, chapter) => sum + chapter.lessons.length, 0)
+
+  // Load progress from localStorage after mount
   useEffect(() => {
+    setMounted(true)
+    
     const progressMap: Record<string, boolean> = {}
     course.chapters.forEach((chapter) => {
       chapter.lessons.forEach((lesson) => {
@@ -27,7 +35,12 @@ export default function CourseDetailClient({ course }: CourseDetailClientProps) 
       })
     })
     setProgress(progressMap)
-  }, [course])
+    
+    // Update completion data
+    const completionData = getCourseCompletionCount(course.id, totalLessons)
+    setCompletedLessons(completionData.completed)
+    setProgressPercentage(completionData.percentage)
+  }, [course, totalLessons])
 
   // Update progress when localStorage changes
   useEffect(() => {
@@ -40,6 +53,11 @@ export default function CourseDetailClient({ course }: CourseDetailClientProps) 
         })
       })
       setProgress(progressMap)
+      
+      // Update completion data
+      const completionData = getCourseCompletionCount(course.id, totalLessons)
+      setCompletedLessons(completionData.completed)
+      setProgressPercentage(completionData.percentage)
     }
 
     window.addEventListener('storage', handleStorageChange)
@@ -49,13 +67,7 @@ export default function CourseDetailClient({ course }: CourseDetailClientProps) 
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('course-progress-updated', handleStorageChange)
     }
-  }, [course])
-
-  const totalChapters = course.chapters.length
-  const totalLessons = course.chapters.reduce((sum, chapter) => sum + chapter.lessons.length, 0)
-  const completionData = getCourseCompletionCount(course.id, totalLessons)
-  const completedLessons = completionData.completed
-  const progressPercentage = completionData.percentage
+  }, [course, totalLessons])
 
   return (
     <div className="py-16 space-y-8">

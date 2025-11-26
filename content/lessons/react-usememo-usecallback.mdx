@@ -1,0 +1,300 @@
+---
+title: useMemo and useCallback
+chapterSlug: react-hooks
+duration: 15
+order: 5
+---
+
+## useMemo and useCallback
+
+These hooks help optimize performance by memoizing values and functions to prevent unnecessary recalculations and re-renders.
+
+## useMemo
+
+Memoizes a computed value:
+
+```jsx
+import { useMemo } from 'react'
+
+function ExpensiveComponent({ items, filter }) {
+  // Without useMemo - runs on every render
+  const filteredItems = items.filter(item => item.includes(filter))
+  
+  // With useMemo - only recalculates when items or filter change
+  const filteredItems = useMemo(() => {
+    return items.filter(item => item.includes(filter))
+  }, [items, filter])
+  
+  return <List items={filteredItems} />
+}
+```
+
+### When to Use useMemo
+
+```jsx
+// ✅ Good: Expensive calculations
+const sortedData = useMemo(() => {
+  return [...data].sort((a, b) => a.name.localeCompare(b.name))
+}, [data])
+
+// ✅ Good: Creating objects to pass as props
+const style = useMemo(() => ({
+  color: theme === 'dark' ? 'white' : 'black',
+  fontSize: size * 2
+}), [theme, size])
+
+// ✅ Good: Complex filtering/transformation
+const visibleTodos = useMemo(() => {
+  return todos
+    .filter(todo => !todo.completed || showCompleted)
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, limit)
+}, [todos, showCompleted, limit])
+
+// ❌ Bad: Simple values (overhead not worth it)
+const doubled = useMemo(() => count * 2, [count])
+```
+
+### useMemo Examples
+
+```jsx
+function SearchResults({ query, allItems }) {
+  // Expensive search operation
+  const results = useMemo(() => {
+    console.log('Searching...')
+    return allItems.filter(item => {
+      // Complex matching logic
+      return item.title.toLowerCase().includes(query.toLowerCase()) ||
+             item.tags.some(tag => tag.includes(query))
+    })
+  }, [query, allItems])
+  
+  // Even more expensive: sorting results
+  const sortedResults = useMemo(() => {
+    return [...results].sort((a, b) => b.relevance - a.relevance)
+  }, [results])
+  
+  return (
+    <ul>
+      {sortedResults.map(item => (
+        <li key={item.id}>{item.title}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+## useCallback
+
+Memoizes a function:
+
+```jsx
+import { useCallback } from 'react'
+
+function ParentComponent() {
+  const [count, setCount] = useState(0)
+  
+  // Without useCallback - new function every render
+  const handleClick = () => {
+    console.log('Clicked')
+  }
+  
+  // With useCallback - same function reference
+  const handleClick = useCallback(() => {
+    console.log('Clicked')
+  }, [])
+  
+  return <ChildComponent onClick={handleClick} />
+}
+```
+
+### Why useCallback Matters
+
+```jsx
+// Child component wrapped in React.memo
+const ExpensiveChild = React.memo(function ExpensiveChild({ onClick }) {
+  console.log('Child rendered')
+  return <button onClick={onClick}>Click me</button>
+})
+
+function Parent() {
+  const [count, setCount] = useState(0)
+  
+  // ❌ Without useCallback: Child re-renders every time Parent renders
+  const handleClick = () => console.log('click')
+  
+  // ✅ With useCallback: Child only re-renders when dependencies change
+  const handleClick = useCallback(() => console.log('click'), [])
+  
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(c => c + 1)}>Increment</button>
+      <ExpensiveChild onClick={handleClick} />
+    </div>
+  )
+}
+```
+
+### useCallback with Dependencies
+
+```jsx
+function TodoList({ todos, onToggle }) {
+  // Depends on onToggle prop
+  const handleToggle = useCallback((id) => {
+    onToggle(id)
+  }, [onToggle])
+  
+  return (
+    <ul>
+      {todos.map(todo => (
+        <TodoItem 
+          key={todo.id} 
+          todo={todo} 
+          onToggle={handleToggle} 
+        />
+      ))}
+    </ul>
+  )
+}
+
+// Using state in callback
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  // ❌ This captures stale count
+  const logCount = useCallback(() => {
+    console.log(count)  // Always logs initial count
+  }, [])
+  
+  // ✅ Include count in dependencies
+  const logCount = useCallback(() => {
+    console.log(count)
+  }, [count])
+  
+  // ✅ Or use functional update to avoid dependency
+  const increment = useCallback(() => {
+    setCount(c => c + 1)  // No dependency on count
+  }, [])
+}
+```
+
+## useCallback vs useMemo
+
+```jsx
+// useCallback returns a function
+const memoizedFn = useCallback(() => {
+  doSomething(a, b)
+}, [a, b])
+
+// useMemo returns a value (can be a function)
+const memoizedFn = useMemo(() => {
+  return () => doSomething(a, b)
+}, [a, b])
+
+// These are equivalent!
+useCallback(fn, deps) === useMemo(() => fn, deps)
+```
+
+## Combined Usage
+
+```jsx
+function ProductList({ products, sortBy, filterBy }) {
+  // Memoize filtered and sorted data
+  const displayProducts = useMemo(() => {
+    let result = products.filter(p => p.category === filterBy)
+    
+    if (sortBy === 'price') {
+      result = [...result].sort((a, b) => a.price - b.price)
+    } else if (sortBy === 'name') {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name))
+    }
+    
+    return result
+  }, [products, sortBy, filterBy])
+  
+  // Memoize event handlers
+  const handleAddToCart = useCallback((productId) => {
+    addToCart(productId)
+  }, [])
+  
+  const handleFavorite = useCallback((productId) => {
+    toggleFavorite(productId)
+  }, [])
+  
+  return (
+    <div>
+      {displayProducts.map(product => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          onAddToCart={handleAddToCart}
+          onFavorite={handleFavorite}
+        />
+      ))}
+    </div>
+  )
+}
+```
+
+## When NOT to Use
+
+```jsx
+// ❌ Premature optimization - simple operations
+const doubled = useMemo(() => count * 2, [count])
+
+// ❌ Functions that change every render anyway
+const handleSubmit = useCallback(() => {
+  submitForm(formData)  // formData changes often
+}, [formData])
+
+// ❌ When child isn't memoized
+function Parent() {
+  const onClick = useCallback(() => {}, [])
+  return <Child onClick={onClick} />  // Child will re-render anyway!
+}
+```
+
+## Performance Guidelines
+
+1. **Measure first** - Don't optimize without profiling
+2. **Use with React.memo** - useCallback alone doesn't prevent re-renders
+3. **Keep dependencies minimal** - More deps = more recalculations
+4. **Consider the cost** - Memoization has its own overhead
+
+```jsx
+// Complete optimization pattern
+const MemoizedChild = React.memo(function Child({ data, onAction }) {
+  return <div onClick={() => onAction(data.id)}>{data.name}</div>
+})
+
+function Parent({ items }) {
+  const [selected, setSelected] = useState(null)
+  
+  // Memoize processed data
+  const processedItems = useMemo(() => 
+    items.map(item => ({ ...item, formatted: format(item) })),
+    [items]
+  )
+  
+  // Memoize handler
+  const handleAction = useCallback((id) => {
+    setSelected(id)
+  }, [])
+  
+  return (
+    <div>
+      {processedItems.map(item => (
+        <MemoizedChild 
+          key={item.id}
+          data={item}
+          onAction={handleAction}
+        />
+      ))}
+    </div>
+  )
+}
+```
+
+These hooks are powerful tools for React performance optimization!
+

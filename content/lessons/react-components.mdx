@@ -1,0 +1,300 @@
+---
+title: Components and Props
+chapterSlug: react-fundamentals
+duration: 15
+order: 1
+---
+
+## React Components
+
+Components are the building blocks of React applications. They let you split the UI into independent, reusable pieces.
+
+## Function Components
+
+The modern way to write React components:
+
+```jsx
+// Simple component
+function Welcome() {
+  return <h1>Hello, World!</h1>
+}
+
+// Arrow function syntax
+const Welcome = () => {
+  return <h1>Hello, World!</h1>
+}
+
+// Implicit return (for simple components)
+const Welcome = () => <h1>Hello, World!</h1>
+```
+
+## Using Components
+
+Components are used like HTML tags:
+
+```jsx
+function App() {
+  return (
+    <div>
+      <Welcome />
+      <Welcome />
+      <Welcome />
+    </div>
+  )
+}
+```
+
+## Props (Properties)
+
+Props are how you pass data from parent to child components:
+
+```jsx
+// Parent passes props
+function App() {
+  return (
+    <div>
+      <Welcome name="Alice" />
+      <Welcome name="Bob" />
+      <Welcome name="Charlie" />
+    </div>
+  )
+}
+
+// Child receives props
+function Welcome(props) {
+  return <h1>Hello, {props.name}!</h1>
+}
+
+// Destructured props (preferred)
+function Welcome({ name }) {
+  return <h1>Hello, {name}!</h1>
+}
+```
+
+## Multiple Props
+
+```jsx
+function UserCard({ name, age, email, isAdmin }) {
+  return (
+    <div className="card">
+      <h2>{name}</h2>
+      <p>Age: {age}</p>
+      <p>Email: {email}</p>
+      {isAdmin && <span className="badge">Admin</span>}
+    </div>
+  )
+}
+
+// Usage
+<UserCard 
+  name="John Doe" 
+  age={30} 
+  email="john@example.com" 
+  isAdmin={true} 
+/>
+```
+
+## Default Props
+
+```jsx
+// Using default parameters
+function Button({ text = 'Click me', color = 'blue' }) {
+  return (
+    <button style={{ backgroundColor: color }}>
+      {text}
+    </button>
+  )
+}
+
+// Usage
+<Button />                          // Uses defaults
+<Button text="Submit" />            // Custom text
+<Button text="Delete" color="red" /> // Custom both
+```
+
+## Props are Read-Only
+
+Never modify props directly:
+
+```jsx
+// ❌ Wrong - don't mutate props
+function Welcome({ name }) {
+  name = name.toUpperCase() // Don't do this!
+  return <h1>Hello, {name}!</h1>
+}
+
+// ✅ Correct - create a new variable
+function Welcome({ name }) {
+  const formattedName = name.toUpperCase()
+  return <h1>Hello, {formattedName}!</h1>
+}
+```
+
+## Passing Objects as Props
+
+```jsx
+const user = {
+  name: 'John',
+  age: 30,
+  email: 'john@example.com'
+}
+
+// Pass individual props
+<UserCard name={user.name} age={user.age} email={user.email} />
+
+// Spread operator (pass all properties)
+<UserCard {...user} />
+```
+
+## Children Prop
+
+The special `children` prop contains nested elements:
+
+```jsx
+function Card({ children, title }) {
+  return (
+    <div className="card">
+      <h2>{title}</h2>
+      <div className="card-body">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// Usage
+<Card title="Welcome">
+  <p>This is the card content.</p>
+  <button>Click me</button>
+</Card>
+```
+
+## Component Composition
+
+Build complex UIs by composing simple components:
+
+```jsx
+function Avatar({ user }) {
+  return <img src={user.avatar} alt={user.name} className="avatar" />
+}
+
+function UserInfo({ user }) {
+  return (
+    <div className="user-info">
+      <Avatar user={user} />
+      <span className="name">{user.name}</span>
+    </div>
+  )
+}
+
+function Comment({ author, text, date }) {
+  return (
+    <div className="comment">
+      <UserInfo user={author} />
+      <p className="text">{text}</p>
+      <span className="date">{date}</span>
+    </div>
+  )
+}
+```
+
+## Conditional Rendering
+
+```jsx
+function Greeting({ isLoggedIn, user }) {
+  // Early return
+  if (!isLoggedIn) {
+    return <p>Please log in</p>
+  }
+  
+  return <h1>Welcome, {user.name}!</h1>
+}
+
+// Ternary operator
+function Greeting({ isLoggedIn }) {
+  return isLoggedIn ? <UserPanel /> : <LoginButton />
+}
+
+// Logical AND
+function Notifications({ messages }) {
+  return (
+    <div>
+      <h1>Notifications</h1>
+      {messages.length > 0 && (
+        <ul>
+          {messages.map(msg => <li key={msg.id}>{msg.text}</li>)}
+        </ul>
+      )}
+    </div>
+  )
+}
+```
+
+## Component Organization
+
+Organize components in files:
+
+```
+src/
+├── components/
+│   ├── common/
+│   │   ├── Button.jsx
+│   │   ├── Card.jsx
+│   │   └── Input.jsx
+│   ├── layout/
+│   │   ├── Header.jsx
+│   │   ├── Footer.jsx
+│   │   └── Sidebar.jsx
+│   └── features/
+│       ├── UserCard.jsx
+│       └── ProductList.jsx
+├── App.jsx
+└── main.jsx
+```
+
+## Export and Import
+
+```jsx
+// Button.jsx
+export default function Button({ children }) {
+  return <button className="btn">{children}</button>
+}
+
+// Named export
+export function PrimaryButton({ children }) {
+  return <button className="btn btn-primary">{children}</button>
+}
+
+// App.jsx
+import Button, { PrimaryButton } from './components/Button'
+
+function App() {
+  return (
+    <div>
+      <Button>Default</Button>
+      <PrimaryButton>Primary</PrimaryButton>
+    </div>
+  )
+}
+```
+
+## Pure Components
+
+Components should be pure - given the same props, they should always render the same output:
+
+```jsx
+// ✅ Pure - same input, same output
+function Greeting({ name }) {
+  return <h1>Hello, {name}!</h1>
+}
+
+// ❌ Impure - output changes even with same input
+let callCount = 0
+function Counter() {
+  callCount++
+  return <p>Called {callCount} times</p>
+}
+```
+
+Components and props are the foundation of React applications!
+

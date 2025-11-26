@@ -1,0 +1,360 @@
+---
+title: Intermediate Interview Questions
+chapterSlug: react-interview-questions
+duration: 25
+order: 2
+---
+
+## Intermediate React Interview Questions
+
+Questions for mid-level React developers.
+
+---
+
+## Q1: Explain the React component lifecycle
+
+**Answer:** Components go through phases: Mounting, Updating, Unmounting.
+
+```jsx
+function Component() {
+  // Mounting: Component is created
+  useEffect(() => {
+    console.log('Component mounted')
+    
+    // Unmounting: Cleanup
+    return () => {
+      console.log('Component will unmount')
+    }
+  }, [])
+  
+  // Updating: Dependencies changed
+  useEffect(() => {
+    console.log('Dependencies updated')
+  }, [dep1, dep2])
+}
+```
+
+Class component methods:
+- `componentDidMount` → `useEffect(() => {}, [])`
+- `componentDidUpdate` → `useEffect(() => {}, [deps])`
+- `componentWillUnmount` → `useEffect(() => cleanup, [])`
+
+---
+
+## Q2: What is the difference between useEffect and useLayoutEffect?
+
+**Answer:**
+
+| useEffect | useLayoutEffect |
+|-----------|-----------------|
+| Runs after paint | Runs before paint |
+| Asynchronous | Synchronous |
+| Won't block visual updates | May block visual updates |
+| Most common choice | For DOM measurements/mutations |
+
+```jsx
+// useEffect - runs after browser paints
+useEffect(() => {
+  // Most side effects go here
+}, [])
+
+// useLayoutEffect - runs before browser paints
+useLayoutEffect(() => {
+  // DOM measurements, prevents flicker
+  const rect = ref.current.getBoundingClientRect()
+}, [])
+```
+
+---
+
+## Q3: How does React.memo work?
+
+**Answer:** `React.memo` is a higher-order component that memoizes functional components, preventing re-renders if props haven't changed.
+
+```jsx
+const MemoizedComponent = React.memo(function Component({ name }) {
+  console.log('Rendering')
+  return <div>{name}</div>
+})
+
+// Custom comparison
+const MemoizedComponent = React.memo(Component, (prevProps, nextProps) => {
+  return prevProps.id === nextProps.id
+})
+```
+
+Use when:
+- Component renders often with same props
+- Component is expensive to render
+- Parent re-renders frequently
+
+---
+
+## Q4: Explain useMemo vs useCallback
+
+**Answer:**
+
+```jsx
+// useMemo - memoizes a VALUE
+const sortedItems = useMemo(() => {
+  return items.sort((a, b) => a.name.localeCompare(b.name))
+}, [items])
+
+// useCallback - memoizes a FUNCTION
+const handleClick = useCallback(() => {
+  console.log(count)
+}, [count])
+
+// They're equivalent:
+useCallback(fn, deps) === useMemo(() => fn, deps)
+```
+
+Use useMemo for:
+- Expensive calculations
+- Objects/arrays passed as props
+
+Use useCallback for:
+- Event handlers passed to memoized children
+- Dependencies in useEffect
+
+---
+
+## Q5: What are error boundaries?
+
+**Answer:** Error boundaries catch JavaScript errors in child components and display fallback UI.
+
+```jsx
+class ErrorBoundary extends React.Component {
+  state = { hasError: false }
+  
+  static getDerivedStateFromError(error) {
+    return { hasError: true }
+  }
+  
+  componentDidCatch(error, errorInfo) {
+    console.error('Error:', error, errorInfo)
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>
+    }
+    return this.props.children
+  }
+}
+
+// Usage
+<ErrorBoundary>
+  <MyComponent />
+</ErrorBoundary>
+```
+
+Note: Error boundaries don't catch:
+- Event handler errors
+- Async code errors
+- Server-side rendering errors
+- Errors in the boundary itself
+
+---
+
+## Q6: How do you optimize React performance?
+
+**Answer:**
+
+1. **Memoization**
+```jsx
+const MemoizedChild = React.memo(Child)
+const value = useMemo(() => compute(a, b), [a, b])
+const handler = useCallback(() => {}, [deps])
+```
+
+2. **Code Splitting**
+```jsx
+const LazyComponent = lazy(() => import('./Component'))
+```
+
+3. **Virtualization** (for long lists)
+```jsx
+import { useVirtualizer } from '@tanstack/react-virtual'
+```
+
+4. **Proper key usage**
+```jsx
+{items.map(item => <Item key={item.id} />)}
+```
+
+5. **Avoid inline objects/functions**
+```jsx
+// ❌ Creates new object every render
+<Child style={{ color: 'red' }} />
+
+// ✅ Stable reference
+const style = useMemo(() => ({ color: 'red' }), [])
+<Child style={style} />
+```
+
+---
+
+## Q7: What are React portals?
+
+**Answer:** Portals render children into a different DOM node outside the parent hierarchy.
+
+```jsx
+import { createPortal } from 'react-dom'
+
+function Modal({ children }) {
+  return createPortal(
+    <div className="modal">{children}</div>,
+    document.body
+  )
+}
+```
+
+Use cases:
+- Modals/dialogs
+- Tooltips
+- Dropdowns
+- Toast notifications
+
+---
+
+## Q8: Explain Context API and its limitations
+
+**Answer:** Context provides a way to share values between components without prop drilling.
+
+```jsx
+const ThemeContext = createContext('light')
+
+function App() {
+  return (
+    <ThemeContext.Provider value="dark">
+      <Page />
+    </ThemeContext.Provider>
+  )
+}
+
+function Button() {
+  const theme = useContext(ThemeContext)
+  return <button className={theme}>Click</button>
+}
+```
+
+Limitations:
+- All consumers re-render when context changes
+- Not suitable for frequently changing data
+- Can cause performance issues if overused
+
+Solutions:
+- Split contexts by update frequency
+- Use memoization
+- Consider state management libraries
+
+---
+
+## Q9: What is reconciliation?
+
+**Answer:** Reconciliation is React's algorithm for diffing two trees and determining which parts need to be updated.
+
+Key assumptions:
+1. Different element types produce different trees
+2. Keys identify stable children across renders
+
+Process:
+1. Compare root elements
+2. If different types → rebuild entire tree
+3. If same type → update attributes, recurse on children
+4. Use keys to match children efficiently
+
+---
+
+## Q10: How do you handle forms in React?
+
+**Answer:**
+
+```jsx
+// Controlled component
+function Form() {
+  const [form, setForm] = useState({ email: '', password: '' })
+  const [errors, setErrors] = useState({})
+  
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm(prev => ({ ...prev, [name]: value }))
+  }
+  
+  const validate = () => {
+    const newErrors = {}
+    if (!form.email) newErrors.email = 'Required'
+    if (!form.password) newErrors.password = 'Required'
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+  
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (validate()) {
+      // Submit form
+    }
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <input name="email" value={form.email} onChange={handleChange} />
+      {errors.email && <span>{errors.email}</span>}
+      <button type="submit">Submit</button>
+    </form>
+  )
+}
+```
+
+For complex forms, consider: React Hook Form, Formik
+
+---
+
+## Q11: What is the difference between createElement and cloneElement?
+
+**Answer:**
+
+```jsx
+// createElement - creates new element
+const element = React.createElement('div', { className: 'box' }, 'Hello')
+// Equivalent to: <div className="box">Hello</div>
+
+// cloneElement - clones existing element with new props
+const cloned = React.cloneElement(element, { id: 'main' })
+// Adds id="main" to the element
+```
+
+cloneElement use cases:
+- Adding props to children
+- Modifying children in parent
+
+---
+
+## Q12: How do you share logic between components?
+
+**Answer:**
+
+1. **Custom Hooks** (preferred)
+```jsx
+function useWindowSize() {
+  const [size, setSize] = useState({ width: 0, height: 0 })
+  // ... logic
+  return size
+}
+```
+
+2. **Render Props**
+```jsx
+<DataFetcher url="/api/data">
+  {({ data, loading }) => loading ? <Spinner /> : <List data={data} />}
+</DataFetcher>
+```
+
+3. **Higher Order Components**
+```jsx
+const EnhancedComponent = withAuth(MyComponent)
+```
+
+Custom hooks are the modern, preferred approach!
+

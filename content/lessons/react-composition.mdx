@@ -1,0 +1,300 @@
+---
+title: Composition vs Inheritance
+chapterSlug: react-component-patterns
+duration: 12
+order: 3
+---
+
+## Composition in React
+
+React uses composition over inheritance. This means building complex UIs by combining simpler components.
+
+## Containment
+
+Components can contain other components using `children`:
+
+```jsx
+function Card({ children, title }) {
+  return (
+    <div className="card">
+      <h2 className="card-title">{title}</h2>
+      <div className="card-content">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// Usage
+function App() {
+  return (
+    <Card title="Welcome">
+      <p>This is the card content.</p>
+      <button>Learn More</button>
+    </Card>
+  )
+}
+```
+
+## Multiple Slots
+
+Use named props for multiple composition points:
+
+```jsx
+function Layout({ header, sidebar, content, footer }) {
+  return (
+    <div className="layout">
+      <header className="header">{header}</header>
+      <div className="main">
+        <aside className="sidebar">{sidebar}</aside>
+        <main className="content">{content}</main>
+      </div>
+      <footer className="footer">{footer}</footer>
+    </div>
+  )
+}
+
+// Usage
+function App() {
+  return (
+    <Layout
+      header={<Navigation />}
+      sidebar={<SideMenu />}
+      content={<MainContent />}
+      footer={<FooterInfo />}
+    />
+  )
+}
+```
+
+## Specialization
+
+Create specialized versions of generic components:
+
+```jsx
+// Generic button
+function Button({ variant = 'default', size = 'medium', children, ...props }) {
+  return (
+    <button 
+      className={`btn btn-${variant} btn-${size}`}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}
+
+// Specialized buttons
+function PrimaryButton(props) {
+  return <Button variant="primary" {...props} />
+}
+
+function DangerButton(props) {
+  return <Button variant="danger" {...props} />
+}
+
+function SmallButton(props) {
+  return <Button size="small" {...props} />
+}
+
+// Usage
+function App() {
+  return (
+    <div>
+      <PrimaryButton>Save</PrimaryButton>
+      <DangerButton>Delete</DangerButton>
+      <SmallButton variant="primary">Small Primary</SmallButton>
+    </div>
+  )
+}
+```
+
+## Dialog Component Pattern
+
+```jsx
+function Dialog({ title, children, actions, isOpen, onClose }) {
+  if (!isOpen) return null
+  
+  return (
+    <div className="dialog-overlay" onClick={onClose}>
+      <div className="dialog" onClick={e => e.stopPropagation()}>
+        <div className="dialog-header">
+          <h2>{title}</h2>
+          <button onClick={onClose}>×</button>
+        </div>
+        <div className="dialog-body">
+          {children}
+        </div>
+        {actions && (
+          <div className="dialog-actions">
+            {actions}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Specialized dialogs
+function ConfirmDialog({ message, onConfirm, onCancel, isOpen }) {
+  return (
+    <Dialog
+      title="Confirm"
+      isOpen={isOpen}
+      onClose={onCancel}
+      actions={
+        <>
+          <button onClick={onCancel}>Cancel</button>
+          <button onClick={onConfirm}>Confirm</button>
+        </>
+      }
+    >
+      <p>{message}</p>
+    </Dialog>
+  )
+}
+
+function AlertDialog({ message, onClose, isOpen }) {
+  return (
+    <Dialog
+      title="Alert"
+      isOpen={isOpen}
+      onClose={onClose}
+      actions={<button onClick={onClose}>OK</button>}
+    >
+      <p>{message}</p>
+    </Dialog>
+  )
+}
+```
+
+## Render Props Pattern
+
+Pass a function as children for flexible rendering:
+
+```jsx
+function Mouse({ children }) {
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setPosition({ x: e.clientX, y: e.clientY })
+    }
+    
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+  
+  return children(position)
+}
+
+// Usage - complete control over rendering
+function App() {
+  return (
+    <Mouse>
+      {({ x, y }) => (
+        <div>
+          Mouse position: {x}, {y}
+        </div>
+      )}
+    </Mouse>
+  )
+}
+```
+
+## Compound Components
+
+Components that work together:
+
+```jsx
+const TabsContext = createContext()
+
+function Tabs({ children, defaultTab }) {
+  const [activeTab, setActiveTab] = useState(defaultTab)
+  
+  return (
+    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+      <div className="tabs">
+        {children}
+      </div>
+    </TabsContext.Provider>
+  )
+}
+
+function TabList({ children }) {
+  return <div className="tab-list">{children}</div>
+}
+
+function Tab({ id, children }) {
+  const { activeTab, setActiveTab } = useContext(TabsContext)
+  
+  return (
+    <button 
+      className={`tab ${activeTab === id ? 'active' : ''}`}
+      onClick={() => setActiveTab(id)}
+    >
+      {children}
+    </button>
+  )
+}
+
+function TabPanels({ children }) {
+  return <div className="tab-panels">{children}</div>
+}
+
+function TabPanel({ id, children }) {
+  const { activeTab } = useContext(TabsContext)
+  
+  if (activeTab !== id) return null
+  return <div className="tab-panel">{children}</div>
+}
+
+// Attach sub-components
+Tabs.List = TabList
+Tabs.Tab = Tab
+Tabs.Panels = TabPanels
+Tabs.Panel = TabPanel
+
+// Usage
+function App() {
+  return (
+    <Tabs defaultTab="tab1">
+      <Tabs.List>
+        <Tabs.Tab id="tab1">Tab 1</Tabs.Tab>
+        <Tabs.Tab id="tab2">Tab 2</Tabs.Tab>
+        <Tabs.Tab id="tab3">Tab 3</Tabs.Tab>
+      </Tabs.List>
+      <Tabs.Panels>
+        <Tabs.Panel id="tab1">Content 1</Tabs.Panel>
+        <Tabs.Panel id="tab2">Content 2</Tabs.Panel>
+        <Tabs.Panel id="tab3">Content 3</Tabs.Panel>
+      </Tabs.Panels>
+    </Tabs>
+  )
+}
+```
+
+## Why Not Inheritance?
+
+```jsx
+// ❌ Don't do this - inheritance
+class Button extends React.Component {
+  // Base button
+}
+
+class PrimaryButton extends Button {
+  // Extends base - creates tight coupling
+}
+
+// ✅ Do this - composition
+function Button({ variant, children, ...props }) {
+  return <button className={`btn btn-${variant}`} {...props}>{children}</button>
+}
+
+function PrimaryButton(props) {
+  return <Button variant="primary" {...props} />
+}
+```
+
+Composition keeps components flexible and reusable!
+

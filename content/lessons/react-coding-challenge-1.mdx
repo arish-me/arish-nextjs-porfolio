@@ -1,0 +1,368 @@
+---
+title: Component Building Challenges
+chapterSlug: react-coding-challenges
+duration: 30
+order: 1
+---
+
+## Component Building Challenges
+
+Practice building real React components from scratch.
+
+---
+
+## Challenge 1: Toggle Switch
+
+Build a reusable toggle switch component.
+
+**Requirements:**
+- Accept `checked` and `onChange` props
+- Accessible (keyboard navigation, aria labels)
+- Customizable colors via props
+
+**Solution:**
+
+```jsx
+function Toggle({ checked, onChange, label }) {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onChange(!checked)
+    }
+  }
+
+  return (
+    <label className="flex items-center gap-3 cursor-pointer">
+      <div
+        role="switch"
+        aria-checked={checked}
+        tabIndex={0}
+        onClick={() => onChange(!checked)}
+        onKeyDown={handleKeyDown}
+        className={`
+          w-12 h-6 rounded-full transition-colors relative
+          ${checked ? 'bg-blue-500' : 'bg-gray-300'}
+        `}
+      >
+        <div
+          className={`
+            w-5 h-5 bg-white rounded-full absolute top-0.5
+            transition-transform shadow
+            ${checked ? 'translate-x-6' : 'translate-x-0.5'}
+          `}
+        />
+      </div>
+      {label && <span>{label}</span>}
+    </label>
+  )
+}
+
+// Usage
+function App() {
+  const [enabled, setEnabled] = useState(false)
+  return <Toggle checked={enabled} onChange={setEnabled} label="Notifications" />
+}
+```
+
+---
+
+## Challenge 2: Accordion
+
+Build an accordion that shows/hides content.
+
+**Requirements:**
+- Only one section open at a time
+- Smooth animation
+- Keyboard accessible
+
+**Solution:**
+
+```jsx
+function Accordion({ items }) {
+  const [openIndex, setOpenIndex] = useState(null)
+
+  const toggle = (index) => {
+    setOpenIndex(openIndex === index ? null : index)
+  }
+
+  return (
+    <div className="border rounded-lg divide-y">
+      {items.map((item, index) => (
+        <AccordionItem
+          key={index}
+          title={item.title}
+          content={item.content}
+          isOpen={openIndex === index}
+          onToggle={() => toggle(index)}
+        />
+      ))}
+    </div>
+  )
+}
+
+function AccordionItem({ title, content, isOpen, onToggle }) {
+  const contentRef = useRef(null)
+  const [height, setHeight] = useState(0)
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setHeight(isOpen ? contentRef.current.scrollHeight : 0)
+    }
+  }, [isOpen])
+
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        className="w-full px-4 py-3 flex justify-between items-center hover:bg-gray-50"
+        aria-expanded={isOpen}
+      >
+        <span className="font-medium">{title}</span>
+        <span className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+          ▼
+        </span>
+      </button>
+      
+      <div
+        style={{ height }}
+        className="overflow-hidden transition-all duration-300"
+      >
+        <div ref={contentRef} className="px-4 py-3 text-gray-600">
+          {content}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Usage
+const items = [
+  { title: 'Section 1', content: 'Content for section 1' },
+  { title: 'Section 2', content: 'Content for section 2' },
+  { title: 'Section 3', content: 'Content for section 3' },
+]
+
+<Accordion items={items} />
+```
+
+---
+
+## Challenge 3: Star Rating
+
+Build an interactive star rating component.
+
+**Requirements:**
+- Clickable stars to set rating
+- Hover preview
+- Read-only mode
+- Half-star support (bonus)
+
+**Solution:**
+
+```jsx
+function StarRating({ value, onChange, max = 5, readOnly = false }) {
+  const [hoverValue, setHoverValue] = useState(null)
+  
+  const displayValue = hoverValue !== null ? hoverValue : value
+
+  return (
+    <div 
+      className="flex gap-1"
+      onMouseLeave={() => !readOnly && setHoverValue(null)}
+    >
+      {Array.from({ length: max }, (_, i) => (
+        <Star
+          key={i}
+          filled={i < displayValue}
+          onClick={() => !readOnly && onChange(i + 1)}
+          onMouseEnter={() => !readOnly && setHoverValue(i + 1)}
+          disabled={readOnly}
+        />
+      ))}
+    </div>
+  )
+}
+
+function Star({ filled, onClick, onMouseEnter, disabled }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      disabled={disabled}
+      className={`
+        text-2xl transition-colors
+        ${filled ? 'text-yellow-400' : 'text-gray-300'}
+        ${!disabled && 'hover:scale-110 cursor-pointer'}
+      `}
+    >
+      ★
+    </button>
+  )
+}
+
+// Usage
+function App() {
+  const [rating, setRating] = useState(3)
+  
+  return (
+    <div>
+      <StarRating value={rating} onChange={setRating} />
+      <p>Rating: {rating}</p>
+      
+      <StarRating value={4} readOnly />
+    </div>
+  )
+}
+```
+
+---
+
+## Challenge 4: Tabs Component
+
+Build a tabs component with compound component pattern.
+
+**Solution:**
+
+```jsx
+const TabsContext = createContext()
+
+function Tabs({ children, defaultValue }) {
+  const [activeTab, setActiveTab] = useState(defaultValue)
+
+  return (
+    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+      <div className="w-full">{children}</div>
+    </TabsContext.Provider>
+  )
+}
+
+function TabList({ children }) {
+  return (
+    <div className="flex border-b" role="tablist">
+      {children}
+    </div>
+  )
+}
+
+function Tab({ value, children }) {
+  const { activeTab, setActiveTab } = useContext(TabsContext)
+  const isActive = activeTab === value
+
+  return (
+    <button
+      role="tab"
+      aria-selected={isActive}
+      onClick={() => setActiveTab(value)}
+      className={`
+        px-4 py-2 font-medium transition-colors
+        ${isActive 
+          ? 'border-b-2 border-blue-500 text-blue-600' 
+          : 'text-gray-500 hover:text-gray-700'}
+      `}
+    >
+      {children}
+    </button>
+  )
+}
+
+function TabPanel({ value, children }) {
+  const { activeTab } = useContext(TabsContext)
+  
+  if (activeTab !== value) return null
+  
+  return (
+    <div role="tabpanel" className="p-4">
+      {children}
+    </div>
+  )
+}
+
+// Attach sub-components
+Tabs.List = TabList
+Tabs.Tab = Tab
+Tabs.Panel = TabPanel
+
+// Usage
+<Tabs defaultValue="tab1">
+  <Tabs.List>
+    <Tabs.Tab value="tab1">Tab 1</Tabs.Tab>
+    <Tabs.Tab value="tab2">Tab 2</Tabs.Tab>
+    <Tabs.Tab value="tab3">Tab 3</Tabs.Tab>
+  </Tabs.List>
+  
+  <Tabs.Panel value="tab1">Content 1</Tabs.Panel>
+  <Tabs.Panel value="tab2">Content 2</Tabs.Panel>
+  <Tabs.Panel value="tab3">Content 3</Tabs.Panel>
+</Tabs>
+```
+
+---
+
+## Challenge 5: Infinite Scroll
+
+Build a list with infinite scroll loading.
+
+**Solution:**
+
+```jsx
+function useInfiniteScroll(callback, options = {}) {
+  const observer = useRef()
+  const { threshold = 0.1 } = options
+
+  const lastElementRef = useCallback(node => {
+    if (observer.current) observer.current.disconnect()
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        callback()
+      }
+    }, { threshold })
+    
+    if (node) observer.current.observe(node)
+  }, [callback, threshold])
+
+  return lastElementRef
+}
+
+function InfiniteList() {
+  const [items, setItems] = useState([])
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+
+  const loadMore = async () => {
+    if (loading || !hasMore) return
+    
+    setLoading(true)
+    const newItems = await fetchItems(page)
+    
+    setItems(prev => [...prev, ...newItems])
+    setPage(prev => prev + 1)
+    setHasMore(newItems.length > 0)
+    setLoading(false)
+  }
+
+  const lastItemRef = useInfiniteScroll(loadMore)
+
+  return (
+    <div className="space-y-4">
+      {items.map((item, index) => (
+        <div
+          key={item.id}
+          ref={index === items.length - 1 ? lastItemRef : null}
+          className="p-4 border rounded"
+        >
+          {item.title}
+        </div>
+      ))}
+      
+      {loading && <div className="text-center py-4">Loading...</div>}
+      {!hasMore && <div className="text-center py-4">No more items</div>}
+    </div>
+  )
+}
+```
+
+Practice these patterns to become a better React developer!
+

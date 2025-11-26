@@ -1,0 +1,300 @@
+---
+title: Beginner Interview Questions
+chapterSlug: react-interview-questions
+duration: 20
+order: 1
+---
+
+## Beginner React Interview Questions
+
+Common interview questions for entry-level React positions.
+
+---
+
+## Q1: What is React?
+
+**Answer:** React is a JavaScript library for building user interfaces, created by Facebook. It uses a component-based architecture where UIs are built from small, reusable pieces called components.
+
+Key features:
+- **Declarative:** Describe what you want, React handles how
+- **Component-Based:** Build encapsulated, reusable components
+- **Virtual DOM:** Efficient updates through diffing algorithm
+- **Unidirectional Data Flow:** Data flows from parent to child
+
+---
+
+## Q2: What is JSX?
+
+**Answer:** JSX is a syntax extension for JavaScript that looks like HTML but compiles to JavaScript function calls.
+
+```jsx
+// JSX
+const element = <h1 className="title">Hello</h1>
+
+// Compiles to
+const element = React.createElement('h1', { className: 'title' }, 'Hello')
+```
+
+Key points:
+- Use `className` instead of `class`
+- Use `htmlFor` instead of `for`
+- All tags must be closed
+- Embed JavaScript with `{}`
+
+---
+
+## Q3: What is the difference between state and props?
+
+**Answer:**
+
+| Props | State |
+|-------|-------|
+| Passed from parent | Managed internally |
+| Read-only | Can be changed |
+| Component configuration | Component's own data |
+| Triggers re-render when parent updates | Triggers re-render when changed |
+
+```jsx
+// Props - passed from parent
+function Greeting({ name }) {
+  return <h1>Hello, {name}</h1>
+}
+
+// State - internal to component
+function Counter() {
+  const [count, setCount] = useState(0)
+  return <button onClick={() => setCount(count + 1)}>{count}</button>
+}
+```
+
+---
+
+## Q4: What are React hooks?
+
+**Answer:** Hooks are functions that let you use state and other React features in function components.
+
+Common hooks:
+- `useState` - Add state to components
+- `useEffect` - Perform side effects
+- `useContext` - Access context values
+- `useRef` - Create mutable references
+- `useMemo` - Memoize expensive calculations
+- `useCallback` - Memoize functions
+
+```jsx
+function Example() {
+  const [count, setCount] = useState(0)
+  
+  useEffect(() => {
+    document.title = `Count: ${count}`
+  }, [count])
+  
+  return <button onClick={() => setCount(count + 1)}>{count}</button>
+}
+```
+
+---
+
+## Q5: What is the Virtual DOM?
+
+**Answer:** The Virtual DOM is a lightweight JavaScript representation of the actual DOM. React uses it to optimize updates.
+
+How it works:
+1. When state changes, React creates a new Virtual DOM
+2. It compares (diffs) new and old Virtual DOM
+3. Calculates minimal changes needed
+4. Updates only changed parts of real DOM
+
+Benefits:
+- Faster updates (batch changes)
+- Better performance
+- Simpler programming model
+
+---
+
+## Q6: What is the useEffect hook?
+
+**Answer:** `useEffect` lets you perform side effects in function components.
+
+```jsx
+useEffect(() => {
+  // Side effect code
+  
+  return () => {
+    // Cleanup (optional)
+  }
+}, [dependencies])
+```
+
+Common use cases:
+- Fetching data
+- Setting up subscriptions
+- Manually changing DOM
+- Timers and intervals
+
+---
+
+## Q7: What is conditional rendering?
+
+**Answer:** Showing different UI based on conditions.
+
+```jsx
+// If statement
+function Greeting({ isLoggedIn }) {
+  if (isLoggedIn) {
+    return <h1>Welcome back!</h1>
+  }
+  return <h1>Please sign in</h1>
+}
+
+// Ternary operator
+function Greeting({ isLoggedIn }) {
+  return isLoggedIn ? <UserPanel /> : <LoginForm />
+}
+
+// Logical AND
+function Notifications({ count }) {
+  return count > 0 && <Badge count={count} />
+}
+```
+
+---
+
+## Q8: What are keys in React lists?
+
+**Answer:** Keys help React identify which items have changed, added, or removed in lists.
+
+```jsx
+// ✅ Good - unique, stable keys
+{users.map(user => (
+  <li key={user.id}>{user.name}</li>
+))}
+
+// ⚠️ Avoid - index as key (unless list is static)
+{items.map((item, index) => (
+  <li key={index}>{item}</li>
+))}
+```
+
+Keys should be:
+- Unique among siblings
+- Stable (don't change)
+- Not random values
+
+---
+
+## Q9: How do you handle events in React?
+
+**Answer:** React uses camelCase event handlers that receive synthetic events.
+
+```jsx
+function Form() {
+  const handleClick = (e) => {
+    e.preventDefault()
+    console.log('Clicked!')
+  }
+  
+  const handleChange = (e) => {
+    console.log(e.target.value)
+  }
+  
+  return (
+    <form>
+      <input onChange={handleChange} />
+      <button onClick={handleClick}>Submit</button>
+    </form>
+  )
+}
+```
+
+---
+
+## Q10: What is a controlled component?
+
+**Answer:** A form element whose value is controlled by React state.
+
+```jsx
+function ControlledInput() {
+  const [value, setValue] = useState('')
+  
+  return (
+    <input
+      value={value}  // Controlled by state
+      onChange={(e) => setValue(e.target.value)}
+    />
+  )
+}
+```
+
+Benefits:
+- Single source of truth
+- Easy validation
+- Consistent behavior
+- Can transform input
+
+---
+
+## Q11: What is prop drilling and how to avoid it?
+
+**Answer:** Prop drilling is passing props through many component levels to reach a deeply nested component.
+
+Solutions:
+1. **Context API** - Share state without props
+2. **State management** - Redux, Zustand
+3. **Composition** - Pass components as children
+
+```jsx
+// ❌ Prop drilling
+<App user={user}>
+  <Header user={user}>
+    <Navigation user={user}>
+      <UserMenu user={user} />
+
+// ✅ Context
+const UserContext = createContext()
+
+function App() {
+  return (
+    <UserContext.Provider value={user}>
+      <Header />
+    </UserContext.Provider>
+  )
+}
+
+function UserMenu() {
+  const user = useContext(UserContext)
+}
+```
+
+---
+
+## Q12: What are fragments?
+
+**Answer:** Fragments let you group elements without adding extra DOM nodes.
+
+```jsx
+// Using Fragment
+import { Fragment } from 'react'
+
+function List() {
+  return (
+    <Fragment>
+      <li>Item 1</li>
+      <li>Item 2</li>
+    </Fragment>
+  )
+}
+
+// Short syntax
+function List() {
+  return (
+    <>
+      <li>Item 1</li>
+      <li>Item 2</li>
+    </>
+  )
+}
+```
+
+These questions cover React fundamentals!
+

@@ -1,0 +1,330 @@
+---
+title: Zustand State Management
+chapterSlug: react-state-management
+duration: 15
+order: 3
+---
+
+## Zustand
+
+Zustand is a small, fast, and scalable state management solution. It's simpler than Redux but more powerful than Context.
+
+## Installation
+
+```bash
+npm install zustand
+```
+
+## Basic Usage
+
+```jsx
+import { create } from 'zustand'
+
+// Create a store
+const useStore = create((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 })),
+  decrement: () => set((state) => ({ count: state.count - 1 })),
+  reset: () => set({ count: 0 })
+}))
+
+// Use in components
+function Counter() {
+  const count = useStore((state) => state.count)
+  const increment = useStore((state) => state.increment)
+  const decrement = useStore((state) => state.decrement)
+  
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>+</button>
+      <button onClick={decrement}>-</button>
+    </div>
+  )
+}
+```
+
+## Store with Multiple Slices
+
+```jsx
+const useStore = create((set, get) => ({
+  // User state
+  user: null,
+  login: (userData) => set({ user: userData }),
+  logout: () => set({ user: null }),
+  
+  // Theme state
+  theme: 'light',
+  toggleTheme: () => set((state) => ({
+    theme: state.theme === 'light' ? 'dark' : 'light'
+  })),
+  
+  // Cart state
+  items: [],
+  addItem: (item) => set((state) => ({
+    items: [...state.items, item]
+  })),
+  removeItem: (id) => set((state) => ({
+    items: state.items.filter(item => item.id !== id)
+  })),
+  
+  // Computed values using get()
+  totalItems: () => get().items.length,
+  totalPrice: () => get().items.reduce((sum, item) => sum + item.price, 0)
+}))
+```
+
+## Selecting State
+
+Only re-render when selected state changes:
+
+```jsx
+// ✅ Good - only re-renders when count changes
+function Counter() {
+  const count = useStore((state) => state.count)
+  return <p>{count}</p>
+}
+
+// ❌ Bad - re-renders on any state change
+function Counter() {
+  const state = useStore()
+  return <p>{state.count}</p>
+}
+
+// Multiple selections
+function UserInfo() {
+  const user = useStore((state) => state.user)
+  const theme = useStore((state) => state.theme)
+  
+  return <div className={theme}>{user?.name}</div>
+}
+
+// Shallow comparison for objects
+import { shallow } from 'zustand/shallow'
+
+function Cart() {
+  const { items, totalPrice } = useStore(
+    (state) => ({ items: state.items, totalPrice: state.totalPrice() }),
+    shallow
+  )
+}
+```
+
+## Async Actions
+
+```jsx
+const useStore = create((set, get) => ({
+  users: [],
+  loading: false,
+  error: null,
+  
+  fetchUsers: async () => {
+    set({ loading: true, error: null })
+    
+    try {
+      const response = await fetch('/api/users')
+      const users = await response.json()
+      set({ users, loading: false })
+    } catch (error) {
+      set({ error: error.message, loading: false })
+    }
+  },
+  
+  createUser: async (userData) => {
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        body: JSON.stringify(userData)
+      })
+      const newUser = await response.json()
+      set((state) => ({ users: [...state.users, newUser] }))
+      return newUser
+    } catch (error) {
+      set({ error: error.message })
+      throw error
+    }
+  }
+}))
+
+// Usage
+function UserList() {
+  const { users, loading, error, fetchUsers } = useStore()
+  
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+  
+  if (loading) return <p>Loading...</p>
+  if (error) return <p>Error: {error}</p>
+  
+  return (
+    <ul>
+      {users.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+## Persist Middleware
+
+Save state to localStorage:
+
+```jsx
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+const useStore = create(
+  persist(
+    (set) => ({
+      theme: 'light',
+      toggleTheme: () => set((state) => ({
+        theme: state.theme === 'light' ? 'dark' : 'light'
+      }))
+    }),
+    {
+      name: 'app-storage', // localStorage key
+      partialize: (state) => ({ theme: state.theme }) // only persist theme
+    }
+  )
+)
+```
+
+## DevTools Middleware
+
+```jsx
+import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
+
+const useStore = create(
+  devtools(
+    (set) => ({
+      count: 0,
+      increment: () => set(
+        (state) => ({ count: state.count + 1 }),
+        false,
+        'increment' // action name for devtools
+      )
+    }),
+    { name: 'MyStore' }
+  )
+)
+```
+
+## Combine Multiple Middlewares
+
+```jsx
+import { create } from 'zustand'
+import { devtools, persist } from 'zustand/middleware'
+
+const useStore = create(
+  devtools(
+    persist(
+      (set) => ({
+        // state and actions
+      }),
+      { name: 'app-storage' }
+    ),
+    { name: 'MyStore' }
+  )
+)
+```
+
+## TypeScript Support
+
+```tsx
+interface User {
+  id: string
+  name: string
+  email: string
+}
+
+interface Store {
+  user: User | null
+  login: (user: User) => void
+  logout: () => void
+}
+
+const useStore = create<Store>((set) => ({
+  user: null,
+  login: (user) => set({ user }),
+  logout: () => set({ user: null })
+}))
+```
+
+## Complete Example: Todo Store
+
+```jsx
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+const useTodoStore = create(
+  persist(
+    (set, get) => ({
+      todos: [],
+      filter: 'all',
+      
+      addTodo: (text) => set((state) => ({
+        todos: [...state.todos, {
+          id: Date.now(),
+          text,
+          completed: false,
+          createdAt: new Date()
+        }]
+      })),
+      
+      toggleTodo: (id) => set((state) => ({
+        todos: state.todos.map(todo =>
+          todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        )
+      })),
+      
+      deleteTodo: (id) => set((state) => ({
+        todos: state.todos.filter(todo => todo.id !== id)
+      })),
+      
+      setFilter: (filter) => set({ filter }),
+      
+      clearCompleted: () => set((state) => ({
+        todos: state.todos.filter(todo => !todo.completed)
+      })),
+      
+      // Computed
+      filteredTodos: () => {
+        const { todos, filter } = get()
+        switch (filter) {
+          case 'active':
+            return todos.filter(t => !t.completed)
+          case 'completed':
+            return todos.filter(t => t.completed)
+          default:
+            return todos
+        }
+      },
+      
+      stats: () => {
+        const { todos } = get()
+        return {
+          total: todos.length,
+          completed: todos.filter(t => t.completed).length,
+          active: todos.filter(t => !t.completed).length
+        }
+      }
+    }),
+    { name: 'todo-storage' }
+  )
+)
+
+// Usage
+function TodoApp() {
+  const addTodo = useTodoStore((s) => s.addTodo)
+  const filteredTodos = useTodoStore((s) => s.filteredTodos())
+  const stats = useTodoStore((s) => s.stats())
+  
+  // Component implementation
+}
+```
+
+Zustand is a fantastic choice for React state management!
+

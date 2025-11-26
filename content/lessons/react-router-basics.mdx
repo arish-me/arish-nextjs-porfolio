@@ -1,0 +1,307 @@
+---
+title: React Router Basics
+chapterSlug: react-router
+duration: 15
+order: 1
+---
+
+## React Router
+
+React Router is the standard routing library for React, enabling navigation between views in a single-page application.
+
+## Installation
+
+```bash
+npm install react-router-dom
+```
+
+## Basic Setup
+
+```jsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+```
+
+## Navigation
+
+### Link Component
+
+```jsx
+import { Link } from 'react-router-dom'
+
+function Navigation() {
+  return (
+    <nav>
+      <Link to="/">Home</Link>
+      <Link to="/about">About</Link>
+      <Link to="/contact">Contact</Link>
+    </nav>
+  )
+}
+```
+
+### NavLink - Active Links
+
+```jsx
+import { NavLink } from 'react-router-dom'
+
+function Navigation() {
+  return (
+    <nav>
+      <NavLink 
+        to="/"
+        className={({ isActive }) => isActive ? 'active' : ''}
+      >
+        Home
+      </NavLink>
+      
+      <NavLink
+        to="/about"
+        style={({ isActive }) => ({
+          fontWeight: isActive ? 'bold' : 'normal'
+        })}
+      >
+        About
+      </NavLink>
+    </nav>
+  )
+}
+```
+
+### Programmatic Navigation
+
+```jsx
+import { useNavigate } from 'react-router-dom'
+
+function LoginForm() {
+  const navigate = useNavigate()
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    await login()
+    navigate('/dashboard')  // Navigate after login
+  }
+  
+  const goBack = () => navigate(-1)  // Go back
+  const goForward = () => navigate(1)  // Go forward
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* form fields */}
+      <button type="submit">Login</button>
+      <button type="button" onClick={goBack}>Cancel</button>
+    </form>
+  )
+}
+```
+
+## Route Parameters
+
+```jsx
+// Routes
+<Routes>
+  <Route path="/users/:userId" element={<UserProfile />} />
+  <Route path="/posts/:postId/comments/:commentId" element={<Comment />} />
+</Routes>
+
+// Component
+import { useParams } from 'react-router-dom'
+
+function UserProfile() {
+  const { userId } = useParams()
+  
+  return <h1>User ID: {userId}</h1>
+}
+
+function Comment() {
+  const { postId, commentId } = useParams()
+  
+  return (
+    <div>
+      <p>Post: {postId}</p>
+      <p>Comment: {commentId}</p>
+    </div>
+  )
+}
+```
+
+## Query Parameters
+
+```jsx
+import { useSearchParams } from 'react-router-dom'
+
+function ProductList() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  
+  const category = searchParams.get('category')
+  const sort = searchParams.get('sort') || 'name'
+  
+  const setCategory = (cat) => {
+    setSearchParams({ category: cat, sort })
+  }
+  
+  return (
+    <div>
+      <p>Category: {category}</p>
+      <p>Sort: {sort}</p>
+      <button onClick={() => setCategory('electronics')}>
+        Electronics
+      </button>
+    </div>
+  )
+}
+
+// URL: /products?category=electronics&sort=price
+```
+
+## Nested Routes
+
+```jsx
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="about" element={<About />} />
+        <Route path="dashboard" element={<Dashboard />}>
+          <Route index element={<DashboardHome />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="profile" element={<Profile />} />
+        </Route>
+      </Route>
+    </Routes>
+  )
+}
+
+// Layout component with Outlet
+import { Outlet } from 'react-router-dom'
+
+function Layout() {
+  return (
+    <div>
+      <Header />
+      <main>
+        <Outlet />  {/* Child routes render here */}
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+function Dashboard() {
+  return (
+    <div>
+      <DashboardNav />
+      <Outlet />  {/* Nested dashboard routes */}
+    </div>
+  )
+}
+```
+
+## 404 Not Found
+
+```jsx
+<Routes>
+  <Route path="/" element={<Home />} />
+  <Route path="/about" element={<About />} />
+  <Route path="*" element={<NotFound />} />  {/* Catch all */}
+</Routes>
+
+function NotFound() {
+  return (
+    <div>
+      <h1>404 - Page Not Found</h1>
+      <Link to="/">Go Home</Link>
+    </div>
+  )
+}
+```
+
+## useLocation Hook
+
+```jsx
+import { useLocation } from 'react-router-dom'
+
+function CurrentPath() {
+  const location = useLocation()
+  
+  return (
+    <div>
+      <p>Path: {location.pathname}</p>
+      <p>Search: {location.search}</p>
+      <p>Hash: {location.hash}</p>
+      <p>State: {JSON.stringify(location.state)}</p>
+    </div>
+  )
+}
+
+// Passing state through navigation
+<Link to="/checkout" state={{ from: 'cart' }}>Checkout</Link>
+
+navigate('/checkout', { state: { from: 'cart' } })
+```
+
+## Route Configuration Object
+
+```jsx
+import { useRoutes } from 'react-router-dom'
+
+const routes = [
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: 'about', element: <About /> },
+      {
+        path: 'dashboard',
+        element: <Dashboard />,
+        children: [
+          { index: true, element: <DashboardHome /> },
+          { path: 'settings', element: <Settings /> }
+        ]
+      },
+      { path: '*', element: <NotFound /> }
+    ]
+  }
+]
+
+function App() {
+  const element = useRoutes(routes)
+  return element
+}
+```
+
+## Redirects
+
+```jsx
+import { Navigate } from 'react-router-dom'
+
+// In routes
+<Route path="/old-path" element={<Navigate to="/new-path" replace />} />
+
+// In component
+function ProtectedRoute({ children }) {
+  const { user } = useAuth()
+  
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+  
+  return children
+}
+```
+
+React Router makes building multi-page React apps straightforward!
+

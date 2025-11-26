@@ -1,0 +1,257 @@
+---
+title: Setting Up Development Environment
+chapterSlug: react-getting-started
+duration: 10
+order: 2
+---
+
+## Setting Up Your React Development Environment
+
+Before we start building React applications, let's set up our development environment with the essential tools.
+
+## Prerequisites
+
+### Node.js
+
+React requires Node.js. Install the LTS version:
+
+```bash
+# Check if Node is installed
+node --version
+
+# Should output something like: v20.x.x
+```
+
+Download from [nodejs.org](https://nodejs.org) if not installed.
+
+### Package Manager
+
+npm comes with Node.js, but you can also use yarn or pnpm:
+
+```bash
+# npm (comes with Node)
+npm --version
+
+# Or install yarn
+npm install -g yarn
+
+# Or install pnpm (faster)
+npm install -g pnpm
+```
+
+### Code Editor
+
+We recommend **Visual Studio Code** with these extensions:
+- ES7+ React/Redux/React-Native snippets
+- Prettier - Code formatter
+- ESLint
+- Auto Rename Tag
+- Bracket Pair Colorizer
+
+## Creating a React Project
+
+### Option 1: Vite (Recommended)
+
+Vite is the modern, fast way to create React projects:
+
+```bash
+# Create with npm
+npm create vite@latest my-react-app -- --template react
+
+# Or with yarn
+yarn create vite my-react-app --template react
+
+# Or with pnpm
+pnpm create vite my-react-app --template react
+
+# Navigate and install dependencies
+cd my-react-app
+npm install
+
+# Start development server
+npm run dev
+```
+
+### Option 2: Create React App
+
+The traditional way (slower, but still works):
+
+```bash
+npx create-react-app my-react-app
+cd my-react-app
+npm start
+```
+
+### Option 3: Next.js (For Production Apps)
+
+For production applications with SSR:
+
+```bash
+npx create-next-app@latest my-next-app
+cd my-next-app
+npm run dev
+```
+
+## Project Structure
+
+A typical Vite React project looks like this:
+
+```
+my-react-app/
+├── node_modules/       # Dependencies
+├── public/             # Static files
+│   └── vite.svg
+├── src/                # Source code
+│   ├── assets/         # Images, fonts, etc.
+│   ├── App.css         # App styles
+│   ├── App.jsx         # Main App component
+│   ├── index.css       # Global styles
+│   └── main.jsx        # Entry point
+├── .gitignore
+├── index.html          # HTML template
+├── package.json        # Dependencies & scripts
+└── vite.config.js      # Vite configuration
+```
+
+## Understanding Key Files
+
+### main.jsx - Entry Point
+
+```jsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
+```
+
+### App.jsx - Main Component
+
+```jsx
+import { useState } from 'react'
+import './App.css'
+
+function App() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <div className="App">
+      <h1>Vite + React</h1>
+      <button onClick={() => setCount(count + 1)}>
+        count is {count}
+      </button>
+    </div>
+  )
+}
+
+export default App
+```
+
+### index.html - HTML Template
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+```
+
+## Essential Commands
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Run linter
+npm run lint
+```
+
+## Setting Up ESLint and Prettier
+
+### ESLint Configuration
+
+```bash
+npm install -D eslint eslint-plugin-react eslint-plugin-react-hooks
+```
+
+```javascript
+// .eslintrc.cjs
+module.exports = {
+  env: { browser: true, es2020: true },
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:react-hooks/recommended',
+  ],
+  parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+  settings: { react: { version: '18.2' } },
+  rules: {
+    'react/prop-types': 'off',
+  },
+}
+```
+
+### Prettier Configuration
+
+```bash
+npm install -D prettier
+```
+
+```json
+// .prettierrc
+{
+  "semi": false,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5"
+}
+```
+
+## Browser DevTools
+
+Install React Developer Tools browser extension:
+- [Chrome](https://chrome.google.com/webstore/detail/react-developer-tools)
+- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/react-devtools/)
+
+This adds React tabs to your browser's developer tools for:
+- Inspecting component hierarchy
+- Viewing and editing props/state
+- Profiling performance
+
+## Hot Module Replacement (HMR)
+
+Vite includes HMR out of the box. When you save a file:
+- Changes appear instantly in the browser
+- Component state is preserved
+- No full page reload needed
+
+```jsx
+// Edit this and save - see instant updates!
+function App() {
+  return <h1>Edit me!</h1>
+}
+```
+
+You're now ready to start building React applications!
+

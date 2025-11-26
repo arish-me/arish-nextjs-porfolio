@@ -1,0 +1,290 @@
+---
+title: Testing React Components
+chapterSlug: react-testing
+duration: 18
+order: 1
+---
+
+## Testing React Components
+
+Testing ensures your components work correctly and helps prevent regressions.
+
+## Setup
+
+For Vite projects:
+
+```bash
+npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
+```
+
+```javascript
+// vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.js',
+  },
+})
+```
+
+```javascript
+// src/test/setup.js
+import '@testing-library/jest-dom'
+```
+
+## Writing Your First Test
+
+```jsx
+// Button.jsx
+function Button({ onClick, children }) {
+  return (
+    <button onClick={onClick} className="btn">
+      {children}
+    </button>
+  )
+}
+
+// Button.test.jsx
+import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import Button from './Button'
+
+describe('Button', () => {
+  it('renders children correctly', () => {
+    render(<Button>Click me</Button>)
+    expect(screen.getByText('Click me')).toBeInTheDocument()
+  })
+  
+  it('calls onClick when clicked', () => {
+    const handleClick = vi.fn()
+    render(<Button onClick={handleClick}>Click me</Button>)
+    
+    fireEvent.click(screen.getByText('Click me'))
+    
+    expect(handleClick).toHaveBeenCalledTimes(1)
+  })
+})
+```
+
+## Queries
+
+Finding elements in the DOM:
+
+```jsx
+import { render, screen } from '@testing-library/react'
+
+// By text content
+screen.getByText('Hello')
+screen.getByText(/hello/i)  // Regex, case insensitive
+
+// By role (preferred)
+screen.getByRole('button')
+screen.getByRole('button', { name: 'Submit' })
+screen.getByRole('heading', { level: 1 })
+screen.getByRole('textbox')
+screen.getByRole('checkbox')
+
+// By label
+screen.getByLabelText('Email')
+
+// By placeholder
+screen.getByPlaceholderText('Enter email')
+
+// By test ID (last resort)
+screen.getByTestId('custom-element')
+
+// Query variants
+screen.getByRole('button')     // Throws if not found
+screen.queryByRole('button')   // Returns null if not found
+screen.findByRole('button')    // Async, waits for element
+screen.getAllByRole('button')  // Returns array
+```
+
+## Testing User Interactions
+
+```jsx
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
+it('allows user to type in input', async () => {
+  const user = userEvent.setup()
+  render(<TextInput />)
+  
+  const input = screen.getByRole('textbox')
+  await user.type(input, 'Hello World')
+  
+  expect(input).toHaveValue('Hello World')
+})
+
+it('submits form with correct data', async () => {
+  const user = userEvent.setup()
+  const handleSubmit = vi.fn()
+  
+  render(<LoginForm onSubmit={handleSubmit} />)
+  
+  await user.type(screen.getByLabelText('Email'), 'test@example.com')
+  await user.type(screen.getByLabelText('Password'), 'password123')
+  await user.click(screen.getByRole('button', { name: 'Login' }))
+  
+  expect(handleSubmit).toHaveBeenCalledWith({
+    email: 'test@example.com',
+    password: 'password123'
+  })
+})
+```
+
+## Testing State Changes
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  return (
+    <div>
+      <span data-testid="count">{count}</span>
+      <button onClick={() => setCount(c => c + 1)}>Increment</button>
+      <button onClick={() => setCount(c => c - 1)}>Decrement</button>
+    </div>
+  )
+}
+
+describe('Counter', () => {
+  it('increments count', async () => {
+    const user = userEvent.setup()
+    render(<Counter />)
+    
+    expect(screen.getByTestId('count')).toHaveTextContent('0')
+    
+    await user.click(screen.getByText('Increment'))
+    
+    expect(screen.getByTestId('count')).toHaveTextContent('1')
+  })
+  
+  it('decrements count', async () => {
+    const user = userEvent.setup()
+    render(<Counter />)
+    
+    await user.click(screen.getByText('Decrement'))
+    
+    expect(screen.getByTestId('count')).toHaveTextContent('-1')
+  })
+})
+```
+
+## Testing Async Behavior
+
+```jsx
+function AsyncComponent() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    fetch('/api/data')
+      .then(res => res.json())
+      .then(data => {
+        setData(data)
+        setLoading(false)
+      })
+  }, [])
+  
+  if (loading) return <p>Loading...</p>
+  return <p>{data.message}</p>
+}
+
+// Test
+import { render, screen, waitFor } from '@testing-library/react'
+
+it('loads and displays data', async () => {
+  // Mock fetch
+  global.fetch = vi.fn(() =>
+    Promise.resolve({
+      json: () => Promise.resolve({ message: 'Hello World' })
+    })
+  )
+  
+  render(<AsyncComponent />)
+  
+  expect(screen.getByText('Loading...')).toBeInTheDocument()
+  
+  await waitFor(() => {
+    expect(screen.getByText('Hello World')).toBeInTheDocument()
+  })
+})
+```
+
+## Mocking
+
+```jsx
+// Mock a module
+vi.mock('./api', () => ({
+  fetchUsers: vi.fn(() => Promise.resolve([
+    { id: 1, name: 'John' }
+  ]))
+}))
+
+// Mock a function
+const mockFn = vi.fn()
+mockFn.mockReturnValue('mocked')
+mockFn.mockResolvedValue('async mocked')
+
+// Spy on a method
+const spy = vi.spyOn(object, 'method')
+```
+
+## Testing with Context
+
+```jsx
+function renderWithProviders(ui, { theme = 'light', ...options } = {}) {
+  function Wrapper({ children }) {
+    return (
+      <ThemeProvider theme={theme}>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </ThemeProvider>
+    )
+  }
+  
+  return render(ui, { wrapper: Wrapper, ...options })
+}
+
+it('renders with theme', () => {
+  renderWithProviders(<ThemedComponent />, { theme: 'dark' })
+  expect(screen.getByTestId('theme')).toHaveTextContent('dark')
+})
+```
+
+## Snapshot Testing
+
+```jsx
+import { render } from '@testing-library/react'
+
+it('matches snapshot', () => {
+  const { container } = render(<Button>Click me</Button>)
+  expect(container).toMatchSnapshot()
+})
+```
+
+## Running Tests
+
+```bash
+# Run tests
+npm test
+
+# Run with coverage
+npm test -- --coverage
+
+# Watch mode
+npm test -- --watch
+
+# Run specific file
+npm test Button.test.jsx
+```
+
+Testing gives you confidence that your code works correctly!
+

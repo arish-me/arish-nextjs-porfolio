@@ -1,0 +1,332 @@
+---
+title: Understanding JSX
+chapterSlug: react-getting-started
+duration: 12
+order: 3
+---
+
+## Understanding JSX
+
+JSX (JavaScript XML) is a syntax extension for JavaScript that lets you write HTML-like code in your JavaScript files. It's not required in React, but it makes writing UI code much more intuitive.
+
+## What is JSX?
+
+JSX looks like HTML but it's actually JavaScript:
+
+```jsx
+// This JSX
+const element = <h1 className="greeting">Hello, World!</h1>
+
+// Gets transformed to this JavaScript
+const element = React.createElement(
+  'h1',
+  { className: 'greeting' },
+  'Hello, World!'
+)
+```
+
+## JSX Rules
+
+### 1. Return a Single Root Element
+
+JSX must have one parent element:
+
+```jsx
+// ❌ Wrong - multiple root elements
+function App() {
+  return (
+    <h1>Title</h1>
+    <p>Content</p>
+  )
+}
+
+// ✅ Correct - wrapped in a div
+function App() {
+  return (
+    <div>
+      <h1>Title</h1>
+      <p>Content</p>
+    </div>
+  )
+}
+
+// ✅ Better - use Fragment to avoid extra DOM element
+function App() {
+  return (
+    <>
+      <h1>Title</h1>
+      <p>Content</p>
+    </>
+  )
+}
+```
+
+### 2. Close All Tags
+
+All tags must be closed, including self-closing tags:
+
+```jsx
+// ❌ Wrong
+<img src="photo.jpg">
+<input type="text">
+<br>
+
+// ✅ Correct
+<img src="photo.jpg" />
+<input type="text" />
+<br />
+```
+
+### 3. camelCase for Attributes
+
+HTML attributes use camelCase in JSX:
+
+```jsx
+// HTML
+<div class="container" onclick="handleClick()">
+  <label for="name">Name</label>
+  <input type="text" tabindex="1">
+</div>
+
+// JSX
+<div className="container" onClick={handleClick}>
+  <label htmlFor="name">Name</label>
+  <input type="text" tabIndex={1} />
+</div>
+```
+
+Common attribute conversions:
+- `class` → `className`
+- `for` → `htmlFor`
+- `onclick` → `onClick`
+- `tabindex` → `tabIndex`
+- `readonly` → `readOnly`
+
+## Embedding JavaScript in JSX
+
+Use curly braces `{}` to embed JavaScript expressions:
+
+### Variables
+
+```jsx
+const name = 'John'
+const age = 25
+
+function Profile() {
+  return (
+    <div>
+      <h1>{name}</h1>
+      <p>Age: {age}</p>
+      <p>Next year: {age + 1}</p>
+    </div>
+  )
+}
+```
+
+### Function Calls
+
+```jsx
+function formatName(user) {
+  return `${user.firstName} ${user.lastName}`
+}
+
+const user = { firstName: 'John', lastName: 'Doe' }
+
+function Greeting() {
+  return <h1>Hello, {formatName(user)}!</h1>
+}
+```
+
+### Object Properties
+
+```jsx
+const product = {
+  name: 'iPhone',
+  price: 999,
+  inStock: true
+}
+
+function Product() {
+  return (
+    <div>
+      <h2>{product.name}</h2>
+      <p>${product.price}</p>
+      <span>{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
+    </div>
+  )
+}
+```
+
+### Ternary Operators
+
+```jsx
+function Greeting({ isLoggedIn }) {
+  return (
+    <div>
+      {isLoggedIn ? (
+        <h1>Welcome back!</h1>
+      ) : (
+        <h1>Please sign in</h1>
+      )}
+    </div>
+  )
+}
+```
+
+### Logical AND (&&)
+
+```jsx
+function Notifications({ count }) {
+  return (
+    <div>
+      {count > 0 && (
+        <span className="badge">{count} new messages</span>
+      )}
+    </div>
+  )
+}
+```
+
+## Styling in JSX
+
+### Inline Styles
+
+Inline styles use an object with camelCase properties:
+
+```jsx
+// Inline style object
+const styles = {
+  backgroundColor: 'blue',
+  color: 'white',
+  padding: '10px 20px',
+  borderRadius: '5px'
+}
+
+function Button() {
+  return <button style={styles}>Click me</button>
+}
+
+// Or inline
+function Button() {
+  return (
+    <button style={{ backgroundColor: 'blue', color: 'white' }}>
+      Click me
+    </button>
+  )
+}
+```
+
+### CSS Classes
+
+```jsx
+import './Button.css'
+
+function Button({ variant }) {
+  return (
+    <button className={`btn btn-${variant}`}>
+      Click me
+    </button>
+  )
+}
+
+// Dynamic classes
+function Button({ isActive }) {
+  return (
+    <button className={`btn ${isActive ? 'active' : ''}`}>
+      Click me
+    </button>
+  )
+}
+```
+
+## Lists in JSX
+
+Render lists using `map()`:
+
+```jsx
+const fruits = ['Apple', 'Banana', 'Cherry']
+
+function FruitList() {
+  return (
+    <ul>
+      {fruits.map((fruit, index) => (
+        <li key={index}>{fruit}</li>
+      ))}
+    </ul>
+  )
+}
+
+// With objects
+const users = [
+  { id: 1, name: 'John' },
+  { id: 2, name: 'Jane' },
+  { id: 3, name: 'Bob' }
+]
+
+function UserList() {
+  return (
+    <ul>
+      {users.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+## Comments in JSX
+
+```jsx
+function App() {
+  return (
+    <div>
+      {/* This is a JSX comment */}
+      <h1>Hello</h1>
+      
+      {/* 
+        Multi-line
+        comment 
+      */}
+      <p>World</p>
+    </div>
+  )
+}
+```
+
+## JSX Prevents Injection Attacks
+
+React automatically escapes values embedded in JSX:
+
+```jsx
+const userInput = '<script>alert("hacked!")</script>'
+
+// This is safe - the script won't execute
+function Display() {
+  return <div>{userInput}</div>
+}
+// Renders as text: <script>alert("hacked!")</script>
+```
+
+## JSX is Just JavaScript
+
+Remember, JSX compiles to `React.createElement()` calls:
+
+```jsx
+// You can use JSX anywhere you use JavaScript
+const element = <h1>Hello</h1>
+
+// In arrays
+const elements = [
+  <li key="1">First</li>,
+  <li key="2">Second</li>
+]
+
+// In conditionals
+const content = isLoading ? <Spinner /> : <Data />
+
+// As function returns
+const getGreeting = (name) => <h1>Hello, {name}!</h1>
+```
+
+JSX makes your React code more readable and maintainable!
+

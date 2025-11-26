@@ -1,0 +1,328 @@
+---
+title: useRef Hook
+chapterSlug: react-hooks
+duration: 12
+order: 4
+---
+
+## useRef Hook
+
+The `useRef` hook creates a mutable reference that persists across renders without causing re-renders when updated.
+
+## Basic Syntax
+
+```jsx
+import { useRef } from 'react'
+
+function Component() {
+  const ref = useRef(initialValue)
+  
+  // Access value with .current
+  console.log(ref.current)
+  
+  // Update without re-render
+  ref.current = newValue
+}
+```
+
+## DOM References
+
+The most common use - accessing DOM elements:
+
+```jsx
+function TextInput() {
+  const inputRef = useRef(null)
+  
+  const focusInput = () => {
+    inputRef.current.focus()
+  }
+  
+  const selectAll = () => {
+    inputRef.current.select()
+  }
+  
+  return (
+    <div>
+      <input ref={inputRef} type="text" />
+      <button onClick={focusInput}>Focus</button>
+      <button onClick={selectAll}>Select All</button>
+    </div>
+  )
+}
+```
+
+## Auto-Focus on Mount
+
+```jsx
+function SearchBox() {
+  const inputRef = useRef(null)
+  
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+  
+  return <input ref={inputRef} placeholder="Search..." />
+}
+```
+
+## Scroll to Element
+
+```jsx
+function LongPage() {
+  const topRef = useRef(null)
+  const bottomRef = useRef(null)
+  
+  const scrollToTop = () => {
+    topRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+  
+  const scrollToBottom = () => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+  
+  return (
+    <div>
+      <div ref={topRef}>Top of page</div>
+      
+      {/* Long content */}
+      
+      <div ref={bottomRef}>Bottom of page</div>
+      
+      <button onClick={scrollToTop}>Go to top</button>
+      <button onClick={scrollToBottom}>Go to bottom</button>
+    </div>
+  )
+}
+```
+
+## Video/Audio Control
+
+```jsx
+function VideoPlayer() {
+  const videoRef = useRef(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  
+  const togglePlay = () => {
+    if (isPlaying) {
+      videoRef.current.pause()
+    } else {
+      videoRef.current.play()
+    }
+    setIsPlaying(!isPlaying)
+  }
+  
+  const skip = (seconds) => {
+    videoRef.current.currentTime += seconds
+  }
+  
+  return (
+    <div>
+      <video ref={videoRef} src="/video.mp4" />
+      <button onClick={togglePlay}>
+        {isPlaying ? 'Pause' : 'Play'}
+      </button>
+      <button onClick={() => skip(-10)}>-10s</button>
+      <button onClick={() => skip(10)}>+10s</button>
+    </div>
+  )
+}
+```
+
+## Storing Previous Values
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0)
+  const prevCountRef = useRef(0)
+  
+  useEffect(() => {
+    prevCountRef.current = count
+  }, [count])
+  
+  return (
+    <div>
+      <p>Current: {count}</p>
+      <p>Previous: {prevCountRef.current}</p>
+      <button onClick={() => setCount(c => c + 1)}>+</button>
+    </div>
+  )
+}
+
+// Custom hook for previous value
+function usePrevious(value) {
+  const ref = useRef()
+  
+  useEffect(() => {
+    ref.current = value
+  }, [value])
+  
+  return ref.current
+}
+
+// Usage
+function Component() {
+  const [count, setCount] = useState(0)
+  const prevCount = usePrevious(count)
+}
+```
+
+## Storing Instance Variables
+
+Unlike state, updating ref doesn't trigger re-render:
+
+```jsx
+function Stopwatch() {
+  const [time, setTime] = useState(0)
+  const [isRunning, setIsRunning] = useState(false)
+  const intervalRef = useRef(null)
+  
+  const start = () => {
+    if (!isRunning) {
+      setIsRunning(true)
+      intervalRef.current = setInterval(() => {
+        setTime(t => t + 1)
+      }, 1000)
+    }
+  }
+  
+  const stop = () => {
+    if (isRunning) {
+      setIsRunning(false)
+      clearInterval(intervalRef.current)
+    }
+  }
+  
+  const reset = () => {
+    stop()
+    setTime(0)
+  }
+  
+  useEffect(() => {
+    return () => clearInterval(intervalRef.current)
+  }, [])
+  
+  return (
+    <div>
+      <p>{time}s</p>
+      <button onClick={start}>Start</button>
+      <button onClick={stop}>Stop</button>
+      <button onClick={reset}>Reset</button>
+    </div>
+  )
+}
+```
+
+## Tracking Mount State
+
+```jsx
+function useIsMounted() {
+  const isMounted = useRef(true)
+  
+  useEffect(() => {
+    return () => {
+      isMounted.current = false
+    }
+  }, [])
+  
+  return isMounted
+}
+
+// Prevent state updates on unmounted component
+function AsyncComponent() {
+  const [data, setData] = useState(null)
+  const isMounted = useIsMounted()
+  
+  useEffect(() => {
+    fetchData().then(result => {
+      if (isMounted.current) {
+        setData(result)
+      }
+    })
+  }, [])
+}
+```
+
+## Measuring Elements
+
+```jsx
+function MeasuredBox() {
+  const boxRef = useRef(null)
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  
+  useEffect(() => {
+    if (boxRef.current) {
+      const { width, height } = boxRef.current.getBoundingClientRect()
+      setDimensions({ width, height })
+    }
+  }, [])
+  
+  return (
+    <div ref={boxRef} style={{ width: '50%', padding: 20 }}>
+      <p>Width: {dimensions.width}px</p>
+      <p>Height: {dimensions.height}px</p>
+    </div>
+  )
+}
+```
+
+## Callback Refs
+
+For more control over when refs are set:
+
+```jsx
+function CallbackRefExample() {
+  const [height, setHeight] = useState(0)
+  
+  const measuredRef = useCallback(node => {
+    if (node !== null) {
+      setHeight(node.getBoundingClientRect().height)
+    }
+  }, [])
+  
+  return (
+    <div ref={measuredRef}>
+      <p>Height: {height}px</p>
+    </div>
+  )
+}
+```
+
+## Forwarding Refs
+
+Pass refs to child components:
+
+```jsx
+import { forwardRef, useRef } from 'react'
+
+// Child component accepts forwarded ref
+const FancyInput = forwardRef((props, ref) => {
+  return <input ref={ref} className="fancy" {...props} />
+})
+
+// Parent can now access child's DOM element
+function Parent() {
+  const inputRef = useRef(null)
+  
+  const focus = () => inputRef.current?.focus()
+  
+  return (
+    <div>
+      <FancyInput ref={inputRef} placeholder="Type here" />
+      <button onClick={focus}>Focus Input</button>
+    </div>
+  )
+}
+```
+
+## useRef vs useState
+
+| useRef | useState |
+|--------|----------|
+| Doesn't trigger re-render | Triggers re-render |
+| Value persists across renders | Value persists across renders |
+| Mutable (.current) | Immutable (use setter) |
+| Sync updates | Batched updates |
+| Good for DOM refs, timers, previous values | Good for UI state |
+
+useRef is essential for working with DOM elements and mutable values!
+

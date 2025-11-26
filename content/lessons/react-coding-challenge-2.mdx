@@ -1,0 +1,419 @@
+---
+title: Hook and State Challenges
+chapterSlug: react-coding-challenges
+duration: 30
+order: 2
+---
+
+## Hook and State Challenges
+
+Practice building custom hooks and managing complex state.
+
+---
+
+## Challenge 1: useLocalStorage Hook
+
+Create a hook that syncs state with localStorage.
+
+**Requirements:**
+- Persist state across page reloads
+- Handle JSON serialization
+- Support lazy initial state
+
+**Solution:**
+
+```jsx
+function useLocalStorage(key, initialValue) {
+  // Lazy initialization
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialValue
+    } catch (error) {
+      console.error(error)
+      return initialValue
+    }
+  })
+
+  // Update localStorage when state changes
+  const setValue = useCallback((value) => {
+    try {
+      // Allow function updates
+      const valueToStore = value instanceof Function ? value(storedValue) : value
+      setStoredValue(valueToStore)
+      window.localStorage.setItem(key, JSON.stringify(valueToStore))
+    } catch (error) {
+      console.error(error)
+    }
+  }, [key, storedValue])
+
+  // Remove from storage
+  const removeValue = useCallback(() => {
+    try {
+      window.localStorage.removeItem(key)
+      setStoredValue(initialValue)
+    } catch (error) {
+      console.error(error)
+    }
+  }, [key, initialValue])
+
+  return [storedValue, setValue, removeValue]
+}
+
+// Usage
+function App() {
+  const [theme, setTheme] = useLocalStorage('theme', 'light')
+  const [user, setUser, removeUser] = useLocalStorage('user', null)
+  
+  return (
+    <div>
+      <button onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+        Toggle Theme: {theme}
+      </button>
+    </div>
+  )
+}
+```
+
+---
+
+## Challenge 2: useFetch Hook with Caching
+
+Build a data fetching hook with caching.
+
+**Solution:**
+
+```jsx
+const cache = new Map()
+
+function useFetch(url, options = {}) {
+  const { cacheTime = 60000 } = options
+  const [state, setState] = useState({
+    data: cache.get(url)?.data || null,
+    loading: !cache.get(url),
+    error: null
+  })
+
+  useEffect(() => {
+    const controller = new AbortController()
+    
+    const fetchData = async () => {
+      // Check cache
+      const cached = cache.get(url)
+      if (cached && Date.now() - cached.timestamp < cacheTime) {
+        setState({ data: cached.data, loading: false, error: null })
+        return
+      }
+
+      setState(prev => ({ ...prev, loading: true, error: null }))
+
+      try {
+        const response = await fetch(url, { signal: controller.signal })
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        
+        const data = await response.json()
+        
+        // Update cache
+        cache.set(url, { data, timestamp: Date.now() })
+        setState({ data, loading: false, error: null })
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          setState(prev => ({ ...prev, loading: false, error: error.message }))
+        }
+      }
+    }
+
+    fetchData()
+    
+    return () => controller.abort()
+  }, [url, cacheTime])
+
+  const refetch = useCallback(() => {
+    cache.delete(url)
+    setState(prev => ({ ...prev, loading: true }))
+  }, [url])
+
+  return { ...state, refetch }
+}
+
+// Usage
+function UserProfile({ userId }) {
+  const { data, loading, error, refetch } = useFetch(`/api/users/${userId}`)
+  
+  if (loading) return <Spinner />
+  if (error) return <Error message={error} onRetry={refetch} />
+  
+  return <Profile user={data} />
+}
+```
+
+---
+
+## Challenge 3: useDebounce and useThrottle
+
+Implement debounce and throttle hooks.
+
+**Solution:**
+
+```jsx
+// Debounce - delays execution until pause in calls
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => clearTimeout(timer)
+  }, [value, delay])
+
+  return debouncedValue
+}
+
+// Debounced callback
+function useDebouncedCallback(callback, delay) {
+  const callbackRef = useRef(callback)
+  callbackRef.current = callback
+
+  return useMemo(
+    () => debounce((...args) => callbackRef.current(...args), delay),
+    [delay]
+  )
+}
+
+// Throttle - limits execution to once per interval
+function useThrottle(value, interval) {
+  const [throttledValue, setThrottledValue] = useState(value)
+  const lastUpdated = useRef(Date.now())
+
+  useEffect(() => {
+    const now = Date.now()
+    
+    if (now >= lastUpdated.current + interval) {
+      lastUpdated.current = now
+      setThrottledValue(value)
+    } else {
+      const timer = setTimeout(() => {
+        lastUpdated.current = Date.now()
+        setThrottledValue(value)
+      }, interval - (now - lastUpdated.current))
+      
+      return () => clearTimeout(timer)
+    }
+  }, [value, interval])
+
+  return throttledValue
+}
+
+// Usage: Debounced search
+function Search() {
+  const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounce(query, 500)
+  
+  useEffect(() => {
+    if (debouncedQuery) {
+      searchAPI(debouncedQuery)
+    }
+  }, [debouncedQuery])
+  
+  return <input value={query} onChange={e => setQuery(e.target.value)} />
+}
+```
+
+---
+
+## Challenge 4: Undo/Redo State Management
+
+Implement state with undo/redo functionality.
+
+**Solution:**
+
+```jsx
+function useUndoRedo(initialState) {
+  const [history, setHistory] = useState({
+    past: [],
+    present: initialState,
+    future: []
+  })
+
+  const canUndo = history.past.length > 0
+  const canRedo = history.future.length > 0
+
+  const set = useCallback((newPresent) => {
+    setHistory(({ past, present }) => ({
+      past: [...past, present],
+      present: typeof newPresent === 'function' ? newPresent(present) : newPresent,
+      future: []
+    }))
+  }, [])
+
+  const undo = useCallback(() => {
+    setHistory(({ past, present, future }) => {
+      if (past.length === 0) return { past, present, future }
+      
+      const previous = past[past.length - 1]
+      const newPast = past.slice(0, -1)
+      
+      return {
+        past: newPast,
+        present: previous,
+        future: [present, ...future]
+      }
+    })
+  }, [])
+
+  const redo = useCallback(() => {
+    setHistory(({ past, present, future }) => {
+      if (future.length === 0) return { past, present, future }
+      
+      const next = future[0]
+      const newFuture = future.slice(1)
+      
+      return {
+        past: [...past, present],
+        present: next,
+        future: newFuture
+      }
+    })
+  }, [])
+
+  const reset = useCallback(() => {
+    setHistory({
+      past: [],
+      present: initialState,
+      future: []
+    })
+  }, [initialState])
+
+  return {
+    state: history.present,
+    set,
+    undo,
+    redo,
+    reset,
+    canUndo,
+    canRedo
+  }
+}
+
+// Usage: Text editor with undo/redo
+function Editor() {
+  const { state, set, undo, redo, canUndo, canRedo } = useUndoRedo('')
+  
+  return (
+    <div>
+      <div className="flex gap-2 mb-2">
+        <button onClick={undo} disabled={!canUndo}>Undo</button>
+        <button onClick={redo} disabled={!canRedo}>Redo</button>
+      </div>
+      <textarea 
+        value={state} 
+        onChange={e => set(e.target.value)}
+        rows={10}
+      />
+    </div>
+  )
+}
+```
+
+---
+
+## Challenge 5: Form State Machine
+
+Build a form with state machine pattern.
+
+**Solution:**
+
+```jsx
+const formMachine = {
+  idle: {
+    SUBMIT: 'validating'
+  },
+  validating: {
+    VALID: 'submitting',
+    INVALID: 'error'
+  },
+  submitting: {
+    SUCCESS: 'success',
+    FAILURE: 'error'
+  },
+  success: {
+    RESET: 'idle'
+  },
+  error: {
+    SUBMIT: 'validating',
+    RESET: 'idle'
+  }
+}
+
+function useFormMachine(initialState = 'idle') {
+  const [state, setState] = useState(initialState)
+
+  const transition = useCallback((event) => {
+    const nextState = formMachine[state]?.[event]
+    if (nextState) {
+      setState(nextState)
+    }
+  }, [state])
+
+  const is = useCallback((checkState) => state === checkState, [state])
+
+  return { state, transition, is }
+}
+
+// Usage
+function ContactForm() {
+  const { state, transition, is } = useFormMachine()
+  const [formData, setFormData] = useState({ name: '', email: '' })
+  const [errors, setErrors] = useState({})
+
+  const validate = () => {
+    const newErrors = {}
+    if (!formData.name) newErrors.name = 'Name required'
+    if (!formData.email) newErrors.email = 'Email required'
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    transition('SUBMIT')
+    
+    if (!validate()) {
+      transition('INVALID')
+      return
+    }
+    
+    transition('VALID')
+    
+    try {
+      await submitForm(formData)
+      transition('SUCCESS')
+    } catch {
+      transition('FAILURE')
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={formData.name}
+        onChange={e => setFormData({ ...formData, name: e.target.value })}
+        disabled={is('submitting')}
+      />
+      {errors.name && <span>{errors.name}</span>}
+      
+      <button type="submit" disabled={is('submitting')}>
+        {is('submitting') ? 'Submitting...' : 'Submit'}
+      </button>
+      
+      {is('success') && <p>Form submitted successfully!</p>}
+      {is('error') && <p>An error occurred. Please try again.</p>}
+    </form>
+  )
+}
+```
+
+These challenges help master React state management!
+

@@ -1,0 +1,356 @@
+---
+title: TanStack Query (React Query)
+chapterSlug: react-data-fetching
+duration: 18
+order: 2
+---
+
+## TanStack Query
+
+TanStack Query (formerly React Query) is the best library for fetching, caching, and updating server state in React.
+
+## Installation
+
+```bash
+npm install @tanstack/react-query
+```
+
+## Setup
+
+```jsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,  // 1 minute
+      retry: 1,
+    }
+  }
+})
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  )
+}
+```
+
+## Basic Query
+
+```jsx
+import { useQuery } from '@tanstack/react-query'
+
+function UserList() {
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await fetch('/api/users')
+      if (!response.ok) throw new Error('Failed to fetch')
+      return response.json()
+    }
+  })
+  
+  if (isLoading) return <Spinner />
+  if (isError) return <p>Error: {error.message}</p>
+  
+  return (
+    <ul>
+      {data.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+## Query Keys
+
+Query keys uniquely identify data in the cache:
+
+```jsx
+// Simple key
+useQuery({ queryKey: ['todos'], ... })
+
+// With variables
+useQuery({ queryKey: ['todos', todoId], ... })
+
+// With filters
+useQuery({ queryKey: ['todos', { status, page }], ... })
+
+// Nested
+useQuery({ queryKey: ['users', userId, 'posts'], ... })
+```
+
+## Query with Parameters
+
+```jsx
+function UserProfile({ userId }) {
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['users', userId],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${userId}`)
+      return response.json()
+    },
+    enabled: !!userId  // Only fetch if userId exists
+  })
+  
+  if (isLoading) return <Spinner />
+  
+  return <h1>{user.name}</h1>
+}
+```
+
+## Mutations
+
+For creating, updating, or deleting data:
+
+```jsx
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+function CreateTodo() {
+  const queryClient = useQueryClient()
+  
+  const mutation = useMutation({
+    mutationFn: async (newTodo) => {
+      const response = await fetch('/api/todos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTodo)
+      })
+      return response.json()
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+    },
+    onError: (error) => {
+      console.error('Failed to create todo:', error)
+    }
+  })
+  
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    mutation.mutate({ title: 'New Todo' })
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <button 
+        type="submit" 
+        disabled={mutation.isPending}
+      >
+        {mutation.isPending ? 'Creating...' : 'Create Todo'}
+      </button>
+      {mutation.isError && <p>Error: {mutation.error.message}</p>}
+    </form>
+  )
+}
+```
+
+## Optimistic Updates
+
+Update UI immediately, rollback on error:
+
+```jsx
+const queryClient = useQueryClient()
+
+const mutation = useMutation({
+  mutationFn: updateTodo,
+  
+  onMutate: async (newTodo) => {
+    // Cancel outgoing refetches
+    await queryClient.cancelQueries({ queryKey: ['todos'] })
+    
+    // Snapshot previous value
+    const previousTodos = queryClient.getQueryData(['todos'])
+    
+    // Optimistically update
+    queryClient.setQueryData(['todos'], (old) =>
+      old.map(todo =>
+        todo.id === newTodo.id ? newTodo : todo
+      )
+    )
+    
+    // Return context with snapshot
+    return { previousTodos }
+  },
+  
+  onError: (err, newTodo, context) => {
+    // Rollback on error
+    queryClient.setQueryData(['todos'], context.previousTodos)
+  },
+  
+  onSettled: () => {
+    // Refetch after error or success
+    queryClient.invalidateQueries({ queryKey: ['todos'] })
+  }
+})
+```
+
+## Infinite Queries
+
+For pagination/infinite scroll:
+
+```jsx
+import { useInfiniteQuery } from '@tanstack/react-query'
+
+function InfinitePosts() {
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading
+  } = useInfiniteQuery({
+    queryKey: ['posts'],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await fetch(`/api/posts?page=${pageParam}`)
+      return response.json()
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+    initialPageParam: 1
+  })
+  
+  if (isLoading) return <Spinner />
+  
+  return (
+    <div>
+      {data.pages.map((page) =>
+        page.posts.map(post => (
+          <Post key={post.id} post={post} />
+        ))
+      )}
+      
+      {hasNextPage && (
+        <button
+          onClick={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+        >
+          {isFetchingNextPage ? 'Loading...' : 'Load More'}
+        </button>
+      )}
+    </div>
+  )
+}
+```
+
+## Parallel Queries
+
+```jsx
+function Dashboard() {
+  const usersQuery = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers
+  })
+  
+  const projectsQuery = useQuery({
+    queryKey: ['projects'],
+    queryFn: fetchProjects
+  })
+  
+  if (usersQuery.isLoading || projectsQuery.isLoading) {
+    return <Spinner />
+  }
+  
+  return (
+    <div>
+      <UserList users={usersQuery.data} />
+      <ProjectList projects={projectsQuery.data} />
+    </div>
+  )
+}
+
+// Or use useQueries for dynamic queries
+import { useQueries } from '@tanstack/react-query'
+
+function UserProfiles({ userIds }) {
+  const userQueries = useQueries({
+    queries: userIds.map(id => ({
+      queryKey: ['users', id],
+      queryFn: () => fetchUser(id)
+    }))
+  })
+  
+  // userQueries is an array of query results
+}
+```
+
+## Dependent Queries
+
+```jsx
+function UserPosts({ userId }) {
+  // First query
+  const { data: user } = useQuery({
+    queryKey: ['users', userId],
+    queryFn: () => fetchUser(userId)
+  })
+  
+  // Second query depends on first
+  const { data: posts } = useQuery({
+    queryKey: ['posts', user?.id],
+    queryFn: () => fetchPosts(user.id),
+    enabled: !!user?.id  // Only run when user exists
+  })
+}
+```
+
+## Prefetching
+
+```jsx
+const queryClient = useQueryClient()
+
+// Prefetch on hover
+function ProjectLink({ projectId }) {
+  const prefetch = () => {
+    queryClient.prefetchQuery({
+      queryKey: ['projects', projectId],
+      queryFn: () => fetchProject(projectId)
+    })
+  }
+  
+  return (
+    <Link 
+      to={`/projects/${projectId}`}
+      onMouseEnter={prefetch}
+    >
+      View Project
+    </Link>
+  )
+}
+```
+
+## Query Options
+
+```jsx
+useQuery({
+  queryKey: ['todos'],
+  queryFn: fetchTodos,
+  
+  // Timing
+  staleTime: 5 * 60 * 1000,      // 5 minutes
+  gcTime: 10 * 60 * 1000,        // 10 minutes (was cacheTime)
+  refetchInterval: 30000,         // Refetch every 30s
+  
+  // Behavior
+  enabled: true,                  // Enable/disable query
+  retry: 3,                       // Retry failed requests
+  retryDelay: 1000,              // Delay between retries
+  
+  // Refetching
+  refetchOnWindowFocus: true,
+  refetchOnMount: true,
+  refetchOnReconnect: true,
+  
+  // Placeholders
+  placeholderData: [],            // Show while loading
+  initialData: cachedData         // Use if available
+})
+```
+
+TanStack Query makes server state management elegant and powerful!
+

@@ -1,0 +1,340 @@
+---
+title: useState Deep Dive
+chapterSlug: react-hooks
+duration: 15
+order: 1
+---
+
+## useState Deep Dive
+
+The `useState` hook is the foundation of state management in React. Let's explore its advanced patterns and best practices.
+
+## Basic Syntax Revisited
+
+```jsx
+import { useState } from 'react'
+
+function Component() {
+  // Syntax: const [value, setValue] = useState(initialValue)
+  const [count, setCount] = useState(0)
+  
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      Count: {count}
+    </button>
+  )
+}
+```
+
+## Lazy Initialization
+
+For expensive initial values, pass a function:
+
+```jsx
+// ❌ Runs on every render
+const [state, setState] = useState(expensiveCalculation())
+
+// ✅ Only runs once on mount
+const [state, setState] = useState(() => expensiveCalculation())
+
+// Real example
+function ExpensiveComponent() {
+  const [data, setData] = useState(() => {
+    const savedData = localStorage.getItem('myData')
+    return savedData ? JSON.parse(savedData) : { items: [], count: 0 }
+  })
+  
+  return <div>{/* render data */}</div>
+}
+```
+
+## Functional Updates
+
+When new state depends on previous state:
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  // ❌ Can cause bugs with rapid updates
+  const handleClick = () => {
+    setCount(count + 1)
+    setCount(count + 1)  // Still uses old count
+    // Result: count only increases by 1
+  }
+  
+  // ✅ Correct - use functional update
+  const handleClick = () => {
+    setCount(prev => prev + 1)
+    setCount(prev => prev + 1)
+    // Result: count increases by 2
+  }
+}
+```
+
+## Complex State Updates
+
+### Objects
+
+```jsx
+function UserProfile() {
+  const [user, setUser] = useState({
+    name: 'John',
+    email: 'john@example.com',
+    preferences: {
+      theme: 'dark',
+      notifications: true
+    }
+  })
+  
+  // Update single field
+  const updateName = (name) => {
+    setUser(prev => ({ ...prev, name }))
+  }
+  
+  // Update nested field
+  const toggleTheme = () => {
+    setUser(prev => ({
+      ...prev,
+      preferences: {
+        ...prev.preferences,
+        theme: prev.preferences.theme === 'dark' ? 'light' : 'dark'
+      }
+    }))
+  }
+  
+  return (
+    <div>
+      <input 
+        value={user.name} 
+        onChange={(e) => updateName(e.target.value)} 
+      />
+      <button onClick={toggleTheme}>
+        Current theme: {user.preferences.theme}
+      </button>
+    </div>
+  )
+}
+```
+
+### Arrays
+
+```jsx
+function TodoApp() {
+  const [todos, setTodos] = useState([
+    { id: 1, text: 'Learn React', completed: false },
+    { id: 2, text: 'Build app', completed: false }
+  ])
+  
+  // Add item
+  const addTodo = (text) => {
+    setTodos(prev => [...prev, { 
+      id: Date.now(), 
+      text, 
+      completed: false 
+    }])
+  }
+  
+  // Remove item
+  const removeTodo = (id) => {
+    setTodos(prev => prev.filter(todo => todo.id !== id))
+  }
+  
+  // Update item
+  const toggleTodo = (id) => {
+    setTodos(prev => prev.map(todo =>
+      todo.id === id 
+        ? { ...todo, completed: !todo.completed }
+        : todo
+    ))
+  }
+  
+  // Update specific field
+  const updateText = (id, text) => {
+    setTodos(prev => prev.map(todo =>
+      todo.id === id ? { ...todo, text } : todo
+    ))
+  }
+  
+  // Insert at position
+  const insertAt = (index, newTodo) => {
+    setTodos(prev => [
+      ...prev.slice(0, index),
+      newTodo,
+      ...prev.slice(index)
+    ])
+  }
+  
+  // Reorder items
+  const moveItem = (fromIndex, toIndex) => {
+    setTodos(prev => {
+      const result = [...prev]
+      const [removed] = result.splice(fromIndex, 1)
+      result.splice(toIndex, 0, removed)
+      return result
+    })
+  }
+}
+```
+
+## Multiple useState vs Single Object
+
+```jsx
+// Option 1: Multiple useState calls
+function Form() {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [age, setAge] = useState(0)
+  
+  // Easy to update individual fields
+  // Clear separation of concerns
+}
+
+// Option 2: Single object state
+function Form() {
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    age: 0
+  })
+  
+  const updateField = (field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }))
+  }
+  
+  // Easier to pass around, reset, or validate
+}
+
+// Recommendation:
+// - Use multiple useState for independent values
+// - Use single object for related values that update together
+```
+
+## Reset State
+
+```jsx
+function ResettableForm() {
+  const initialState = {
+    name: '',
+    email: '',
+    message: ''
+  }
+  
+  const [form, setForm] = useState(initialState)
+  
+  const reset = () => {
+    setForm(initialState)
+  }
+  
+  return (
+    <form>
+      {/* form fields */}
+      <button type="button" onClick={reset}>Reset</button>
+    </form>
+  )
+}
+```
+
+## State with TypeScript
+
+```tsx
+// Inferred types
+const [count, setCount] = useState(0)  // number
+const [name, setName] = useState('')   // string
+
+// Explicit types
+const [user, setUser] = useState<User | null>(null)
+const [items, setItems] = useState<Item[]>([])
+
+// Union types
+const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+
+// Interface
+interface FormState {
+  name: string
+  email: string
+  age: number
+}
+
+const [form, setForm] = useState<FormState>({
+  name: '',
+  email: '',
+  age: 0
+})
+```
+
+## Common Patterns
+
+### Toggle Pattern
+
+```jsx
+function Toggle() {
+  const [isOn, setIsOn] = useState(false)
+  
+  const toggle = () => setIsOn(prev => !prev)
+  
+  return <button onClick={toggle}>{isOn ? 'ON' : 'OFF'}</button>
+}
+```
+
+### Counter Pattern
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  const increment = () => setCount(prev => prev + 1)
+  const decrement = () => setCount(prev => prev - 1)
+  const reset = () => setCount(0)
+  const incrementBy = (n) => setCount(prev => prev + n)
+  
+  return (
+    <div>
+      <span>{count}</span>
+      <button onClick={increment}>+</button>
+      <button onClick={decrement}>-</button>
+      <button onClick={reset}>Reset</button>
+    </div>
+  )
+}
+```
+
+### Input Pattern
+
+```jsx
+function Input() {
+  const [value, setValue] = useState('')
+  
+  const handleChange = (e) => setValue(e.target.value)
+  const clear = () => setValue('')
+  
+  return (
+    <div>
+      <input value={value} onChange={handleChange} />
+      <button onClick={clear}>Clear</button>
+    </div>
+  )
+}
+```
+
+## State Batching
+
+React batches state updates for performance:
+
+```jsx
+function BatchingExample() {
+  const [count, setCount] = useState(0)
+  const [flag, setFlag] = useState(false)
+  
+  const handleClick = () => {
+    // Both updates are batched - only one re-render
+    setCount(c => c + 1)
+    setFlag(f => !f)
+  }
+  
+  console.log('Render') // Only logs once per click
+}
+```
+
+Understanding useState deeply is crucial for effective React development!
+

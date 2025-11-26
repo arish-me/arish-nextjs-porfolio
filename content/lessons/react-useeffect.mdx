@@ -1,0 +1,384 @@
+---
+title: useEffect Hook
+chapterSlug: react-hooks
+duration: 18
+order: 2
+---
+
+## useEffect Hook
+
+The `useEffect` hook lets you perform side effects in function components. Side effects include data fetching, subscriptions, timers, and manual DOM manipulation.
+
+## Basic Syntax
+
+```jsx
+import { useEffect } from 'react'
+
+function Component() {
+  useEffect(() => {
+    // Side effect code here
+    console.log('Effect ran!')
+    
+    // Optional cleanup function
+    return () => {
+      console.log('Cleanup!')
+    }
+  }, [dependencies])
+}
+```
+
+## Effect Dependencies
+
+### No Dependencies Array - Runs on Every Render
+
+```jsx
+function Component() {
+  useEffect(() => {
+    console.log('I run on every render')
+  })
+  // ⚠️ Rarely what you want - can cause infinite loops
+}
+```
+
+### Empty Dependencies Array - Runs Once on Mount
+
+```jsx
+function Component() {
+  useEffect(() => {
+    console.log('I run once on mount')
+    
+    return () => {
+      console.log('I run once on unmount')
+    }
+  }, [])
+}
+```
+
+### With Dependencies - Runs When Dependencies Change
+
+```jsx
+function Component({ userId }) {
+  const [user, setUser] = useState(null)
+  
+  useEffect(() => {
+    console.log('I run when userId changes')
+    fetchUser(userId).then(setUser)
+  }, [userId])
+}
+```
+
+## Data Fetching
+
+```jsx
+function UserProfile({ userId }) {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await fetch(`/api/users/${userId}`)
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch user')
+        }
+        
+        const data = await response.json()
+        setUser(data)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchUser()
+  }, [userId])
+  
+  if (loading) return <p>Loading...</p>
+  if (error) return <p>Error: {error}</p>
+  if (!user) return null
+  
+  return <div>{user.name}</div>
+}
+```
+
+## Cleanup Functions
+
+Cleanup prevents memory leaks and stale updates:
+
+### Subscriptions
+
+```jsx
+function ChatRoom({ roomId }) {
+  useEffect(() => {
+    const connection = createConnection(roomId)
+    connection.connect()
+    
+    // Cleanup: disconnect when roomId changes or unmount
+    return () => {
+      connection.disconnect()
+    }
+  }, [roomId])
+}
+```
+
+### Timers
+
+```jsx
+function Timer() {
+  const [count, setCount] = useState(0)
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCount(c => c + 1)
+    }, 1000)
+    
+    // Cleanup: clear interval on unmount
+    return () => clearInterval(intervalId)
+  }, [])
+  
+  return <p>Count: {count}</p>
+}
+```
+
+### Event Listeners
+
+```jsx
+function WindowSize() {
+  const [size, setSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  })
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+    
+    window.addEventListener('resize', handleResize)
+    
+    // Cleanup: remove listener on unmount
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+  
+  return <p>{size.width} x {size.height}</p>
+}
+```
+
+## Abort Fetch Requests
+
+Cancel requests when component unmounts or dependencies change:
+
+```jsx
+function SearchResults({ query }) {
+  const [results, setResults] = useState([])
+  
+  useEffect(() => {
+    const controller = new AbortController()
+    
+    const fetchResults = async () => {
+      try {
+        const response = await fetch(`/api/search?q=${query}`, {
+          signal: controller.signal
+        })
+        const data = await response.json()
+        setResults(data)
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error(err)
+        }
+      }
+    }
+    
+    fetchResults()
+    
+    // Cleanup: abort request
+    return () => controller.abort()
+  }, [query])
+  
+  return <ul>{results.map(r => <li key={r.id}>{r.title}</li>)}</ul>
+}
+```
+
+## Multiple Effects
+
+Separate effects by concern:
+
+```jsx
+function UserDashboard({ userId }) {
+  const [user, setUser] = useState(null)
+  const [posts, setPosts] = useState([])
+  
+  // Effect for user data
+  useEffect(() => {
+    fetchUser(userId).then(setUser)
+  }, [userId])
+  
+  // Effect for posts data
+  useEffect(() => {
+    fetchPosts(userId).then(setPosts)
+  }, [userId])
+  
+  // Effect for document title
+  useEffect(() => {
+    if (user) {
+      document.title = `${user.name}'s Dashboard`
+    }
+    
+    return () => {
+      document.title = 'My App'
+    }
+  }, [user])
+}
+```
+
+## Common Patterns
+
+### Debouncing
+
+```jsx
+function SearchInput() {
+  const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedQuery(query)
+    }, 500)
+    
+    return () => clearTimeout(timeoutId)
+  }, [query])
+  
+  useEffect(() => {
+    if (debouncedQuery) {
+      // Perform search
+      console.log('Searching for:', debouncedQuery)
+    }
+  }, [debouncedQuery])
+  
+  return (
+    <input 
+      value={query} 
+      onChange={(e) => setQuery(e.target.value)} 
+    />
+  )
+}
+```
+
+### Local Storage Sync
+
+```jsx
+function usePersistentState(key, initialValue) {
+  const [value, setValue] = useState(() => {
+    const saved = localStorage.getItem(key)
+    return saved ? JSON.parse(saved) : initialValue
+  })
+  
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value))
+  }, [key, value])
+  
+  return [value, setValue]
+}
+
+// Usage
+function App() {
+  const [theme, setTheme] = usePersistentState('theme', 'light')
+}
+```
+
+### Focus Management
+
+```jsx
+function AutoFocusInput() {
+  const inputRef = useRef(null)
+  
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+  
+  return <input ref={inputRef} />
+}
+```
+
+## Effect Execution Order
+
+```jsx
+function Component() {
+  console.log('1. Render')
+  
+  useEffect(() => {
+    console.log('3. Effect runs')
+    
+    return () => {
+      console.log('2. Cleanup from previous effect')
+    }
+  })
+  
+  // Order: Render → Previous Cleanup → Effect
+}
+```
+
+## Common Mistakes
+
+### Missing Dependencies
+
+```jsx
+// ❌ Bug: effect uses count but doesn't list it
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount(count + 1)  // Always uses initial count (0)
+    }, 1000)
+    return () => clearInterval(id)
+  }, [])  // Missing count
+}
+
+// ✅ Fix with functional update
+function Counter() {
+  const [count, setCount] = useState(0)
+  
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount(c => c + 1)  // Uses latest count
+    }, 1000)
+    return () => clearInterval(id)
+  }, [])
+}
+```
+
+### Infinite Loops
+
+```jsx
+// ❌ Infinite loop: effect creates new object every render
+function Component() {
+  const [data, setData] = useState(null)
+  const options = { method: 'GET' }  // New object every render
+  
+  useEffect(() => {
+    fetch('/api/data', options).then(res => res.json()).then(setData)
+  }, [options])  // options changes every render!
+}
+
+// ✅ Fix: memoize or move inside effect
+function Component() {
+  const [data, setData] = useState(null)
+  
+  useEffect(() => {
+    const options = { method: 'GET' }
+    fetch('/api/data', options).then(res => res.json()).then(setData)
+  }, [])  // No external dependency
+}
+```
+
+useEffect is essential for handling side effects in React!
+

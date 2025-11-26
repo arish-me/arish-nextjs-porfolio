@@ -1,0 +1,268 @@
+---
+title: React Portals
+chapterSlug: react-advanced-patterns
+duration: 10
+order: 3
+---
+
+## React Portals
+
+Portals let you render children into a DOM node outside the parent component's DOM hierarchy.
+
+## Basic Portal
+
+```jsx
+import { createPortal } from 'react-dom'
+
+function Modal({ children, isOpen }) {
+  if (!isOpen) return null
+  
+  return createPortal(
+    <div className="modal-overlay">
+      <div className="modal-content">
+        {children}
+      </div>
+    </div>,
+    document.body  // Render to body, not parent
+  )
+}
+
+// Usage
+function App() {
+  const [showModal, setShowModal] = useState(false)
+  
+  return (
+    <div className="app">
+      <button onClick={() => setShowModal(true)}>Open Modal</button>
+      
+      <Modal isOpen={showModal}>
+        <h2>Modal Title</h2>
+        <p>Modal content here</p>
+        <button onClick={() => setShowModal(false)}>Close</button>
+      </Modal>
+    </div>
+  )
+}
+```
+
+## Why Use Portals?
+
+### CSS Overflow Issues
+
+```jsx
+// Without portal - modal gets clipped
+<div style={{ overflow: 'hidden' }}>
+  <Modal>Content</Modal>  {/* Gets clipped! */}
+</div>
+
+// With portal - renders to body, no clipping
+<div style={{ overflow: 'hidden' }}>
+  <Modal>Content</Modal>  {/* Renders outside, visible! */}
+</div>
+```
+
+### Z-Index Stacking
+
+```jsx
+// Portals escape z-index stacking contexts
+function Tooltip({ children, content }) {
+  const [show, setShow] = useState(false)
+  const [coords, setCoords] = useState({ x: 0, y: 0 })
+  const ref = useRef()
+  
+  const handleMouseEnter = () => {
+    const rect = ref.current.getBoundingClientRect()
+    setCoords({ x: rect.x, y: rect.bottom })
+    setShow(true)
+  }
+  
+  return (
+    <>
+      <span 
+        ref={ref}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setShow(false)}
+      >
+        {children}
+      </span>
+      
+      {show && createPortal(
+        <div 
+          className="tooltip"
+          style={{ position: 'fixed', left: coords.x, top: coords.y }}
+        >
+          {content}
+        </div>,
+        document.body
+      )}
+    </>
+  )
+}
+```
+
+## Complete Modal Component
+
+```jsx
+import { createPortal } from 'react-dom'
+import { useEffect, useRef } from 'react'
+
+function Modal({ isOpen, onClose, title, children }) {
+  const overlayRef = useRef()
+  
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'hidden'
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = ''
+    }
+  }, [isOpen, onClose])
+  
+  // Handle click outside
+  const handleOverlayClick = (e) => {
+    if (e.target === overlayRef.current) {
+      onClose()
+    }
+  }
+  
+  if (!isOpen) return null
+  
+  return createPortal(
+    <div 
+      ref={overlayRef}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={handleOverlayClick}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl max-w-md w-full m-4"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="flex items-center justify-between p-4 border-b">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="p-4">
+          {children}
+        </div>
+      </div>
+    </div>,
+    document.body
+  )
+}
+```
+
+## Dropdown Menu
+
+```jsx
+function Dropdown({ trigger, children }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const triggerRef = useRef()
+  
+  const handleOpen = () => {
+    const rect = triggerRef.current.getBoundingClientRect()
+    setPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX
+    })
+    setIsOpen(true)
+  }
+  
+  // Close on outside click
+  useEffect(() => {
+    if (!isOpen) return
+    
+    const handleClick = (e) => {
+      if (!triggerRef.current.contains(e.target)) {
+        setIsOpen(false)
+      }
+    }
+    
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [isOpen])
+  
+  return (
+    <>
+      <div ref={triggerRef} onClick={handleOpen}>
+        {trigger}
+      </div>
+      
+      {isOpen && createPortal(
+        <div 
+          className="absolute bg-white shadow-lg rounded-md py-2 min-w-48 z-50"
+          style={{ top: position.top, left: position.left }}
+        >
+          {children}
+        </div>,
+        document.body
+      )}
+    </>
+  )
+}
+
+// Usage
+<Dropdown trigger={<button>Menu</button>}>
+  <a href="#" className="block px-4 py-2 hover:bg-gray-100">Profile</a>
+  <a href="#" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
+  <a href="#" className="block px-4 py-2 hover:bg-gray-100">Logout</a>
+</Dropdown>
+```
+
+## Portal Container
+
+Create a dedicated portal container:
+
+```html
+<!-- index.html -->
+<body>
+  <div id="root"></div>
+  <div id="portal-root"></div>
+</body>
+```
+
+```jsx
+function Modal({ children, isOpen }) {
+  if (!isOpen) return null
+  
+  const portalRoot = document.getElementById('portal-root')
+  
+  return createPortal(children, portalRoot)
+}
+```
+
+## Event Bubbling
+
+Events still bubble through React tree, not DOM tree:
+
+```jsx
+function App() {
+  const handleClick = () => console.log('App clicked')
+  
+  return (
+    <div onClick={handleClick}>
+      <Modal isOpen={true}>
+        <button>Click me</button>  {/* Still triggers App's onClick! */}
+      </Modal>
+    </div>
+  )
+}
+```
+
+Portals are essential for modals, tooltips, and overlays!
+

@@ -1,0 +1,366 @@
+---
+title: Context API for State
+chapterSlug: react-state-management
+duration: 15
+order: 1
+---
+
+## Context API for State Management
+
+The Context API provides a way to pass data through the component tree without prop drilling. Combined with hooks, it's a powerful state management solution.
+
+## Basic Context State Pattern
+
+```jsx
+import { createContext, useContext, useState } from 'react'
+
+// 1. Create context
+const CounterContext = createContext(null)
+
+// 2. Create provider component
+function CounterProvider({ children }) {
+  const [count, setCount] = useState(0)
+  
+  const increment = () => setCount(c => c + 1)
+  const decrement = () => setCount(c => c - 1)
+  const reset = () => setCount(0)
+  
+  const value = { count, increment, decrement, reset }
+  
+  return (
+    <CounterContext.Provider value={value}>
+      {children}
+    </CounterContext.Provider>
+  )
+}
+
+// 3. Create custom hook
+function useCounter() {
+  const context = useContext(CounterContext)
+  if (!context) {
+    throw new Error('useCounter must be used within CounterProvider')
+  }
+  return context
+}
+
+// 4. Use in components
+function CounterDisplay() {
+  const { count } = useCounter()
+  return <h1>Count: {count}</h1>
+}
+
+function CounterButtons() {
+  const { increment, decrement, reset } = useCounter()
+  return (
+    <div>
+      <button onClick={decrement}>-</button>
+      <button onClick={increment}>+</button>
+      <button onClick={reset}>Reset</button>
+    </div>
+  )
+}
+
+// 5. Wrap app with provider
+function App() {
+  return (
+    <CounterProvider>
+      <CounterDisplay />
+      <CounterButtons />
+    </CounterProvider>
+  )
+}
+```
+
+## Shopping Cart Context
+
+Real-world example:
+
+```jsx
+import { createContext, useContext, useReducer } from 'react'
+
+// Actions
+const ACTIONS = {
+  ADD_ITEM: 'ADD_ITEM',
+  REMOVE_ITEM: 'REMOVE_ITEM',
+  UPDATE_QUANTITY: 'UPDATE_QUANTITY',
+  CLEAR_CART: 'CLEAR_CART'
+}
+
+// Reducer
+function cartReducer(state, action) {
+  switch (action.type) {
+    case ACTIONS.ADD_ITEM: {
+      const existingItem = state.items.find(
+        item => item.id === action.payload.id
+      )
+      
+      if (existingItem) {
+        return {
+          ...state,
+          items: state.items.map(item =>
+            item.id === action.payload.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          )
+        }
+      }
+      
+      return {
+        ...state,
+        items: [...state.items, { ...action.payload, quantity: 1 }]
+      }
+    }
+    
+    case ACTIONS.REMOVE_ITEM:
+      return {
+        ...state,
+        items: state.items.filter(item => item.id !== action.payload)
+      }
+    
+    case ACTIONS.UPDATE_QUANTITY:
+      return {
+        ...state,
+        items: state.items.map(item =>
+          item.id === action.payload.id
+            ? { ...item, quantity: action.payload.quantity }
+            : item
+        )
+      }
+    
+    case ACTIONS.CLEAR_CART:
+      return { ...state, items: [] }
+    
+    default:
+      return state
+  }
+}
+
+// Context
+const CartContext = createContext(null)
+
+// Provider
+function CartProvider({ children }) {
+  const [state, dispatch] = useReducer(cartReducer, { items: [] })
+  
+  const addItem = (product) => {
+    dispatch({ type: ACTIONS.ADD_ITEM, payload: product })
+  }
+  
+  const removeItem = (productId) => {
+    dispatch({ type: ACTIONS.REMOVE_ITEM, payload: productId })
+  }
+  
+  const updateQuantity = (productId, quantity) => {
+    dispatch({ type: ACTIONS.UPDATE_QUANTITY, payload: { id: productId, quantity } })
+  }
+  
+  const clearCart = () => {
+    dispatch({ type: ACTIONS.CLEAR_CART })
+  }
+  
+  const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0)
+  const totalPrice = state.items.reduce(
+    (sum, item) => sum + item.price * item.quantity, 0
+  )
+  
+  const value = {
+    items: state.items,
+    totalItems,
+    totalPrice,
+    addItem,
+    removeItem,
+    updateQuantity,
+    clearCart
+  }
+  
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+    </CartContext.Provider>
+  )
+}
+
+// Hook
+function useCart() {
+  const context = useContext(CartContext)
+  if (!context) {
+    throw new Error('useCart must be used within CartProvider')
+  }
+  return context
+}
+
+// Usage
+function ProductCard({ product }) {
+  const { addItem } = useCart()
+  
+  return (
+    <div className="product-card">
+      <h3>{product.name}</h3>
+      <p>${product.price}</p>
+      <button onClick={() => addItem(product)}>Add to Cart</button>
+    </div>
+  )
+}
+
+function CartIcon() {
+  const { totalItems } = useCart()
+  
+  return (
+    <div className="cart-icon">
+      🛒 <span className="badge">{totalItems}</span>
+    </div>
+  )
+}
+
+function CartSummary() {
+  const { items, totalPrice, removeItem, updateQuantity, clearCart } = useCart()
+  
+  return (
+    <div className="cart-summary">
+      <h2>Your Cart</h2>
+      {items.map(item => (
+        <div key={item.id} className="cart-item">
+          <span>{item.name}</span>
+          <input
+            type="number"
+            value={item.quantity}
+            onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
+            min="1"
+          />
+          <span>${item.price * item.quantity}</span>
+          <button onClick={() => removeItem(item.id)}>Remove</button>
+        </div>
+      ))}
+      <div className="total">Total: ${totalPrice.toFixed(2)}</div>
+      <button onClick={clearCart}>Clear Cart</button>
+    </div>
+  )
+}
+```
+
+## Theme Context
+
+```jsx
+const ThemeContext = createContext(null)
+
+function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState('light')
+  
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+  }
+  
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
+  
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
+function useTheme() {
+  const context = useContext(ThemeContext)
+  if (!context) {
+    throw new Error('useTheme must be used within ThemeProvider')
+  }
+  return context
+}
+```
+
+## Multiple Contexts
+
+```jsx
+function App() {
+  return (
+    <AuthProvider>
+      <ThemeProvider>
+        <CartProvider>
+          <NotificationProvider>
+            <Router>
+              <Main />
+            </Router>
+          </NotificationProvider>
+        </CartProvider>
+      </ThemeProvider>
+    </AuthProvider>
+  )
+}
+
+// Clean up with a combined provider
+function AppProviders({ children }) {
+  return (
+    <AuthProvider>
+      <ThemeProvider>
+        <CartProvider>
+          <NotificationProvider>
+            {children}
+          </NotificationProvider>
+        </CartProvider>
+      </ThemeProvider>
+    </AuthProvider>
+  )
+}
+
+function App() {
+  return (
+    <AppProviders>
+      <Router>
+        <Main />
+      </Router>
+    </AppProviders>
+  )
+}
+```
+
+## Performance Optimization
+
+Split context to prevent unnecessary re-renders:
+
+```jsx
+// ❌ Bad: All consumers re-render when any value changes
+const AppContext = createContext()
+
+function AppProvider({ children }) {
+  const [user, setUser] = useState(null)
+  const [theme, setTheme] = useState('light')
+  
+  return (
+    <AppContext.Provider value={{ user, setUser, theme, setTheme }}>
+      {children}
+    </AppContext.Provider>
+  )
+}
+
+// ✅ Good: Separate contexts for unrelated state
+const UserContext = createContext()
+const ThemeContext = createContext()
+
+// ✅ Even better: Split state and dispatch
+const CartStateContext = createContext()
+const CartDispatchContext = createContext()
+
+function CartProvider({ children }) {
+  const [state, dispatch] = useReducer(cartReducer, initialState)
+  
+  return (
+    <CartStateContext.Provider value={state}>
+      <CartDispatchContext.Provider value={dispatch}>
+        {children}
+      </CartDispatchContext.Provider>
+    </CartStateContext.Provider>
+  )
+}
+
+// Components that only dispatch won't re-render on state changes
+function AddButton({ product }) {
+  const dispatch = useContext(CartDispatchContext)
+  return <button onClick={() => dispatch({ type: 'ADD', payload: product })}>Add</button>
+}
+```
+
+Context API is perfect for medium-sized apps without external dependencies!
+

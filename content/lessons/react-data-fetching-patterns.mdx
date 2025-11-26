@@ -1,0 +1,373 @@
+---
+title: Data Fetching Patterns
+chapterSlug: react-data-fetching
+duration: 15
+order: 1
+---
+
+## Data Fetching in React
+
+React doesn't have built-in data fetching. Let's explore the common patterns.
+
+## Basic Fetch with useEffect
+
+```jsx
+function UserList() {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/users')
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch users')
+        }
+        
+        const data = await response.json()
+        setUsers(data)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchUsers()
+  }, [])
+  
+  if (loading) return <p>Loading...</p>
+  if (error) return <p>Error: {error}</p>
+  
+  return (
+    <ul>
+      {users.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+## Custom useFetch Hook
+
+```jsx
+function useFetch(url) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
+  useEffect(() => {
+    const controller = new AbortController()
+    
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const response = await fetch(url, {
+          signal: controller.signal
+        })
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        
+        const json = await response.json()
+        setData(json)
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setError(err.message)
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+    
+    return () => controller.abort()
+  }, [url])
+  
+  return { data, loading, error }
+}
+
+// Usage
+function UserProfile({ userId }) {
+  const { data: user, loading, error } = useFetch(`/api/users/${userId}`)
+  
+  if (loading) return <Spinner />
+  if (error) return <Error message={error} />
+  
+  return <h1>{user.name}</h1>
+}
+```
+
+## Fetching with Dependencies
+
+```jsx
+function UserPosts({ userId }) {
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    const controller = new AbortController()
+    
+    const fetchPosts = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch(`/api/users/${userId}/posts`, {
+          signal: controller.signal
+        })
+        const data = await response.json()
+        setPosts(data)
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error(err)
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    if (userId) {
+      fetchPosts()
+    }
+    
+    return () => controller.abort()
+  }, [userId])  // Re-fetch when userId changes
+  
+  // render...
+}
+```
+
+## Parallel Fetching
+
+```jsx
+function Dashboard({ userId }) {
+  const [data, setData] = useState({
+    user: null,
+    posts: null,
+    comments: null
+  })
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    const fetchAll = async () => {
+      setLoading(true)
+      
+      try {
+        // Fetch in parallel
+        const [userRes, postsRes, commentsRes] = await Promise.all([
+          fetch(`/api/users/${userId}`),
+          fetch(`/api/users/${userId}/posts`),
+          fetch(`/api/users/${userId}/comments`)
+        ])
+        
+        const [user, posts, comments] = await Promise.all([
+          userRes.json(),
+          postsRes.json(),
+          commentsRes.json()
+        ])
+        
+        setData({ user, posts, comments })
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchAll()
+  }, [userId])
+  
+  // render...
+}
+```
+
+## Conditional Fetching
+
+```jsx
+function SearchResults({ query }) {
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  
+  useEffect(() => {
+    // Don't fetch if query is too short
+    if (query.length < 3) {
+      setResults([])
+      return
+    }
+    
+    const controller = new AbortController()
+    
+    const search = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch(
+          `/api/search?q=${encodeURIComponent(query)}`,
+          { signal: controller.signal }
+        )
+        const data = await response.json()
+        setResults(data)
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error(err)
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    search()
+    
+    return () => controller.abort()
+  }, [query])
+  
+  // render...
+}
+```
+
+## POST/PUT/DELETE Requests
+
+```jsx
+function CreateUser() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  
+  const createUser = async (userData) => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to create user')
+      }
+      
+      return await response.json()
+    } catch (err) {
+      setError(err.message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const newUser = await createUser({ name, email })
+      console.log('Created:', newUser)
+    } catch {
+      // Error already set in state
+    }
+  }
+  
+  // render...
+}
+```
+
+## API Service Layer
+
+```jsx
+// services/api.js
+const API_BASE = '/api'
+
+async function request(endpoint, options = {}) {
+  const url = `${API_BASE}${endpoint}`
+  
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers
+    },
+    ...options
+  }
+  
+  // Add auth token if available
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  
+  const response = await fetch(url, config)
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}))
+    throw new Error(error.message || 'Request failed')
+  }
+  
+  return response.json()
+}
+
+export const api = {
+  get: (endpoint) => request(endpoint),
+  
+  post: (endpoint, data) => request(endpoint, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  
+  put: (endpoint, data) => request(endpoint, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+  
+  delete: (endpoint) => request(endpoint, {
+    method: 'DELETE'
+  })
+}
+
+// Usage
+import { api } from './services/api'
+
+const users = await api.get('/users')
+const newUser = await api.post('/users', { name: 'John' })
+await api.delete('/users/123')
+```
+
+## Error Boundary for Data Fetching
+
+```jsx
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null }
+  
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error">
+          <h2>Something went wrong</h2>
+          <button onClick={() => window.location.reload()}>
+            Reload page
+          </button>
+        </div>
+      )
+    }
+    
+    return this.props.children
+  }
+}
+
+// Usage
+<ErrorBoundary>
+  <UserProfile userId={userId} />
+</ErrorBoundary>
+```
+
+These patterns form the foundation of data fetching in React!
+

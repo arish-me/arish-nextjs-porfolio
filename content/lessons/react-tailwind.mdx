@@ -1,0 +1,322 @@
+---
+title: Tailwind CSS with React
+chapterSlug: react-styling
+duration: 15
+order: 2
+---
+
+## Tailwind CSS with React
+
+Tailwind CSS is a utility-first framework that integrates beautifully with React.
+
+## Installation
+
+```bash
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+```javascript
+// tailwind.config.js
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+```css
+/* index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+## Basic Usage
+
+```jsx
+function Card({ title, children }) {
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">{title}</h2>
+      <p className="text-gray-600 leading-relaxed">{children}</p>
+    </div>
+  )
+}
+```
+
+## Responsive Design
+
+```jsx
+function ResponsiveGrid({ items }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+      {items.map(item => (
+        <div 
+          key={item.id} 
+          className="bg-white p-4 rounded shadow
+                     sm:p-6 
+                     md:p-8"
+        >
+          <h3 className="text-lg md:text-xl lg:text-2xl font-bold">
+            {item.title}
+          </h3>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+## Interactive States
+
+```jsx
+function Button({ children }) {
+  return (
+    <button className="
+      bg-blue-500 text-white px-4 py-2 rounded
+      hover:bg-blue-600
+      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+      active:bg-blue-700
+      disabled:opacity-50 disabled:cursor-not-allowed
+      transition-colors duration-200
+    ">
+      {children}
+    </button>
+  )
+}
+```
+
+## Conditional Classes with clsx
+
+```bash
+npm install clsx
+```
+
+```jsx
+import clsx from 'clsx'
+
+function Button({ variant, size, disabled, children }) {
+  return (
+    <button
+      className={clsx(
+        // Base styles
+        'font-medium rounded transition-colors',
+        
+        // Variants
+        {
+          'bg-blue-500 text-white hover:bg-blue-600': variant === 'primary',
+          'bg-gray-200 text-gray-800 hover:bg-gray-300': variant === 'secondary',
+          'bg-red-500 text-white hover:bg-red-600': variant === 'danger',
+          'bg-transparent border border-gray-300 hover:bg-gray-50': variant === 'outline',
+        },
+        
+        // Sizes
+        {
+          'text-sm px-3 py-1.5': size === 'small',
+          'px-4 py-2': size === 'medium',
+          'text-lg px-6 py-3': size === 'large',
+        },
+        
+        // States
+        {
+          'opacity-50 cursor-not-allowed': disabled,
+        }
+      )}
+      disabled={disabled}
+    >
+      {children}
+    </button>
+  )
+}
+```
+
+## Dark Mode
+
+```javascript
+// tailwind.config.js
+export default {
+  darkMode: 'class',
+  // ...
+}
+```
+
+```jsx
+function ThemeToggle() {
+  const [dark, setDark] = useState(false)
+  
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark)
+  }, [dark])
+  
+  return (
+    <button onClick={() => setDark(!dark)}>
+      {dark ? '☀️' : '🌙'}
+    </button>
+  )
+}
+
+function Card() {
+  return (
+    <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-lg shadow">
+      <h2 className="text-xl font-bold">Title</h2>
+      <p className="text-gray-600 dark:text-gray-300">Content</p>
+    </div>
+  )
+}
+```
+
+## Component Patterns
+
+### Reusable Input
+
+```jsx
+function Input({ label, error, ...props }) {
+  return (
+    <div className="mb-4">
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {label}
+        </label>
+      )}
+      <input
+        className={clsx(
+          'w-full px-3 py-2 border rounded-md shadow-sm',
+          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+          error
+            ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+            : 'border-gray-300'
+        )}
+        {...props}
+      />
+      {error && (
+        <p className="mt-1 text-sm text-red-600">{error}</p>
+      )}
+    </div>
+  )
+}
+```
+
+### Modal
+
+```jsx
+function Modal({ isOpen, onClose, title, children }) {
+  if (!isOpen) return null
+  
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">{title}</h2>
+            <button 
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+          <div>{children}</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+### Badge
+
+```jsx
+function Badge({ variant = 'default', children }) {
+  const variants = {
+    default: 'bg-gray-100 text-gray-800',
+    success: 'bg-green-100 text-green-800',
+    warning: 'bg-yellow-100 text-yellow-800',
+    danger: 'bg-red-100 text-red-800',
+    info: 'bg-blue-100 text-blue-800',
+  }
+  
+  return (
+    <span className={clsx(
+      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+      variants[variant]
+    )}>
+      {children}
+    </span>
+  )
+}
+```
+
+## Custom Theme
+
+```javascript
+// tailwind.config.js
+export default {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+        },
+        brand: '#ff6b6b',
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
+      spacing: {
+        '128': '32rem',
+      },
+    },
+  },
+}
+```
+
+```jsx
+<button className="bg-primary-500 hover:bg-primary-600">
+  Primary
+</button>
+```
+
+## @apply Directive
+
+For reusable component styles:
+
+```css
+/* styles.css */
+@layer components {
+  .btn {
+    @apply px-4 py-2 font-medium rounded transition-colors;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+}
+```
+
+```jsx
+<button className="btn btn-primary">Click me</button>
+<div className="card">Card content</div>
+```
+
+Tailwind CSS makes styling React components fast and consistent!
+

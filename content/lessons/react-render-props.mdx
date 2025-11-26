@@ -1,0 +1,299 @@
+---
+title: Render Props Pattern
+chapterSlug: react-advanced-patterns
+duration: 12
+order: 2
+---
+
+## Render Props Pattern
+
+Render props is a technique for sharing code between components using a prop whose value is a function.
+
+## Basic Render Props
+
+```jsx
+// Component with render prop
+function Mouse({ render }) {
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setPosition({ x: e.clientX, y: e.clientY })
+    }
+    
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+  
+  return render(position)
+}
+
+// Usage
+function App() {
+  return (
+    <Mouse 
+      render={({ x, y }) => (
+        <div>
+          Mouse position: {x}, {y}
+        </div>
+      )}
+    />
+  )
+}
+```
+
+## Children as Function
+
+Common variation using children:
+
+```jsx
+function Mouse({ children }) {
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setPosition({ x: e.clientX, y: e.clientY })
+    }
+    
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+  
+  return children(position)
+}
+
+// Usage - cleaner syntax
+function App() {
+  return (
+    <Mouse>
+      {({ x, y }) => (
+        <div>Mouse position: {x}, {y}</div>
+      )}
+    </Mouse>
+  )
+}
+```
+
+## Toggle Component
+
+```jsx
+function Toggle({ children }) {
+  const [on, setOn] = useState(false)
+  
+  const toggle = () => setOn(prev => !prev)
+  const setTrue = () => setOn(true)
+  const setFalse = () => setOn(false)
+  
+  return children({ on, toggle, setTrue, setFalse })
+}
+
+// Usage
+function App() {
+  return (
+    <Toggle>
+      {({ on, toggle }) => (
+        <div>
+          <button onClick={toggle}>
+            {on ? 'ON' : 'OFF'}
+          </button>
+          {on && <div>Content is visible!</div>}
+        </div>
+      )}
+    </Toggle>
+  )
+}
+```
+
+## Fetch Component
+
+```jsx
+function Fetch({ url, children }) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch(url)
+        const json = await response.json()
+        setData(json)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+  }, [url])
+  
+  return children({ data, loading, error })
+}
+
+// Usage
+function UserProfile({ userId }) {
+  return (
+    <Fetch url={`/api/users/${userId}`}>
+      {({ data, loading, error }) => {
+        if (loading) return <Spinner />
+        if (error) return <Error message={error} />
+        return <Profile user={data} />
+      }}
+    </Fetch>
+  )
+}
+```
+
+## Form Component
+
+```jsx
+function Form({ initialValues, onSubmit, children }) {
+  const [values, setValues] = useState(initialValues)
+  const [errors, setErrors] = useState({})
+  
+  const handleChange = (name) => (e) => {
+    setValues(prev => ({
+      ...prev,
+      [name]: e.target.value
+    }))
+  }
+  
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onSubmit(values)
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      {children({ values, errors, handleChange })}
+    </form>
+  )
+}
+
+// Usage
+function LoginForm() {
+  return (
+    <Form 
+      initialValues={{ email: '', password: '' }}
+      onSubmit={values => console.log(values)}
+    >
+      {({ values, handleChange }) => (
+        <>
+          <input
+            value={values.email}
+            onChange={handleChange('email')}
+            placeholder="Email"
+          />
+          <input
+            type="password"
+            value={values.password}
+            onChange={handleChange('password')}
+            placeholder="Password"
+          />
+          <button type="submit">Login</button>
+        </>
+      )}
+    </Form>
+  )
+}
+```
+
+## Downshift Pattern (Advanced)
+
+```jsx
+function Autocomplete({ items, onChange, children }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [inputValue, setInputValue] = useState('')
+  const [highlightedIndex, setHighlightedIndex] = useState(0)
+  
+  const filteredItems = items.filter(item =>
+    item.toLowerCase().includes(inputValue.toLowerCase())
+  )
+  
+  const getInputProps = () => ({
+    value: inputValue,
+    onChange: (e) => setInputValue(e.target.value),
+    onFocus: () => setIsOpen(true),
+    onBlur: () => setTimeout(() => setIsOpen(false), 200),
+    onKeyDown: (e) => {
+      if (e.key === 'ArrowDown') {
+        setHighlightedIndex(i => Math.min(i + 1, filteredItems.length - 1))
+      } else if (e.key === 'ArrowUp') {
+        setHighlightedIndex(i => Math.max(i - 1, 0))
+      } else if (e.key === 'Enter' && isOpen) {
+        selectItem(filteredItems[highlightedIndex])
+      }
+    }
+  })
+  
+  const getItemProps = (index) => ({
+    onClick: () => selectItem(filteredItems[index]),
+    className: highlightedIndex === index ? 'highlighted' : ''
+  })
+  
+  const selectItem = (item) => {
+    setInputValue(item)
+    setIsOpen(false)
+    onChange(item)
+  }
+  
+  return children({
+    isOpen,
+    inputValue,
+    filteredItems,
+    highlightedIndex,
+    getInputProps,
+    getItemProps
+  })
+}
+
+// Usage
+<Autocomplete items={['React', 'Vue', 'Angular']} onChange={console.log}>
+  {({ isOpen, filteredItems, getInputProps, getItemProps }) => (
+    <div>
+      <input {...getInputProps()} />
+      {isOpen && (
+        <ul>
+          {filteredItems.map((item, index) => (
+            <li key={item} {...getItemProps(index)}>{item}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )}
+</Autocomplete>
+```
+
+## Render Props vs Hooks
+
+Most render prop patterns can be replaced with hooks:
+
+```jsx
+// Render prop
+<Mouse>
+  {({ x, y }) => <Cursor x={x} y={y} />}
+</Mouse>
+
+// Hook equivalent
+function App() {
+  const { x, y } = useMouse()
+  return <Cursor x={x} y={y} />
+}
+```
+
+### When to use Render Props
+
+- When you need to pass rendered output
+- Component libraries with flexible rendering
+- When hooks aren't possible
+
+### When to use Hooks
+
+- Most stateful logic sharing (preferred)
+- Simpler code structure
+- Better composability
+
+Render props remain useful for specific patterns!
+
