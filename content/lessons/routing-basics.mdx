@@ -1,0 +1,370 @@
+---
+title: Routing in Rails
+chapterSlug: rails-fundamentals
+duration: 12
+order: 2
+---
+
+## Routing in Rails
+
+The router is the traffic controller of your Rails app. It receives incoming requests and dispatches them to the appropriate controller action.
+
+## The Routes File
+
+All routes are defined in `config/routes.rb`:
+
+```ruby
+Rails.application.routes.draw do
+  # Your routes go here
+end
+```
+
+## Basic Routes
+
+### Simple Routes
+
+```ruby
+# GET /welcome → WelcomeController#index
+get '/welcome', to: 'welcome#index'
+
+# POST /articles → ArticlesController#create
+post '/articles', to: 'articles#create'
+
+# Route with dynamic segment
+get '/articles/:id', to: 'articles#show'
+# /articles/1 → params[:id] = "1"
+# /articles/42 → params[:id] = "42"
+```
+
+### Root Route
+
+The homepage of your application:
+
+```ruby
+# GET / → PagesController#home
+root 'pages#home'
+
+# Or using a specific controller action
+root to: 'articles#index'
+```
+
+## RESTful Routes with Resources
+
+The `resources` method generates all CRUD routes:
+
+```ruby
+resources :articles
+```
+
+This creates these routes:
+
+| HTTP Verb | Path | Controller#Action | Used For |
+|-----------|------|-------------------|----------|
+| GET | /articles | articles#index | List all articles |
+| GET | /articles/new | articles#new | Form for new article |
+| POST | /articles | articles#create | Create an article |
+| GET | /articles/:id | articles#show | Show an article |
+| GET | /articles/:id/edit | articles#edit | Form to edit article |
+| PATCH/PUT | /articles/:id | articles#update | Update an article |
+| DELETE | /articles/:id | articles#destroy | Delete an article |
+
+### Limiting Routes
+
+```ruby
+# Only specific actions
+resources :articles, only: [:index, :show]
+
+# All except specific actions
+resources :articles, except: [:destroy]
+```
+
+### Singular Resource
+
+For resources where there's only one (like current user profile):
+
+```ruby
+resource :profile
+# GET /profile → profiles#show
+# GET /profile/edit → profiles#edit
+# PATCH /profile → profiles#update
+```
+
+## Nested Resources
+
+For resources that belong to other resources:
+
+```ruby
+resources :articles do
+  resources :comments
+end
+```
+
+This creates routes like:
+- `GET /articles/:article_id/comments` → comments#index
+- `POST /articles/:article_id/comments` → comments#create
+- `GET /articles/:article_id/comments/:id` → comments#show
+
+```ruby
+# In CommentsController
+class CommentsController < ApplicationController
+  def create
+    @article = Article.find(params[:article_id])
+    @comment = @article.comments.build(comment_params)
+    @comment.save
+  end
+end
+```
+
+### Shallow Nesting
+
+Avoid deeply nested routes:
+
+```ruby
+resources :articles do
+  resources :comments, shallow: true
+end
+
+# Creates:
+# /articles/:article_id/comments (index, new, create)
+# /comments/:id (show, edit, update, destroy)
+```
+
+## Custom Routes
+
+### Member Routes
+
+Actions on a specific resource:
+
+```ruby
+resources :articles do
+  member do
+    post :publish
+    delete :archive
+  end
+end
+
+# POST /articles/:id/publish → articles#publish
+# DELETE /articles/:id/archive → articles#archive
+```
+
+Shorthand for single action:
+
+```ruby
+resources :articles do
+  post :publish, on: :member
+end
+```
+
+### Collection Routes
+
+Actions on the entire collection:
+
+```ruby
+resources :articles do
+  collection do
+    get :search
+    get :drafts
+  end
+end
+
+# GET /articles/search → articles#search
+# GET /articles/drafts → articles#drafts
+```
+
+## Named Routes and Helpers
+
+Rails generates URL helper methods for each route:
+
+```ruby
+resources :articles
+```
+
+This creates these helpers:
+
+```ruby
+articles_path          # /articles
+articles_url           # http://example.com/articles
+new_article_path       # /articles/new
+article_path(@article) # /articles/1
+edit_article_path(@article) # /articles/1/edit
+```
+
+Use them in views and controllers:
+
+```erb
+<!-- In views -->
+<%= link_to 'All Articles', articles_path %>
+<%= link_to article.title, article_path(article) %>
+<%= link_to 'Edit', edit_article_path(article) %>
+
+<!-- Shorthand with resources -->
+<%= link_to 'View', article %>
+<%= link_to 'Edit', [:edit, article] %>
+```
+
+### Custom Path Names
+
+```ruby
+resources :articles, path: 'posts'
+# /posts, /posts/:id instead of /articles, /articles/:id
+
+resources :articles, path_names: { new: 'create', edit: 'modify' }
+# /articles/create, /articles/:id/modify
+```
+
+### Named Routes with 'as'
+
+```ruby
+get '/login', to: 'sessions#new', as: :login
+# login_path → /login
+
+get '/dashboard', to: 'admin#dashboard', as: :admin_dashboard
+# admin_dashboard_path → /dashboard
+```
+
+## Namespaces and Scopes
+
+### Namespace
+
+Groups controllers under a module and changes the URL:
+
+```ruby
+namespace :admin do
+  resources :articles
+end
+
+# URL: /admin/articles
+# Controller: Admin::ArticlesController
+# Views: app/views/admin/articles/
+```
+
+```ruby
+# app/controllers/admin/articles_controller.rb
+module Admin
+  class ArticlesController < ApplicationController
+    def index
+      @articles = Article.all
+    end
+  end
+end
+```
+
+### Scope
+
+Changes the URL but not the controller module:
+
+```ruby
+scope '/admin' do
+  resources :articles
+end
+
+# URL: /admin/articles
+# Controller: ArticlesController (no module)
+```
+
+### Module Only
+
+Changes the controller module but not the URL:
+
+```ruby
+scope module: 'admin' do
+  resources :articles
+end
+
+# URL: /articles
+# Controller: Admin::ArticlesController
+```
+
+## Route Constraints
+
+### Format Constraints
+
+```ruby
+# Only respond to JSON
+resources :articles, constraints: { format: 'json' }
+
+# Multiple formats
+get '/feed', to: 'articles#feed', constraints: { format: /(rss|atom)/ }
+```
+
+### Custom Constraints
+
+```ruby
+# Only numeric IDs
+resources :articles, constraints: { id: /\d+/ }
+
+# Subdomain constraint
+constraints subdomain: 'api' do
+  resources :articles
+end
+
+# Custom constraint class
+class AuthenticatedConstraint
+  def matches?(request)
+    request.session[:user_id].present?
+  end
+end
+
+constraints AuthenticatedConstraint.new do
+  resources :dashboard
+end
+```
+
+## Redirects
+
+```ruby
+# Simple redirect
+get '/old-path', to: redirect('/new-path')
+
+# Dynamic redirect
+get '/articles/:id', to: redirect('/posts/%{id}')
+
+# Redirect with status code
+get '/old', to: redirect('/new', status: 301)
+```
+
+## Viewing Routes
+
+```bash
+# See all routes
+rails routes
+
+# Filter routes
+rails routes -c articles    # Only ArticlesController
+rails routes -g search      # Routes matching "search"
+```
+
+## Route Organization
+
+For large applications, organize routes:
+
+```ruby
+# config/routes.rb
+Rails.application.routes.draw do
+  root 'home#index'
+  
+  # Public routes
+  resources :articles, only: [:index, :show]
+  
+  # Authenticated routes
+  authenticate :user do
+    resources :articles, except: [:index, :show]
+  end
+  
+  # Admin namespace
+  namespace :admin do
+    resources :users
+    resources :articles
+  end
+  
+  # API namespace
+  namespace :api do
+    namespace :v1 do
+      resources :articles, only: [:index, :show]
+    end
+  end
+end
+```
+
+Routes are the entry point to your application - design them thoughtfully!
+

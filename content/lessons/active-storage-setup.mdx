@@ -1,0 +1,281 @@
+---
+title: Active Storage Setup
+chapterSlug: active-storage
+duration: 10
+order: 1
+---
+
+## Active Storage
+
+Active Storage is Rails' built-in solution for uploading files to cloud storage services like Amazon S3, Google Cloud Storage, or Microsoft Azure Storage. It can also store files locally.
+
+## Installation
+
+Active Storage comes with Rails. Install the migrations:
+
+```bash
+rails active_storage:install
+rails db:migrate
+```
+
+This creates two tables:
+- `active_storage_blobs` - Stores file metadata
+- `active_storage_attachments` - Polymorphic join table linking blobs to models
+
+## Configuration
+
+### Local Storage (Development)
+
+```yaml
+# config/storage.yml
+local:
+  service: Disk
+  root: <%= Rails.root.join("storage") %>
+```
+
+### Amazon S3
+
+```yaml
+# config/storage.yml
+amazon:
+  service: S3
+  access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
+  secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
+  region: us-east-1
+  bucket: your-bucket-name
+```
+
+Add the gem:
+```ruby
+# Gemfile
+gem 'aws-sdk-s3', require: false
+```
+
+### Google Cloud Storage
+
+```yaml
+google:
+  service: GCS
+  project: your-project
+  credentials: <%= Rails.root.join("path/to/keyfile.json") %>
+  bucket: your-bucket-name
+```
+
+### Setting the Service
+
+```ruby
+# config/environments/development.rb
+config.active_storage.service = :local
+
+# config/environments/production.rb
+config.active_storage.service = :amazon
+```
+
+## Attaching Files to Models
+
+### has_one_attached
+
+For single file attachments:
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+end
+```
+
+### has_many_attached
+
+For multiple file attachments:
+
+```ruby
+class Article < ApplicationRecord
+  has_many_attached :images
+end
+```
+
+## Using Attachments
+
+### In Forms
+
+```erb
+<%= form_with model: @user do |f| %>
+  <%= f.label :avatar %>
+  <%= f.file_field :avatar %>
+  <%= f.submit %>
+<% end %>
+
+<!-- Multiple files -->
+<%= form_with model: @article do |f| %>
+  <%= f.label :images %>
+  <%= f.file_field :images, multiple: true %>
+  <%= f.submit %>
+<% end %>
+```
+
+### In Controllers
+
+```ruby
+class UsersController < ApplicationController
+  def create
+    @user = User.new(user_params)
+    if @user.save
+      redirect_to @user
+    else
+      render :new
+    end
+  end
+  
+  def update
+    @user = User.find(params[:id])
+    @user.update(user_params)
+  end
+  
+  private
+  
+  def user_params
+    params.require(:user).permit(:name, :email, :avatar, images: [])
+  end
+end
+```
+
+### Attaching Files Programmatically
+
+```ruby
+# Attach from file path
+user.avatar.attach(io: File.open('/path/to/file.jpg'), filename: 'avatar.jpg')
+
+# Attach from URL
+require 'open-uri'
+user.avatar.attach(io: URI.open('https://example.com/image.jpg'), filename: 'avatar.jpg')
+
+# Attach from uploaded file
+user.avatar.attach(params[:avatar])
+
+# Multiple files
+article.images.attach(params[:images])
+```
+
+## Displaying Attachments
+
+### Images
+
+```erb
+<% if @user.avatar.attached? %>
+  <%= image_tag @user.avatar %>
+  
+  <!-- With size -->
+  <%= image_tag @user.avatar, size: "100x100" %>
+  
+  <!-- Get URL -->
+  <%= url_for(@user.avatar) %>
+  
+  <!-- Rails URL helper -->
+  <%= rails_blob_path(@user.avatar, only_path: true) %>
+<% end %>
+```
+
+### Download Links
+
+```erb
+<%= link_to "Download", rails_blob_path(@document.file, disposition: "attachment") %>
+
+<!-- Or inline -->
+<%= link_to "View", rails_blob_path(@document.file, disposition: "inline") %>
+```
+
+### Multiple Attachments
+
+```erb
+<% @article.images.each do |image| %>
+  <%= image_tag image, class: "gallery-image" %>
+<% end %>
+```
+
+## Checking Attachments
+
+```ruby
+# Check if attached
+user.avatar.attached?
+
+# Check how many
+article.images.count
+
+# Get blob metadata
+user.avatar.blob.filename
+user.avatar.blob.content_type
+user.avatar.blob.byte_size
+user.avatar.blob.created_at
+```
+
+## Removing Attachments
+
+```ruby
+# Remove single attachment
+user.avatar.purge       # Synchronously
+user.avatar.purge_later # Background job
+
+# Remove from collection
+article.images.find(blob_id).purge
+```
+
+### Remove in Form
+
+```erb
+<%= form_with model: @user do |f| %>
+  <% if @user.avatar.attached? %>
+    <%= image_tag @user.avatar, size: "100x100" %>
+    <%= f.check_box :remove_avatar, {}, true, false %>
+    <%= f.label :remove_avatar, "Remove avatar" %>
+  <% end %>
+  
+  <%= f.file_field :avatar %>
+  <%= f.submit %>
+<% end %>
+```
+
+```ruby
+# Controller
+def update
+  @user = User.find(params[:id])
+  @user.avatar.purge if params[:user][:remove_avatar] == "true"
+  @user.update(user_params)
+end
+```
+
+## Direct Uploads
+
+Enable JavaScript direct uploads for better UX:
+
+```javascript
+// app/javascript/application.js
+import * as ActiveStorage from "@rails/activestorage"
+ActiveStorage.start()
+```
+
+```erb
+<%= form_with model: @article, local: true do |f| %>
+  <%= f.file_field :images, multiple: true, direct_upload: true %>
+  <%= f.submit %>
+<% end %>
+```
+
+## Callbacks
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+  
+  after_commit :process_avatar, on: [:create, :update]
+  
+  private
+  
+  def process_avatar
+    if avatar.attached?
+      # Do something after avatar is uploaded
+    end
+  end
+end
+```
+
+Active Storage makes file handling in Rails simple and flexible!
+

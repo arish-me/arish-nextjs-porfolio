@@ -1,0 +1,309 @@
+---
+title: Belongs To and Has One
+chapterSlug: active-record-associations
+duration: 10
+order: 1
+---
+
+## Active Record Associations
+
+Associations are connections between models. They make common operations simpler and easier by using the relationships between models.
+
+## Why Associations?
+
+Without associations, you'd have to write a lot of manual code:
+
+```ruby
+# Without associations
+class Article < ApplicationRecord
+end
+
+class Comment < ApplicationRecord
+end
+
+# Getting all comments for an article
+comments = Comment.where(article_id: article.id)
+
+# Creating a comment for an article
+comment = Comment.create(article_id: article.id, body: "Great article!")
+```
+
+With associations, it becomes much cleaner:
+
+```ruby
+# With associations
+class Article < ApplicationRecord
+  has_many :comments
+end
+
+class Comment < ApplicationRecord
+  belongs_to :article
+end
+
+# Getting all comments
+comments = article.comments
+
+# Creating a comment
+article.comments.create(body: "Great article!")
+```
+
+## belongs_to Association
+
+`belongs_to` sets up a connection with another model where the current model contains the foreign key.
+
+### Basic Usage
+
+```ruby
+# The comments table has an article_id column
+class Comment < ApplicationRecord
+  belongs_to :article
+end
+
+# Migration
+class CreateComments < ActiveRecord::Migration[7.1]
+  def change
+    create_table :comments do |t|
+      t.text :body
+      t.references :article, null: false, foreign_key: true
+      t.timestamps
+    end
+  end
+end
+```
+
+### Using belongs_to
+
+```ruby
+comment = Comment.first
+
+# Access the associated article
+comment.article            # => #<Article id: 1, title: "...">
+comment.article.title      # => "My Article"
+
+# Set the association
+comment.article = Article.find(2)
+comment.save
+
+# Build a new article (doesn't save)
+comment.build_article(title: "New Article")
+
+# Create a new article (saves immediately)
+comment.create_article(title: "New Article")
+```
+
+### belongs_to Options
+
+```ruby
+class Comment < ApplicationRecord
+  # Basic
+  belongs_to :article
+  
+  # Custom class name
+  belongs_to :author, class_name: "User"
+  
+  # Custom foreign key
+  belongs_to :article, foreign_key: "post_id"
+  
+  # Optional association (allows nil)
+  belongs_to :category, optional: true
+  
+  # Polymorphic association
+  belongs_to :commentable, polymorphic: true
+  
+  # Touch parent on update
+  belongs_to :article, touch: true
+  
+  # Counter cache
+  belongs_to :article, counter_cache: true
+  # Requires articles.comments_count column
+  
+  # Inverse of (for bidirectional associations)
+  belongs_to :article, inverse_of: :comments
+  
+  # Dependent behavior
+  belongs_to :article, dependent: :destroy
+end
+```
+
+### Optional belongs_to
+
+By default in Rails 5+, `belongs_to` requires the associated record to exist:
+
+```ruby
+class Comment < ApplicationRecord
+  belongs_to :article  # article_id cannot be nil
+end
+
+comment = Comment.new(body: "Test")
+comment.valid?  # => false
+comment.errors  # => { article: ["must exist"] }
+
+# Make it optional
+class Comment < ApplicationRecord
+  belongs_to :article, optional: true
+end
+
+# Or globally in config
+# config/application.rb
+config.active_record.belongs_to_required_by_default = false
+```
+
+## has_one Association
+
+`has_one` sets up a one-to-one connection where the other model contains the foreign key.
+
+### Basic Usage
+
+```ruby
+class User < ApplicationRecord
+  has_one :profile
+end
+
+class Profile < ApplicationRecord
+  belongs_to :user
+end
+
+# Migration for profiles
+class CreateProfiles < ActiveRecord::Migration[7.1]
+  def change
+    create_table :profiles do |t|
+      t.string :bio
+      t.string :avatar_url
+      t.references :user, null: false, foreign_key: true
+      t.timestamps
+    end
+  end
+end
+```
+
+### Using has_one
+
+```ruby
+user = User.first
+
+# Access the associated profile
+user.profile              # => #<Profile id: 1, ...>
+user.profile.bio          # => "Ruby developer"
+
+# Check if profile exists
+user.profile.present?     # => true
+
+# Set the association
+user.profile = Profile.new(bio: "New bio")
+user.save
+
+# Build a new profile (doesn't save)
+user.build_profile(bio: "My bio")
+
+# Create a new profile (saves immediately)
+user.create_profile(bio: "My bio")
+```
+
+### has_one Options
+
+```ruby
+class User < ApplicationRecord
+  # Basic
+  has_one :profile
+  
+  # Custom class name
+  has_one :account, class_name: "UserAccount"
+  
+  # Custom foreign key
+  has_one :profile, foreign_key: "owner_id"
+  
+  # Dependent behavior
+  has_one :profile, dependent: :destroy
+  has_one :profile, dependent: :delete
+  has_one :profile, dependent: :nullify
+  
+  # Conditions
+  has_one :active_subscription, -> { where(active: true) }, class_name: "Subscription"
+  
+  # Through another association
+  has_one :account_history, through: :profile
+  
+  # Source (when through is used)
+  has_one :main_address, through: :profile, source: :address
+end
+```
+
+## has_one vs belongs_to
+
+The key difference is where the foreign key lives:
+
+```
+┌─────────────┐         ┌─────────────┐
+│    User     │         │   Profile   │
+├─────────────┤         ├─────────────┤
+│ id          │◀────────│ user_id     │
+│ name        │ has_one │ bio         │
+│ email       │         │ avatar_url  │
+└─────────────┘         └─────────────┘
+                belongs_to
+```
+
+The model with the **foreign key** uses `belongs_to`.
+
+## Touch Option
+
+Update parent's `updated_at` when child changes:
+
+```ruby
+class Comment < ApplicationRecord
+  belongs_to :article, touch: true
+end
+
+# When comment is saved/updated/destroyed:
+comment.save
+# Article's updated_at is also updated!
+
+# Touch specific column
+belongs_to :article, touch: :comments_updated_at
+```
+
+## Counter Cache
+
+Track the number of associated records efficiently:
+
+```ruby
+# Migration
+class AddCommentsCountToArticles < ActiveRecord::Migration[7.1]
+  def change
+    add_column :articles, :comments_count, :integer, default: 0
+    
+    # Backfill existing counts
+    Article.find_each do |article|
+      Article.reset_counters(article.id, :comments)
+    end
+  end
+end
+
+# Model
+class Comment < ApplicationRecord
+  belongs_to :article, counter_cache: true
+end
+
+# Usage
+article.comments_count  # No database query!
+
+# Custom column name
+belongs_to :article, counter_cache: :total_comments
+```
+
+## Autosave
+
+Automatically save associated records:
+
+```ruby
+class Article < ApplicationRecord
+  has_one :metadata, autosave: true
+end
+
+article = Article.find(1)
+article.metadata.description = "New description"
+article.save  # Also saves metadata!
+```
+
+These are the foundational one-to-one relationships in Rails!
+

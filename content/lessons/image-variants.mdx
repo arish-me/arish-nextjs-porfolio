@@ -1,0 +1,255 @@
+---
+title: Image Variants and Processing
+chapterSlug: active-storage
+duration: 10
+order: 2
+---
+
+## Image Processing with Active Storage
+
+Active Storage can transform images on-the-fly using variants. This is perfect for creating thumbnails, resizing images, and applying filters.
+
+## Setup
+
+Add image processing gem:
+
+```ruby
+# Gemfile
+gem 'image_processing', '~> 1.2'
+```
+
+Install ImageMagick or libvips:
+
+```bash
+# macOS
+brew install vips
+
+# Ubuntu
+sudo apt install libvips
+```
+
+## Creating Variants
+
+### Basic Resize
+
+```erb
+<!-- Resize to fit within dimensions -->
+<%= image_tag @user.avatar.variant(resize_to_limit: [100, 100]) %>
+
+<!-- Resize to exact dimensions (crops if needed) -->
+<%= image_tag @user.avatar.variant(resize_to_fill: [100, 100]) %>
+
+<!-- Resize to fill, with gravity -->
+<%= image_tag @user.avatar.variant(resize_to_fill: [100, 100, { gravity: "Center" }]) %>
+
+<!-- Resize width only (height auto) -->
+<%= image_tag @user.avatar.variant(resize: "300x") %>
+
+<!-- Resize height only (width auto) -->
+<%= image_tag @user.avatar.variant(resize: "x200") %>
+```
+
+### Common Variant Options
+
+```ruby
+# Thumbnail (resize and crop)
+avatar.variant(resize_to_fill: [150, 150])
+
+# Limit size (maintain aspect ratio)
+avatar.variant(resize_to_limit: [800, 600])
+
+# Convert format
+avatar.variant(format: :webp)
+
+# Rotate
+avatar.variant(rotate: 90)
+
+# Quality (for JPEG)
+avatar.variant(saver: { quality: 80 })
+
+# Multiple transformations
+avatar.variant(
+  resize_to_fill: [200, 200],
+  format: :webp,
+  saver: { quality: 80 }
+)
+```
+
+## Named Variants
+
+Define variants in your model for reuse:
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar do |attachable|
+    attachable.variant :thumb, resize_to_fill: [100, 100]
+    attachable.variant :medium, resize_to_limit: [300, 300]
+    attachable.variant :large, resize_to_limit: [800, 800]
+  end
+end
+```
+
+```erb
+<%= image_tag @user.avatar.variant(:thumb) %>
+<%= image_tag @user.avatar.variant(:medium) %>
+<%= image_tag @user.avatar.variant(:large) %>
+```
+
+## Preprocessing Variants
+
+Generate variants immediately on upload:
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar do |attachable|
+    attachable.variant :thumb, resize_to_fill: [100, 100], preprocessed: true
+  end
+end
+```
+
+Or use a job:
+
+```ruby
+class ProcessImageJob < ApplicationJob
+  def perform(user)
+    user.avatar.variant(:thumb).processed
+    user.avatar.variant(:medium).processed
+  end
+end
+
+# After upload
+class User < ApplicationRecord
+  after_commit :process_avatar_variants, on: [:create, :update]
+  
+  private
+  
+  def process_avatar_variants
+    ProcessImageJob.perform_later(self) if avatar.attached?
+  end
+end
+```
+
+## Checking Variant Status
+
+```ruby
+# Check if variant is processed
+user.avatar.variant(:thumb).processed?
+
+# Process synchronously
+variant = user.avatar.variant(:thumb).processed
+
+# Get variant URL
+url_for(user.avatar.variant(:thumb))
+```
+
+## Representation (for non-images)
+
+For PDFs and videos, use representations:
+
+```ruby
+class Document < ApplicationRecord
+  has_one_attached :file
+end
+```
+
+```erb
+<% if @document.file.representable? %>
+  <%= image_tag @document.file.representation(resize_to_limit: [100, 100]) %>
+<% end %>
+```
+
+## Preview (for videos)
+
+```ruby
+class Video < ApplicationRecord
+  has_one_attached :file
+end
+```
+
+```erb
+<% if @video.file.previewable? %>
+  <%= image_tag @video.file.preview(resize_to_limit: [300, 300]) %>
+<% end %>
+```
+
+## Validations
+
+Validate file types and sizes:
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+  
+  validates :avatar, content_type: ['image/png', 'image/jpeg', 'image/gif'],
+                     size: { less_than: 5.megabytes }
+end
+
+# Or with active_storage_validations gem
+# Gemfile: gem 'active_storage_validations'
+
+class User < ApplicationRecord
+  has_one_attached :avatar
+  
+  validates :avatar, attached: true,
+                     content_type: [:png, :jpg, :jpeg],
+                     size: { less_than: 5.megabytes },
+                     dimension: { width: { min: 100, max: 2000 },
+                                  height: { min: 100, max: 2000 } }
+end
+```
+
+## Custom Transformations
+
+```ruby
+# Using ImageMagick/libvips options directly
+avatar.variant(
+  resize_to_fill: [200, 200],
+  monochrome: true,
+  rotate: 45
+)
+
+# Complex transformation
+avatar.variant(
+  resize_to_fill: [400, 400],
+  format: :jpg,
+  saver: { 
+    quality: 85,
+    strip: true  # Remove metadata
+  }
+)
+```
+
+## Responsive Images
+
+```erb
+<picture>
+  <source 
+    srcset="<%= url_for(@article.image.variant(resize_to_limit: [1200, 1200])) %>"
+    media="(min-width: 1200px)">
+  <source 
+    srcset="<%= url_for(@article.image.variant(resize_to_limit: [800, 800])) %>"
+    media="(min-width: 800px)">
+  <source 
+    srcset="<%= url_for(@article.image.variant(resize_to_limit: [400, 400])) %>"
+    media="(min-width: 400px)">
+  <%= image_tag @article.image.variant(resize_to_limit: [400, 400]), 
+      alt: @article.title,
+      loading: "lazy" %>
+</picture>
+```
+
+## Using with CDN
+
+```ruby
+# config/environments/production.rb
+config.active_storage.service = :amazon
+
+# Use CDN for serving
+config.active_storage.resolve_model_to_route = :rails_storage_proxy
+
+# Or custom CDN host
+Rails.application.routes.default_url_options[:host] = 'cdn.example.com'
+```
+
+Image variants make it easy to serve optimized images for any use case!
+

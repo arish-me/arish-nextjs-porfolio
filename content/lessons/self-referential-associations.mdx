@@ -1,0 +1,336 @@
+---
+title: Self-Referential Associations
+chapterSlug: active-record-associations
+duration: 10
+order: 5
+---
+
+## Self-Referential Associations
+
+Self-referential associations are when a model has a relationship with itself. Common examples include employees and managers, followers on social networks, and parent-child categories.
+
+## Basic Self-Referential belongs_to
+
+### Employee and Manager
+
+```ruby
+class Employee < ApplicationRecord
+  belongs_to :manager, class_name: "Employee", optional: true
+  has_many :subordinates, class_name: "Employee", foreign_key: "manager_id"
+end
+```
+
+### Migration
+
+```ruby
+class CreateEmployees < ActiveRecord::Migration[7.1]
+  def change
+    create_table :employees do |t|
+      t.string :name
+      t.references :manager, foreign_key: { to_table: :employees }
+      t.timestamps
+    end
+  end
+end
+```
+
+### Usage
+
+```ruby
+# Create employees
+ceo = Employee.create(name: "Jane CEO")
+manager = Employee.create(name: "Bob Manager", manager: ceo)
+developer = Employee.create(name: "Alice Developer", manager: manager)
+
+# Navigate the hierarchy
+developer.manager              # => Bob Manager
+developer.manager.manager      # => Jane CEO
+manager.subordinates           # => [Alice Developer]
+ceo.subordinates               # => [Bob Manager]
+
+# Find all without manager (top level)
+Employee.where(manager: nil)
+```
+
+## Many-to-Many Self-Referential
+
+### Social Network Followers
+
+```ruby
+class User < ApplicationRecord
+  # People I follow
+  has_many :active_follows, class_name: "Follow",
+           foreign_key: "follower_id", dependent: :destroy
+  has_many :following, through: :active_follows, source: :followed
+  
+  # People who follow me
+  has_many :passive_follows, class_name: "Follow",
+           foreign_key: "followed_id", dependent: :destroy
+  has_many :followers, through: :passive_follows, source: :follower
+  
+  def follow(other_user)
+    following << other_user unless self == other_user
+  end
+  
+  def unfollow(other_user)
+    following.delete(other_user)
+  end
+  
+  def following?(other_user)
+    following.include?(other_user)
+  end
+end
+
+class Follow < ApplicationRecord
+  belongs_to :follower, class_name: "User"
+  belongs_to :followed, class_name: "User"
+  
+  validates :follower_id, uniqueness: { scope: :followed_id }
+  validate :cannot_follow_self
+  
+  private
+  
+  def cannot_follow_self
+    errors.add(:base, "You can't follow yourself") if follower_id == followed_id
+  end
+end
+```
+
+### Migration
+
+```ruby
+class CreateFollows < ActiveRecord::Migration[7.1]
+  def change
+    create_table :follows do |t|
+      t.references :follower, null: false, foreign_key: { to_table: :users }
+      t.references :followed, null: false, foreign_key: { to_table: :users }
+      t.timestamps
+    end
+    
+    add_index :follows, [:follower_id, :followed_id], unique: true
+  end
+end
+```
+
+### Usage
+
+```ruby
+alice = User.find(1)
+bob = User.find(2)
+
+alice.follow(bob)
+alice.following?(bob)     # => true
+bob.followers             # => [alice]
+alice.following           # => [bob]
+alice.followers.count     # Number of followers
+alice.following.count     # Number following
+```
+
+## Friendships (Bidirectional)
+
+```ruby
+class User < ApplicationRecord
+  has_many :friendships, dependent: :destroy
+  has_many :friends, through: :friendships
+  
+  has_many :inverse_friendships, class_name: "Friendship",
+           foreign_key: "friend_id", dependent: :destroy
+  has_many :inverse_friends, through: :inverse_friendships, source: :user
+  
+  def all_friends
+    friends + inverse_friends
+  end
+  
+  def friend?(user)
+    friends.include?(user) || inverse_friends.include?(user)
+  end
+  
+  def befriend(user)
+    friendships.create(friend: user) unless friend?(user)
+  end
+  
+  def unfriend(user)
+    friendships.where(friend: user).destroy_all
+    inverse_friendships.where(user: user).destroy_all
+  end
+end
+
+class Friendship < ApplicationRecord
+  belongs_to :user
+  belongs_to :friend, class_name: "User"
+  
+  validates :friend_id, uniqueness: { scope: :user_id }
+end
+```
+
+## Hierarchical Data (Categories)
+
+### Basic Parent-Child
+
+```ruby
+class Category < ApplicationRecord
+  belongs_to :parent, class_name: "Category", optional: true
+  has_many :children, class_name: "Category", foreign_key: "parent_id"
+  
+  scope :roots, -> { where(parent_id: nil) }
+  
+  def ancestors
+    node, nodes = self, []
+    while node = node.parent
+      nodes.unshift(node)
+    end
+    nodes
+  end
+  
+  def descendants
+    children.flat_map { |child| [child] + child.descendants }
+  end
+  
+  def self_and_ancestors
+    [self] + ancestors
+  end
+  
+  def self_and_descendants
+    [self] + descendants
+  end
+  
+  def root?
+    parent_id.nil?
+  end
+  
+  def leaf?
+    children.empty?
+  end
+  
+  def depth
+    ancestors.count
+  end
+end
+```
+
+### Migration
+
+```ruby
+class CreateCategories < ActiveRecord::Migration[7.1]
+  def change
+    create_table :categories do |t|
+      t.string :name
+      t.references :parent, foreign_key: { to_table: :categories }
+      t.timestamps
+    end
+  end
+end
+```
+
+### Usage
+
+```ruby
+# Create category tree
+electronics = Category.create(name: "Electronics")
+computers = Category.create(name: "Computers", parent: electronics)
+laptops = Category.create(name: "Laptops", parent: computers)
+
+# Navigate
+laptops.parent              # => Computers
+laptops.ancestors           # => [Electronics, Computers]
+electronics.children        # => [Computers]
+electronics.descendants     # => [Computers, Laptops]
+Category.roots              # => [Electronics, ...]
+```
+
+## Comment Threads (Nested Comments)
+
+```ruby
+class Comment < ApplicationRecord
+  belongs_to :commentable, polymorphic: true
+  belongs_to :parent, class_name: "Comment", optional: true
+  has_many :replies, class_name: "Comment", foreign_key: "parent_id"
+  
+  scope :root_comments, -> { where(parent_id: nil) }
+  
+  def depth
+    parent ? parent.depth + 1 : 0
+  end
+  
+  def thread
+    root = self
+    root = root.parent while root.parent
+    root
+  end
+end
+```
+
+## Using Gems for Trees
+
+For complex hierarchies, consider using gems:
+
+### Ancestry Gem
+
+```ruby
+# Gemfile
+gem 'ancestry'
+
+# Migration
+class AddAncestryToCategories < ActiveRecord::Migration[7.1]
+  def change
+    add_column :categories, :ancestry, :string
+    add_index :categories, :ancestry
+  end
+end
+
+# Model
+class Category < ApplicationRecord
+  has_ancestry
+end
+
+# Usage
+category.parent
+category.children
+category.ancestors
+category.descendants
+category.subtree
+category.depth
+Category.roots
+Category.arrange  # Returns nested hash
+```
+
+### Closure Tree Gem
+
+```ruby
+# Gemfile
+gem 'closure_tree'
+
+# Model
+class Category < ApplicationRecord
+  has_closure_tree
+end
+
+# More efficient queries for deep hierarchies
+```
+
+## Performance Considerations
+
+```ruby
+# Avoid N+1 with recursive queries
+class Category < ApplicationRecord
+  # Use includes for immediate children
+  scope :with_children, -> { includes(:children) }
+  
+  # For PostgreSQL, use recursive CTE
+  def self.descendants_of(category_id)
+    sql = <<-SQL
+      WITH RECURSIVE tree AS (
+        SELECT * FROM categories WHERE id = #{category_id}
+        UNION ALL
+        SELECT c.* FROM categories c
+        JOIN tree t ON c.parent_id = t.id
+      )
+      SELECT * FROM tree WHERE id != #{category_id}
+    SQL
+    find_by_sql(sql)
+  end
+end
+```
+
+Self-referential associations are essential for modeling real-world hierarchical relationships!
+

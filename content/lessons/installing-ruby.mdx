@@ -1,0 +1,149 @@
+---
+title: Installing Ruby
+chapterSlug: getting-started
+duration: 10
+order: 2
+---
+
+## Installing Ruby on Your System
+
+Before we can use Rails, we need to install Ruby. The best way to manage Ruby versions is using a version manager like `rbenv` or `rvm`.
+
+## Installing on macOS
+
+### Step 1: Install Homebrew (if not already installed)
+
+Homebrew is the package manager for macOS. Open Terminal and run:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+### Step 2: Install rbenv
+
+rbenv lets you easily switch between multiple Ruby versions:
+
+```bash
+# Install rbenv and ruby-build
+brew install rbenv ruby-build
+
+# Add rbenv to your shell
+echo 'eval "$(rbenv init - zsh)"' >> ~/.zshrc
+
+# Reload your shell
+source ~/.zshrc
+```
+
+### Step 3: Install Ruby
+
+Now install the latest Ruby version:
+
+```bash
+# List available Ruby versions
+rbenv install -l
+
+# Install Ruby 3.3.0 (or latest stable)
+rbenv install 3.3.0
+
+# Set it as the global default
+rbenv global 3.3.0
+
+# Verify installation
+ruby -v
+# Output: ruby 3.3.0 (2023-12-25 revision 5124f9ac75) [arm64-darwin23]
+```
+
+## Installing on Ubuntu/Debian Linux
+
+### Step 1: Install dependencies
+
+```bash
+sudo apt update
+sudo apt install -y git curl libssl-dev libreadline-dev zlib1g-dev \
+  autoconf bison build-essential libyaml-dev libreadline-dev \
+  libncurses5-dev libffi-dev libgdbm-dev
+```
+
+### Step 2: Install rbenv
+
+```bash
+# Clone rbenv
+git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+
+# Add to PATH
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(rbenv init - bash)"' >> ~/.bashrc
+source ~/.bashrc
+
+# Install ruby-build plugin
+git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+```
+
+### Step 3: Install Ruby
+
+```bash
+rbenv install 3.3.0
+rbenv global 3.3.0
+ruby -v
+```
+
+## Installing on Windows
+
+For Windows, we recommend using WSL2 (Windows Subsystem for Linux):
+
+### Step 1: Enable WSL2
+
+Open PowerShell as Administrator:
+
+```powershell
+wsl --install
+```
+
+### Step 2: Install Ubuntu from Microsoft Store
+
+After restarting, install Ubuntu from the Microsoft Store, then follow the Linux instructions above.
+
+## Verifying Your Installation
+
+Run these commands to verify everything is working:
+
+```bash
+# Check Ruby version
+ruby -v
+
+# Check gem (Ruby's package manager)
+gem -v
+
+# Check bundler (manages gem dependencies)
+gem install bundler
+bundler -v
+```
+
+## Common Issues and Fixes
+
+### Permission errors with gems
+
+Never use `sudo` to install gems. If you get permission errors:
+
+```bash
+# Check that rbenv is properly configured
+which ruby
+# Should show: /Users/yourname/.rbenv/shims/ruby
+
+# If not, reinitialize rbenv
+rbenv init
+source ~/.zshrc  # or ~/.bashrc
+```
+
+### OpenSSL errors
+
+If you see SSL certificate errors:
+
+```bash
+# macOS
+brew install openssl
+RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl)" rbenv install 3.3.0
+```
+
+You're now ready to install Rails and create your first application!
+

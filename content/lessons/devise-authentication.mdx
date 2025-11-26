@@ -1,0 +1,321 @@
+---
+title: Devise Authentication
+chapterSlug: authentication
+duration: 12
+order: 2
+---
+
+## Devise
+
+Devise is the most popular authentication gem for Rails. It provides a complete authentication solution with minimal setup.
+
+## Installation
+
+```ruby
+# Gemfile
+gem 'devise'
+```
+
+```bash
+bundle install
+rails generate devise:install
+```
+
+Follow the setup instructions shown after installation.
+
+## Basic Setup
+
+### Generate User Model
+
+```bash
+rails generate devise User
+rails db:migrate
+```
+
+### Configure Routes
+
+```ruby
+# config/routes.rb
+Rails.application.routes.draw do
+  devise_for :users
+  
+  # Your routes
+  root 'home#index'
+end
+```
+
+This adds routes for:
+- `/users/sign_in` - Login
+- `/users/sign_up` - Registration
+- `/users/sign_out` - Logout
+- `/users/password/new` - Forgot password
+- `/users/password/edit` - Reset password
+- `/users/confirmation/new` - Resend confirmation
+- `/users/edit` - Edit profile
+
+## Devise Modules
+
+```ruby
+# app/models/user.rb
+class User < ApplicationRecord
+  devise :database_authenticatable,  # Password authentication
+         :registerable,              # User registration
+         :recoverable,               # Password reset
+         :rememberable,              # Remember me
+         :validatable,               # Email/password validations
+         :confirmable,               # Email confirmation
+         :lockable,                  # Lock after failed attempts
+         :timeoutable,               # Session timeout
+         :trackable,                 # Track sign in count, timestamps, IP
+         :omniauthable               # OAuth authentication
+end
+```
+
+## Controller Helpers
+
+```ruby
+# In any controller
+class ArticlesController < ApplicationController
+  before_action :authenticate_user!  # Require login
+  
+  def index
+    # current_user is available
+    @articles = current_user.articles
+  end
+end
+
+# In views
+<% if user_signed_in? %>
+  Welcome, <%= current_user.email %>
+  <%= link_to "Log out", destroy_user_session_path, method: :delete %>
+<% else %>
+  <%= link_to "Log in", new_user_session_path %>
+  <%= link_to "Sign up", new_user_registration_path %>
+<% end %>
+```
+
+## Customizing Views
+
+Generate views to customize them:
+
+```bash
+rails generate devise:views
+```
+
+This creates views in `app/views/devise/`:
+- `sessions/new.html.erb` - Login form
+- `registrations/new.html.erb` - Sign up form
+- `registrations/edit.html.erb` - Edit profile
+- `passwords/new.html.erb` - Forgot password
+- `passwords/edit.html.erb` - Reset password
+- `confirmations/new.html.erb` - Resend confirmation
+- `mailer/` - Email templates
+
+### Custom Login Form
+
+```erb
+<!-- app/views/devise/sessions/new.html.erb -->
+<h2>Log In</h2>
+
+<%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+  <div class="field">
+    <%= f.label :email %>
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :password %>
+    <%= f.password_field :password, autocomplete: "current-password", class: "form-control" %>
+  </div>
+
+  <% if devise_mapping.rememberable? %>
+    <div class="field">
+      <%= f.check_box :remember_me %>
+      <%= f.label :remember_me %>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit "Log in", class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+<%= render "devise/shared/links" %>
+```
+
+## Customizing Controllers
+
+Generate controller to customize:
+
+```bash
+rails generate devise:controllers users
+```
+
+```ruby
+# app/controllers/users/registrations_controller.rb
+class Users::RegistrationsController < Devise::RegistrationsController
+  before_action :configure_permitted_parameters
+  
+  protected
+  
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:name, :username])
+    devise_parameter_sanitizer.permit(:account_update, keys: [:name, :username, :avatar])
+  end
+  
+  def after_sign_up_path_for(resource)
+    dashboard_path
+  end
+end
+```
+
+Update routes:
+
+```ruby
+devise_for :users, controllers: {
+  registrations: 'users/registrations',
+  sessions: 'users/sessions'
+}
+```
+
+## Adding Custom Fields
+
+```bash
+rails generate migration AddNameToUsers name:string
+rails db:migrate
+```
+
+```ruby
+# app/controllers/application_controller.rb
+class ApplicationController < ActionController::Base
+  before_action :configure_permitted_parameters, if: :devise_controller?
+  
+  protected
+  
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:name])
+    devise_parameter_sanitizer.permit(:account_update, keys: [:name, :avatar])
+  end
+end
+```
+
+## Confirmable (Email Verification)
+
+```bash
+rails generate migration AddConfirmableToUsers confirmation_token:string:uniq confirmed_at:datetime confirmation_sent_at:datetime unconfirmed_email:string
+rails db:migrate
+```
+
+```ruby
+# app/models/user.rb
+devise :confirmable
+
+# For existing users
+User.update_all(confirmed_at: Time.current)
+```
+
+## Lockable (Account Locking)
+
+```bash
+rails generate migration AddLockableToUsers failed_attempts:integer unlock_token:string:uniq locked_at:datetime
+rails db:migrate
+```
+
+```ruby
+devise :lockable
+
+# config/initializers/devise.rb
+config.lock_strategy = :failed_attempts
+config.unlock_strategy = :both
+config.maximum_attempts = 5
+config.unlock_in = 1.hour
+```
+
+## OAuth with OmniAuth
+
+```ruby
+# Gemfile
+gem 'omniauth-google-oauth2'
+gem 'omniauth-github'
+gem 'omniauth-rails_csrf_protection'
+```
+
+```ruby
+# config/initializers/devise.rb
+config.omniauth :google_oauth2, 
+  ENV['GOOGLE_CLIENT_ID'], 
+  ENV['GOOGLE_CLIENT_SECRET'],
+  scope: 'email,profile'
+
+config.omniauth :github, 
+  ENV['GITHUB_KEY'], 
+  ENV['GITHUB_SECRET'],
+  scope: 'user:email'
+```
+
+```ruby
+# app/models/user.rb
+devise :omniauthable, omniauth_providers: [:google_oauth2, :github]
+
+def self.from_omniauth(auth)
+  where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
+    user.email = auth.info.email
+    user.password = Devise.friendly_token[0, 20]
+    user.name = auth.info.name
+  end
+end
+```
+
+```ruby
+# app/controllers/users/omniauth_callbacks_controller.rb
+class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+  def google_oauth2
+    handle_auth("Google")
+  end
+  
+  def github
+    handle_auth("Github")
+  end
+  
+  private
+  
+  def handle_auth(provider)
+    @user = User.from_omniauth(request.env["omniauth.auth"])
+    
+    if @user.persisted?
+      sign_in_and_redirect @user, event: :authentication
+      set_flash_message(:notice, :success, kind: provider) if is_navigational_format?
+    else
+      session["devise.auth_data"] = request.env["omniauth.auth"].except(:extra)
+      redirect_to new_user_registration_url
+    end
+  end
+end
+```
+
+## Configuration
+
+```ruby
+# config/initializers/devise.rb
+Devise.setup do |config|
+  config.mailer_sender = 'noreply@example.com'
+  
+  # Password requirements
+  config.password_length = 8..128
+  
+  # Session timeout
+  config.timeout_in = 30.minutes
+  
+  # Remember me duration
+  config.remember_for = 2.weeks
+  
+  # Reset password token validity
+  config.reset_password_within = 6.hours
+  
+  # Sign out method
+  config.sign_out_via = :delete
+end
+```
+
+Devise provides a robust, battle-tested authentication solution for Rails!
+

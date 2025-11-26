@@ -1,0 +1,407 @@
+---
+title: Callbacks
+chapterSlug: models-and-active-record
+duration: 10
+order: 4
+---
+
+## Active Record Callbacks
+
+Callbacks are methods that get called at certain points in an object's lifecycle. They allow you to trigger logic before or after changes to an object's state.
+
+## The Callback Lifecycle
+
+### Creating an Object
+
+```ruby
+# Order of callbacks when creating:
+before_validation
+after_validation
+before_save
+around_save
+before_create
+around_create
+after_create
+after_save
+after_commit / after_rollback
+```
+
+### Updating an Object
+
+```ruby
+# Order of callbacks when updating:
+before_validation
+after_validation
+before_save
+around_save
+before_update
+around_update
+after_update
+after_save
+after_commit / after_rollback
+```
+
+### Destroying an Object
+
+```ruby
+# Order of callbacks when destroying:
+before_destroy
+around_destroy
+after_destroy
+after_commit / after_rollback
+```
+
+## Defining Callbacks
+
+### Method Reference
+
+```ruby
+class User < ApplicationRecord
+  before_save :normalize_email
+  after_create :send_welcome_email
+  before_destroy :check_if_can_destroy
+  
+  private
+  
+  def normalize_email
+    self.email = email.downcase.strip
+  end
+  
+  def send_welcome_email
+    UserMailer.welcome(self).deliver_later
+  end
+  
+  def check_if_can_destroy
+    if admin?
+      errors.add(:base, "Cannot delete admin users")
+      throw :abort
+    end
+  end
+end
+```
+
+### Block Syntax
+
+```ruby
+class User < ApplicationRecord
+  before_save do
+    self.email = email.downcase if email.present?
+  end
+  
+  after_create do |user|
+    Rails.logger.info "Created user: #{user.email}"
+  end
+end
+```
+
+### Lambda/Proc
+
+```ruby
+class User < ApplicationRecord
+  before_save ->(user) { user.email = user.email.downcase }
+end
+```
+
+## Common Callbacks
+
+### before_validation
+
+```ruby
+class User < ApplicationRecord
+  before_validation :set_defaults
+  before_validation :normalize_data
+  
+  private
+  
+  def set_defaults
+    self.role ||= 'user'
+    self.status ||= 'pending'
+  end
+  
+  def normalize_data
+    self.email = email.downcase.strip if email.present?
+    self.phone = phone.gsub(/\D/, '') if phone.present?
+  end
+end
+```
+
+### before_save
+
+```ruby
+class Article < ApplicationRecord
+  before_save :generate_slug
+  before_save :set_published_at
+  
+  private
+  
+  def generate_slug
+    self.slug = title.parameterize if title_changed?
+  end
+  
+  def set_published_at
+    if published? && published_at.nil?
+      self.published_at = Time.current
+    end
+  end
+end
+```
+
+### after_create
+
+```ruby
+class User < ApplicationRecord
+  after_create :send_welcome_email
+  after_create :create_default_settings
+  after_create :notify_admin
+  
+  private
+  
+  def send_welcome_email
+    UserMailer.welcome(self).deliver_later
+  end
+  
+  def create_default_settings
+    settings.create!(theme: 'light', notifications: true)
+  end
+  
+  def notify_admin
+    AdminNotifier.new_user(self).deliver_later
+  end
+end
+```
+
+### after_save
+
+```ruby
+class Product < ApplicationRecord
+  after_save :update_search_index
+  after_save :clear_cache
+  
+  private
+  
+  def update_search_index
+    SearchIndexer.perform_async(id)
+  end
+  
+  def clear_cache
+    Rails.cache.delete("product:#{id}")
+    Rails.cache.delete("products:all")
+  end
+end
+```
+
+### before_destroy
+
+```ruby
+class User < ApplicationRecord
+  before_destroy :check_for_orders
+  before_destroy :archive_data
+  
+  private
+  
+  def check_for_orders
+    if orders.pending.any?
+      errors.add(:base, "Cannot delete user with pending orders")
+      throw :abort
+    end
+  end
+  
+  def archive_data
+    DataArchiver.archive_user(self)
+  end
+end
+```
+
+### after_destroy
+
+```ruby
+class Attachment < ApplicationRecord
+  after_destroy :delete_file_from_storage
+  
+  private
+  
+  def delete_file_from_storage
+    FileStorage.delete(file_key)
+  end
+end
+```
+
+## Conditional Callbacks
+
+```ruby
+class User < ApplicationRecord
+  after_save :notify_admin, if: :role_changed?
+  before_save :encrypt_password, if: :password_changed?
+  after_create :send_email, unless: :skip_email?
+  
+  # Multiple conditions
+  after_save :update_index, if: [:published?, :content_changed?]
+  
+  # Lambda condition
+  before_destroy :check_permission, if: -> { !Rails.env.test? }
+  
+  private
+  
+  def skip_email?
+    imported? || test_account?
+  end
+end
+```
+
+## Halting Execution
+
+Use `throw :abort` to stop the callback chain:
+
+```ruby
+class Order < ApplicationRecord
+  before_save :check_inventory
+  
+  private
+  
+  def check_inventory
+    if items.any? { |item| !item.in_stock? }
+      errors.add(:base, "Some items are out of stock")
+      throw :abort  # Prevents save
+    end
+  end
+end
+```
+
+## Callback Classes
+
+For complex or reusable callback logic:
+
+```ruby
+# app/models/concerns/user_callbacks.rb
+class UserCallbacks
+  def after_create(user)
+    send_welcome_email(user)
+    create_default_settings(user)
+  end
+  
+  def before_destroy(user)
+    archive_user_data(user)
+  end
+  
+  private
+  
+  def send_welcome_email(user)
+    UserMailer.welcome(user).deliver_later
+  end
+  
+  def create_default_settings(user)
+    user.settings.create!(defaults: true)
+  end
+  
+  def archive_user_data(user)
+    DataArchiver.archive(user)
+  end
+end
+
+# app/models/user.rb
+class User < ApplicationRecord
+  after_create UserCallbacks.new
+  before_destroy UserCallbacks.new
+end
+```
+
+## Transaction Callbacks
+
+These run after the database transaction commits or rolls back:
+
+```ruby
+class Order < ApplicationRecord
+  after_commit :send_confirmation_email, on: :create
+  after_commit :sync_with_external_system
+  after_rollback :handle_failed_save
+  
+  private
+  
+  def send_confirmation_email
+    # This runs after the transaction commits
+    # Safe to reference the order ID
+    OrderMailer.confirmation(self).deliver_later
+  end
+  
+  def sync_with_external_system
+    ExternalSyncJob.perform_later(id)
+  end
+  
+  def handle_failed_save
+    Rails.logger.error "Order save failed: #{errors.full_messages}"
+  end
+end
+```
+
+## Skipping Callbacks
+
+```ruby
+# These methods skip callbacks:
+user.update_column(:name, "value")
+user.update_columns(name: "value", email: "email")
+User.update_all(status: "active")
+user.delete  # vs user.destroy
+User.delete_all  # vs User.destroy_all
+
+# Using touch: false
+article.save(touch: false)  # Skips touching timestamps
+```
+
+## Best Practices
+
+```ruby
+class User < ApplicationRecord
+  # 1. Keep callbacks simple and focused
+  after_create :send_welcome_email
+  
+  # 2. Use background jobs for slow operations
+  after_commit :sync_to_crm, on: :create
+  
+  # 3. Avoid callbacks that modify other records
+  # Bad: after_save :update_all_related_records
+  
+  # 4. Use service objects for complex logic
+  after_create :setup_account
+  
+  private
+  
+  def send_welcome_email
+    UserMailer.welcome(self).deliver_later
+  end
+  
+  def sync_to_crm
+    CrmSyncJob.perform_later(id)
+  end
+  
+  def setup_account
+    AccountSetupService.new(self).call
+  end
+end
+```
+
+## Common Pitfalls
+
+```ruby
+# 1. Infinite loops - callbacks triggering updates that trigger callbacks
+after_save :update_related
+def update_related
+  related_record.update(field: value)  # Might trigger callbacks
+end
+
+# Solution: Use update_column or check if change is needed
+def update_related
+  related_record.update_column(:field, value) if field_changed?
+end
+
+# 2. Slow callbacks blocking requests
+after_create :heavy_processing  # Blocks the request!
+
+# Solution: Use background jobs
+after_create :schedule_processing
+def schedule_processing
+  HeavyProcessingJob.perform_later(id)
+end
+```
+
+Callbacks are powerful but use them wisely - complex callback chains can make debugging difficult!
+

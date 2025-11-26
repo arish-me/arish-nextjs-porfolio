@@ -1,0 +1,386 @@
+---
+title: Testing Basics
+chapterSlug: testing
+duration: 15
+order: 1
+---
+
+## Testing in Rails
+
+Testing is a fundamental part of Rails development. Rails comes with Minitest built-in, but many developers prefer RSpec. We'll cover both.
+
+## Why Test?
+
+- Catch bugs before production
+- Enable confident refactoring
+- Document how code should work
+- Prevent regressions
+- Speed up development long-term
+
+## Minitest (Built-in)
+
+### Running Tests
+
+```bash
+# Run all tests
+rails test
+
+# Run specific file
+rails test test/models/user_test.rb
+
+# Run specific test
+rails test test/models/user_test.rb:15
+
+# Run model tests
+rails test:models
+
+# Run controller tests
+rails test:controllers
+
+# Run system tests
+rails test:system
+```
+
+### Model Tests
+
+```ruby
+# test/models/user_test.rb
+require "test_helper"
+
+class UserTest < ActiveSupport::TestCase
+  test "should not save user without email" do
+    user = User.new(password: "password123")
+    assert_not user.save, "Saved user without email"
+  end
+  
+  test "should save user with valid attributes" do
+    user = User.new(email: "test@example.com", password: "password123")
+    assert user.save
+  end
+  
+  test "email should be unique" do
+    User.create!(email: "test@example.com", password: "password")
+    user = User.new(email: "test@example.com", password: "password")
+    assert_not user.valid?
+    assert_includes user.errors[:email], "has already been taken"
+  end
+end
+```
+
+### Controller Tests
+
+```ruby
+# test/controllers/articles_controller_test.rb
+require "test_helper"
+
+class ArticlesControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @article = articles(:one)
+    @user = users(:one)
+  end
+  
+  test "should get index" do
+    get articles_url
+    assert_response :success
+  end
+  
+  test "should get new when logged in" do
+    sign_in @user
+    get new_article_url
+    assert_response :success
+  end
+  
+  test "should create article" do
+    sign_in @user
+    assert_difference("Article.count") do
+      post articles_url, params: { 
+        article: { title: "New Article", body: "Content" } 
+      }
+    end
+    assert_redirected_to article_url(Article.last)
+  end
+  
+  test "should show article" do
+    get article_url(@article)
+    assert_response :success
+  end
+  
+  test "should update article" do
+    sign_in @user
+    patch article_url(@article), params: { 
+      article: { title: "Updated Title" } 
+    }
+    assert_redirected_to article_url(@article)
+  end
+  
+  test "should destroy article" do
+    sign_in @user
+    assert_difference("Article.count", -1) do
+      delete article_url(@article)
+    end
+    assert_redirected_to articles_url
+  end
+end
+```
+
+### Fixtures
+
+```yaml
+# test/fixtures/users.yml
+one:
+  email: john@example.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+
+two:
+  email: jane@example.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+
+# test/fixtures/articles.yml
+one:
+  title: First Article
+  body: This is the first article.
+  user: one
+  published: true
+
+two:
+  title: Second Article
+  body: This is the second article.
+  user: two
+  published: false
+```
+
+## RSpec (Popular Alternative)
+
+### Setup
+
+```ruby
+# Gemfile
+group :development, :test do
+  gem 'rspec-rails'
+  gem 'factory_bot_rails'
+  gem 'faker'
+end
+
+group :test do
+  gem 'shoulda-matchers'
+  gem 'database_cleaner-active_record'
+end
+```
+
+```bash
+rails generate rspec:install
+```
+
+### Running Specs
+
+```bash
+# Run all specs
+bundle exec rspec
+
+# Run specific file
+bundle exec rspec spec/models/user_spec.rb
+
+# Run specific test
+bundle exec rspec spec/models/user_spec.rb:15
+
+# Run with format
+bundle exec rspec --format documentation
+```
+
+### Model Specs
+
+```ruby
+# spec/models/user_spec.rb
+require 'rails_helper'
+
+RSpec.describe User, type: :model do
+  describe 'validations' do
+    it { should validate_presence_of(:email) }
+    it { should validate_uniqueness_of(:email).case_insensitive }
+    it { should validate_length_of(:password).is_at_least(8) }
+  end
+  
+  describe 'associations' do
+    it { should have_many(:articles).dependent(:destroy) }
+    it { should have_one(:profile) }
+  end
+  
+  describe '#full_name' do
+    it 'returns first and last name' do
+      user = build(:user, first_name: 'John', last_name: 'Doe')
+      expect(user.full_name).to eq('John Doe')
+    end
+  end
+  
+  describe '.active' do
+    it 'returns only active users' do
+      active_user = create(:user, active: true)
+      inactive_user = create(:user, active: false)
+      
+      expect(User.active).to include(active_user)
+      expect(User.active).not_to include(inactive_user)
+    end
+  end
+end
+```
+
+### Request Specs
+
+```ruby
+# spec/requests/articles_spec.rb
+require 'rails_helper'
+
+RSpec.describe "Articles", type: :request do
+  let(:user) { create(:user) }
+  let(:article) { create(:article, user: user) }
+  
+  describe "GET /articles" do
+    it "returns a list of articles" do
+      create_list(:article, 3)
+      
+      get articles_path
+      
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Articles")
+    end
+  end
+  
+  describe "POST /articles" do
+    context "when logged in" do
+      before { sign_in user }
+      
+      it "creates a new article" do
+        expect {
+          post articles_path, params: { 
+            article: { title: "New", body: "Content" } 
+          }
+        }.to change(Article, :count).by(1)
+        
+        expect(response).to redirect_to(article_path(Article.last))
+      end
+      
+      it "fails with invalid params" do
+        post articles_path, params: { article: { title: "" } }
+        
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+    
+    context "when not logged in" do
+      it "redirects to login" do
+        post articles_path, params: { article: { title: "New" } }
+        
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
+end
+```
+
+### Factories
+
+```ruby
+# spec/factories/users.rb
+FactoryBot.define do
+  factory :user do
+    email { Faker::Internet.email }
+    password { 'password123' }
+    first_name { Faker::Name.first_name }
+    last_name { Faker::Name.last_name }
+    
+    trait :admin do
+      role { 'admin' }
+    end
+    
+    trait :with_articles do
+      after(:create) do |user|
+        create_list(:article, 3, user: user)
+      end
+    end
+  end
+end
+
+# spec/factories/articles.rb
+FactoryBot.define do
+  factory :article do
+    title { Faker::Lorem.sentence }
+    body { Faker::Lorem.paragraphs(number: 3).join("\n\n") }
+    published { true }
+    user
+    
+    trait :draft do
+      published { false }
+    end
+  end
+end
+
+# Usage
+user = create(:user)
+admin = create(:user, :admin)
+user_with_articles = create(:user, :with_articles)
+article = create(:article, user: user)
+draft = create(:article, :draft)
+```
+
+### Configuration
+
+```ruby
+# spec/rails_helper.rb
+require 'spec_helper'
+require 'rspec/rails'
+
+RSpec.configure do |config|
+  config.include FactoryBot::Syntax::Methods
+  config.include Devise::Test::IntegrationHelpers, type: :request
+  
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation)
+  end
+  
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
+  end
+end
+
+# Shoulda Matchers config
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
+end
+```
+
+## System Tests
+
+```ruby
+# spec/system/articles_spec.rb
+require 'rails_helper'
+
+RSpec.describe "Articles", type: :system do
+  let(:user) { create(:user) }
+  
+  before do
+    driven_by(:selenium_chrome_headless)
+  end
+  
+  it "allows user to create an article" do
+    sign_in user
+    
+    visit new_article_path
+    
+    fill_in "Title", with: "My New Article"
+    fill_in "Body", with: "This is the content"
+    click_button "Create Article"
+    
+    expect(page).to have_content("Article was successfully created")
+    expect(page).to have_content("My New Article")
+  end
+end
+```
+
+Testing is essential for building robust Rails applications!
+

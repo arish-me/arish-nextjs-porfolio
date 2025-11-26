@@ -1,0 +1,346 @@
+---
+title: Has Many Through
+chapterSlug: active-record-associations
+duration: 12
+order: 3
+---
+
+## has_many :through Association
+
+`has_many :through` sets up a many-to-many connection via a join model. This is one of the most powerful and commonly used associations in Rails.
+
+## When to Use has_many :through
+
+Use it when:
+- You need a many-to-many relationship
+- The join table needs additional attributes
+- You want to work with the join model independently
+
+## Basic Example
+
+```ruby
+# A doctor has many patients through appointments
+class Doctor < ApplicationRecord
+  has_many :appointments
+  has_many :patients, through: :appointments
+end
+
+class Appointment < ApplicationRecord
+  belongs_to :doctor
+  belongs_to :patient
+end
+
+class Patient < ApplicationRecord
+  has_many :appointments
+  has_many :doctors, through: :appointments
+end
+```
+
+### Migrations
+
+```ruby
+class CreateDoctors < ActiveRecord::Migration[7.1]
+  def change
+    create_table :doctors do |t|
+      t.string :name
+      t.string :specialization
+      t.timestamps
+    end
+  end
+end
+
+class CreatePatients < ActiveRecord::Migration[7.1]
+  def change
+    create_table :patients do |t|
+      t.string :name
+      t.date :birth_date
+      t.timestamps
+    end
+  end
+end
+
+class CreateAppointments < ActiveRecord::Migration[7.1]
+  def change
+    create_table :appointments do |t|
+      t.references :doctor, null: false, foreign_key: true
+      t.references :patient, null: false, foreign_key: true
+      t.datetime :scheduled_at
+      t.text :notes
+      t.timestamps
+    end
+  end
+end
+```
+
+## Using has_many :through
+
+```ruby
+doctor = Doctor.find(1)
+patient = Patient.find(1)
+
+# Access through association
+doctor.patients                    # All patients
+patient.doctors                    # All doctors
+
+# Access the join model
+doctor.appointments                # All appointments
+patient.appointments               # All appointments
+
+# Create through association
+doctor.patients << patient         # Creates appointment
+doctor.patients.create(name: "John Doe")
+
+# Create with join model attributes
+doctor.appointments.create(
+  patient: patient,
+  scheduled_at: 1.week.from_now,
+  notes: "Annual checkup"
+)
+
+# Query through association
+doctor.patients.where(active: true)
+patient.doctors.where(specialization: "Cardiology")
+
+# Check existence
+doctor.patients.include?(patient)
+doctor.patients.exists?(patient.id)
+```
+
+## Real-World Examples
+
+### Articles and Tags
+
+```ruby
+class Article < ApplicationRecord
+  has_many :taggings
+  has_many :tags, through: :taggings
+end
+
+class Tagging < ApplicationRecord
+  belongs_to :article
+  belongs_to :tag
+end
+
+class Tag < ApplicationRecord
+  has_many :taggings
+  has_many :articles, through: :taggings
+end
+
+# Usage
+article = Article.find(1)
+article.tags                       # All tags
+article.tag_ids                    # Array of tag IDs
+
+# Add tags
+article.tags << Tag.find_by(name: "ruby")
+article.tags.create(name: "rails")
+
+# Find articles by tag
+Tag.find_by(name: "ruby").articles
+Article.joins(:tags).where(tags: { name: "ruby" })
+```
+
+### Users and Roles
+
+```ruby
+class User < ApplicationRecord
+  has_many :user_roles
+  has_many :roles, through: :user_roles
+  
+  def has_role?(role_name)
+    roles.exists?(name: role_name)
+  end
+  
+  def add_role(role_name)
+    role = Role.find_or_create_by(name: role_name)
+    roles << role unless roles.include?(role)
+  end
+end
+
+class UserRole < ApplicationRecord
+  belongs_to :user
+  belongs_to :role
+  
+  # Additional attributes on the join
+  # granted_by_id, granted_at, expires_at
+end
+
+class Role < ApplicationRecord
+  has_many :user_roles
+  has_many :users, through: :user_roles
+end
+
+# Usage
+user.roles.pluck(:name)           # => ["admin", "editor"]
+user.has_role?("admin")           # => true
+user.add_role("moderator")
+```
+
+### Courses and Students
+
+```ruby
+class Course < ApplicationRecord
+  has_many :enrollments
+  has_many :students, through: :enrollments
+  
+  def enroll(student)
+    enrollments.create(student: student, enrolled_at: Time.current)
+  end
+  
+  def active_students
+    students.joins(:enrollments)
+            .where(enrollments: { status: 'active' })
+  end
+end
+
+class Enrollment < ApplicationRecord
+  belongs_to :course
+  belongs_to :student
+  
+  # Additional attributes
+  # status, enrolled_at, completed_at, grade
+  
+  validates :student_id, uniqueness: { scope: :course_id }
+end
+
+class Student < ApplicationRecord
+  has_many :enrollments
+  has_many :courses, through: :enrollments
+  
+  def completed_courses
+    courses.joins(:enrollments)
+           .where(enrollments: { status: 'completed' })
+  end
+end
+```
+
+## Source and Source Type
+
+When the association name doesn't match the class name:
+
+```ruby
+class User < ApplicationRecord
+  has_many :subscriptions
+  has_many :subscribed_articles, through: :subscriptions, source: :article
+end
+
+class Subscription < ApplicationRecord
+  belongs_to :user
+  belongs_to :article
+end
+
+# Without source, Rails would look for 'subscribed_article' on Subscription
+user.subscribed_articles
+```
+
+## Nested has_many :through
+
+```ruby
+class Country < ApplicationRecord
+  has_many :states
+  has_many :cities, through: :states
+  has_many :restaurants, through: :cities
+end
+
+class State < ApplicationRecord
+  belongs_to :country
+  has_many :cities
+  has_many :restaurants, through: :cities
+end
+
+class City < ApplicationRecord
+  belongs_to :state
+  has_many :restaurants
+end
+
+class Restaurant < ApplicationRecord
+  belongs_to :city
+end
+
+# Usage
+country.restaurants                # All restaurants in country
+state.restaurants                  # All restaurants in state
+city.restaurants                   # All restaurants in city
+```
+
+## Callbacks on Join Model
+
+```ruby
+class Enrollment < ApplicationRecord
+  belongs_to :course
+  belongs_to :student
+  
+  after_create :send_welcome_email
+  after_create :increment_student_count
+  before_destroy :send_unenroll_notification
+  
+  private
+  
+  def send_welcome_email
+    CourseMailer.welcome(student, course).deliver_later
+  end
+  
+  def increment_student_count
+    course.increment!(:students_count)
+  end
+  
+  def send_unenroll_notification
+    CourseMailer.unenrolled(student, course).deliver_later
+  end
+end
+```
+
+## Validations on Join Model
+
+```ruby
+class Enrollment < ApplicationRecord
+  belongs_to :course
+  belongs_to :student
+  
+  validates :student_id, uniqueness: { 
+    scope: :course_id,
+    message: "is already enrolled in this course"
+  }
+  
+  validate :course_not_full
+  validate :student_eligible
+  
+  private
+  
+  def course_not_full
+    if course.enrollments.count >= course.max_students
+      errors.add(:base, "Course is full")
+    end
+  end
+  
+  def student_eligible
+    unless student.verified?
+      errors.add(:student, "must be verified to enroll")
+    end
+  end
+end
+```
+
+## Querying Through Associations
+
+```ruby
+# Find all students enrolled in Ruby courses
+Student.joins(:courses).where(courses: { name: "Ruby 101" })
+
+# Find all courses a student is enrolled in with status
+Student.find(1).courses.joins(:enrollments)
+              .where(enrollments: { status: 'active' })
+
+# Count enrollments per course
+Course.joins(:enrollments)
+      .group(:id)
+      .count
+
+# Recent enrollments
+Enrollment.includes(:student, :course)
+          .where("created_at > ?", 1.week.ago)
+          .order(created_at: :desc)
+```
+
+has_many :through is essential for modeling real-world many-to-many relationships!
+

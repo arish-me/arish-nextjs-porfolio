@@ -1,0 +1,401 @@
+---
+title: Controllers Basics
+chapterSlug: rails-fundamentals
+duration: 12
+order: 3
+---
+
+## Controllers in Rails
+
+Controllers are the C in MVC. They receive HTTP requests, interact with models to get data, and render views or redirect users.
+
+## Creating a Controller
+
+### Using the Generator
+
+```bash
+rails generate controller Articles index show new create edit update destroy
+# Creates:
+# app/controllers/articles_controller.rb
+# app/views/articles/ (with view files)
+# test/controllers/articles_controller_test.rb
+# app/helpers/articles_helper.rb
+```
+
+### Manual Creation
+
+```ruby
+# app/controllers/articles_controller.rb
+class ArticlesController < ApplicationController
+  def index
+    @articles = Article.all
+  end
+  
+  def show
+    @article = Article.find(params[:id])
+  end
+end
+```
+
+## Controller Actions
+
+Each public method in a controller is an action that can respond to a route:
+
+```ruby
+class ArticlesController < ApplicationController
+  # GET /articles
+  def index
+    @articles = Article.published.recent
+  end
+  
+  # GET /articles/:id
+  def show
+    @article = Article.find(params[:id])
+  end
+  
+  # GET /articles/new
+  def new
+    @article = Article.new
+  end
+  
+  # POST /articles
+  def create
+    @article = Article.new(article_params)
+    
+    if @article.save
+      redirect_to @article, notice: 'Article created!'
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+  
+  # GET /articles/:id/edit
+  def edit
+    @article = Article.find(params[:id])
+  end
+  
+  # PATCH/PUT /articles/:id
+  def update
+    @article = Article.find(params[:id])
+    
+    if @article.update(article_params)
+      redirect_to @article, notice: 'Article updated!'
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+  
+  # DELETE /articles/:id
+  def destroy
+    @article = Article.find(params[:id])
+    @article.destroy
+    redirect_to articles_path, notice: 'Article deleted!'
+  end
+  
+  private
+  
+  def article_params
+    params.require(:article).permit(:title, :body, :published)
+  end
+end
+```
+
+## Working with Parameters
+
+### Accessing Parameters
+
+```ruby
+# URL: /articles?category=ruby&page=2
+params[:category]  # => "ruby"
+params[:page]      # => "2"
+
+# URL: /articles/5
+params[:id]        # => "5"
+
+# Form data (POST/PATCH)
+params[:article][:title]  # => "My Title"
+```
+
+### Strong Parameters
+
+Strong parameters protect against mass assignment vulnerabilities:
+
+```ruby
+class ArticlesController < ApplicationController
+  private
+  
+  # Basic usage
+  def article_params
+    params.require(:article).permit(:title, :body, :published)
+  end
+  
+  # With nested attributes
+  def article_params
+    params.require(:article).permit(
+      :title, 
+      :body,
+      :category_id,
+      tag_ids: [],                    # Array of values
+      images_attributes: [:id, :url, :_destroy],  # Nested
+      metadata: {}                    # Hash (permit all keys)
+    )
+  end
+  
+  # Conditional parameters
+  def article_params
+    permitted = [:title, :body]
+    permitted << :published if current_user.admin?
+    params.require(:article).permit(permitted)
+  end
+end
+```
+
+## Rendering Responses
+
+### Render Views
+
+```ruby
+class ArticlesController < ApplicationController
+  def show
+    @article = Article.find(params[:id])
+    # Automatically renders app/views/articles/show.html.erb
+  end
+  
+  def index
+    @articles = Article.all
+    render :index  # Explicit render (same as default)
+  end
+  
+  def special
+    @article = Article.find(params[:id])
+    render :show  # Render a different template
+  end
+  
+  def from_other
+    render 'other_controller/other_action'  # Render from another controller
+  end
+end
+```
+
+### Render with Options
+
+```ruby
+# Render with status code
+render :new, status: :unprocessable_entity  # 422
+render :not_found, status: :not_found       # 404
+
+# Render different formats
+render json: @article
+render xml: @article
+render plain: 'Hello World'
+render html: '<h1>Hello</h1>'.html_safe
+
+# Render with layout
+render :show, layout: 'admin'
+render :show, layout: false  # No layout
+
+# Render partial
+render partial: 'form'
+render partial: 'article', collection: @articles
+```
+
+## Redirects
+
+```ruby
+class ArticlesController < ApplicationController
+  def create
+    @article = Article.new(article_params)
+    
+    if @article.save
+      # Redirect to the article's show page
+      redirect_to @article
+      
+      # Or with a flash message
+      redirect_to @article, notice: 'Created!'
+      
+      # Or with alert
+      redirect_to articles_path, alert: 'Something went wrong'
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+  
+  def old_action
+    # Redirect to another URL
+    redirect_to 'https://example.com'
+    
+    # Redirect back to previous page
+    redirect_back(fallback_location: root_path)
+    
+    # Redirect with status
+    redirect_to @article, status: :see_other  # 303
+  end
+end
+```
+
+## Flash Messages
+
+Flash messages display information to users after redirects:
+
+```ruby
+class ArticlesController < ApplicationController
+  def create
+    @article = Article.new(article_params)
+    
+    if @article.save
+      flash[:notice] = 'Article created successfully!'
+      # Or shorthand:
+      redirect_to @article, notice: 'Article created!'
+    else
+      flash.now[:alert] = 'Please fix the errors'
+      render :new, status: :unprocessable_entity
+    end
+  end
+end
+```
+
+Display flash messages in layouts:
+
+```erb
+<!-- app/views/layouts/application.html.erb -->
+<body>
+  <% if flash[:notice] %>
+    <div class="alert alert-success"><%= flash[:notice] %></div>
+  <% end %>
+  
+  <% if flash[:alert] %>
+    <div class="alert alert-danger"><%= flash[:alert] %></div>
+  <% end %>
+  
+  <%= yield %>
+</body>
+```
+
+## Filters (Callbacks)
+
+Run code before, after, or around controller actions:
+
+### Before Action
+
+```ruby
+class ArticlesController < ApplicationController
+  before_action :authenticate_user!
+  before_action :set_article, only: [:show, :edit, :update, :destroy]
+  before_action :authorize_user, only: [:edit, :update, :destroy]
+  
+  def show
+    # @article is already set by before_action
+  end
+  
+  private
+  
+  def set_article
+    @article = Article.find(params[:id])
+  end
+  
+  def authorize_user
+    unless @article.user == current_user
+      redirect_to articles_path, alert: 'Not authorized'
+    end
+  end
+end
+```
+
+### After and Around Actions
+
+```ruby
+class ArticlesController < ApplicationController
+  after_action :track_view, only: [:show]
+  around_action :log_request
+  
+  private
+  
+  def track_view
+    @article.increment!(:view_count)
+  end
+  
+  def log_request
+    Rails.logger.info "Starting request..."
+    yield  # Execute the action
+    Rails.logger.info "Finished request"
+  end
+end
+```
+
+### Skip Filters
+
+```ruby
+class Admin::ArticlesController < ApplicationController
+  skip_before_action :authenticate_user!, only: [:public_page]
+end
+```
+
+## Respond to Different Formats
+
+```ruby
+class ArticlesController < ApplicationController
+  def index
+    @articles = Article.all
+    
+    respond_to do |format|
+      format.html  # renders index.html.erb
+      format.json { render json: @articles }
+      format.xml { render xml: @articles }
+      format.csv { send_data @articles.to_csv }
+    end
+  end
+  
+  def show
+    @article = Article.find(params[:id])
+    
+    respond_to do |format|
+      format.html
+      format.json { render json: @article }
+      format.pdf do
+        pdf = ArticlePdf.new(@article)
+        send_data pdf.render, filename: "article.pdf"
+      end
+    end
+  end
+end
+```
+
+## Sending Files
+
+```ruby
+class DownloadsController < ApplicationController
+  def show
+    # Send a file
+    send_file Rails.root.join('files', 'document.pdf'),
+              filename: 'document.pdf',
+              type: 'application/pdf',
+              disposition: 'attachment'  # or 'inline' to display
+    
+    # Send data directly
+    send_data generate_pdf,
+              filename: 'report.pdf',
+              type: 'application/pdf'
+  end
+end
+```
+
+## Streaming
+
+```ruby
+class ReportsController < ApplicationController
+  def large_report
+    # Stream large data
+    self.response.headers['Content-Type'] = 'text/csv'
+    self.response.headers['Content-Disposition'] = 'attachment; filename="report.csv"'
+    
+    self.response_body = Enumerator.new do |yielder|
+      Article.find_each do |article|
+        yielder << article.to_csv_row
+      end
+    end
+  end
+end
+```
+
+Controllers are the orchestrators of your Rails app - keep them clean and focused!
+

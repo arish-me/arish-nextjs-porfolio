@@ -1,0 +1,316 @@
+---
+title: Strong Parameters
+chapterSlug: forms-and-validations
+duration: 8
+order: 2
+---
+
+## Strong Parameters
+
+Strong Parameters is a security feature in Rails that prevents mass assignment vulnerabilities. It ensures only explicitly permitted parameters are used for model creation or updates.
+
+## Why Strong Parameters?
+
+Without protection, malicious users could inject unwanted attributes:
+
+```ruby
+# Dangerous - user could set admin: true
+User.create(params[:user])
+
+# With strong parameters - only permitted fields
+User.create(user_params)
+```
+
+## Basic Usage
+
+### In Controllers
+
+```ruby
+class ArticlesController < ApplicationController
+  def create
+    @article = Article.new(article_params)
+    if @article.save
+      redirect_to @article
+    else
+      render :new
+    end
+  end
+  
+  def update
+    @article = Article.find(params[:id])
+    if @article.update(article_params)
+      redirect_to @article
+    else
+      render :edit
+    end
+  end
+  
+  private
+  
+  def article_params
+    params.require(:article).permit(:title, :body, :published)
+  end
+end
+```
+
+## Require vs Permit
+
+### require
+
+Ensures the parameter hash exists:
+
+```ruby
+# params = { article: { title: "Hello" } }
+params.require(:article)
+# => { title: "Hello" }
+
+# params = {}
+params.require(:article)
+# => ActionController::ParameterMissing exception
+```
+
+### permit
+
+Specifies which keys are allowed:
+
+```ruby
+params.require(:article).permit(:title, :body)
+# Only allows :title and :body
+
+# Unpermitted keys are ignored
+# params = { article: { title: "Hi", admin: true } }
+# => { title: "Hi" } (admin is removed)
+```
+
+## Permitting Different Types
+
+### Scalar Values
+
+```ruby
+# Simple attributes
+params.require(:user).permit(:name, :email, :age)
+
+# Specific types
+params.require(:user).permit(
+  :name,           # string
+  :age,            # integer
+  :active,         # boolean
+  :rating          # decimal
+)
+```
+
+### Arrays
+
+```ruby
+# Array of scalar values
+params.require(:article).permit(:title, tag_ids: [])
+
+# Example params:
+# { article: { title: "Hi", tag_ids: [1, 2, 3] } }
+
+# Array of permitted values
+params.require(:user).permit(:name, roles: [])
+```
+
+### Nested Hashes
+
+```ruby
+# Single nested hash
+params.require(:user).permit(:name, address: [:street, :city, :zip])
+
+# Example params:
+# { user: { name: "John", address: { street: "123 Main", city: "NYC" } } }
+
+# Hash with any keys (use sparingly)
+params.require(:user).permit(:name, metadata: {})
+```
+
+### Nested Attributes
+
+```ruby
+# For accepts_nested_attributes_for
+params.require(:article).permit(
+  :title,
+  :body,
+  comments_attributes: [:id, :body, :_destroy]
+)
+
+# Example params:
+# { article: { 
+#     title: "Hello",
+#     comments_attributes: [
+#       { id: 1, body: "Great!" },
+#       { body: "New comment" }
+#     ]
+#   }
+# }
+```
+
+## Advanced Patterns
+
+### Conditional Permits
+
+```ruby
+def user_params
+  permitted = [:name, :email]
+  permitted << :role if current_user.admin?
+  permitted << :password if action_name == 'create'
+  
+  params.require(:user).permit(permitted)
+end
+
+# Or with merge
+def user_params
+  base_params = [:name, :email]
+  admin_params = current_user.admin? ? [:role, :verified] : []
+  
+  params.require(:user).permit(base_params + admin_params)
+end
+```
+
+### Reusing Permit Lists
+
+```ruby
+class ArticlesController < ApplicationController
+  PERMITTED_PARAMS = [:title, :body, :category_id, tag_ids: []]
+  
+  private
+  
+  def article_params
+    params.require(:article).permit(PERMITTED_PARAMS)
+  end
+end
+```
+
+### Multiple Models
+
+```ruby
+class RegistrationsController < ApplicationController
+  def create
+    @user = User.new(user_params)
+    @user.build_profile(profile_params)
+    
+    if @user.save
+      redirect_to dashboard_path
+    else
+      render :new
+    end
+  end
+  
+  private
+  
+  def user_params
+    params.require(:user).permit(:email, :password, :password_confirmation)
+  end
+  
+  def profile_params
+    params.require(:profile).permit(:name, :bio, :avatar)
+  end
+end
+```
+
+## Handling Unpermitted Parameters
+
+### In Development
+
+```ruby
+# config/environments/development.rb
+config.action_controller.action_on_unpermitted_parameters = :raise
+# Raises ActionController::UnpermittedParameters
+```
+
+### Logging
+
+```ruby
+# config/environments/production.rb
+config.action_controller.action_on_unpermitted_parameters = :log
+# Logs unpermitted parameters
+```
+
+## Fetch with Default
+
+```ruby
+# Get parameter with default
+page = params.fetch(:page, 1)
+per_page = params.fetch(:per_page, 25)
+
+# With permit
+def search_params
+  params.fetch(:search, {}).permit(:query, :category, :sort)
+end
+```
+
+## Common Patterns
+
+### Create vs Update
+
+```ruby
+class UsersController < ApplicationController
+  def create
+    @user = User.new(create_params)
+  end
+  
+  def update
+    @user.update(update_params)
+  end
+  
+  private
+  
+  def create_params
+    params.require(:user).permit(:name, :email, :password, :password_confirmation)
+  end
+  
+  def update_params
+    # Don't require password on update
+    permitted = [:name, :email]
+    permitted += [:password, :password_confirmation] if params[:user][:password].present?
+    params.require(:user).permit(permitted)
+  end
+end
+```
+
+### API Controllers
+
+```ruby
+class Api::ArticlesController < Api::BaseController
+  def create
+    @article = current_user.articles.create!(article_params)
+    render json: @article, status: :created
+  end
+  
+  private
+  
+  def article_params
+    params.require(:data)
+          .require(:attributes)
+          .permit(:title, :body, :published)
+  end
+end
+```
+
+### With Concerns
+
+```ruby
+# app/controllers/concerns/article_params.rb
+module ArticleParams
+  extend ActiveSupport::Concern
+  
+  private
+  
+  def article_params
+    params.require(:article).permit(permitted_article_attributes)
+  end
+  
+  def permitted_article_attributes
+    [:title, :body, :category_id, tag_ids: []]
+  end
+end
+
+# app/controllers/articles_controller.rb
+class ArticlesController < ApplicationController
+  include ArticleParams
+end
+```
+
+Strong parameters are your first line of defense against malicious input!
+

@@ -1,0 +1,86 @@
+---
+title: Introduction to Ruby on Rails
+chapterSlug: getting-started
+duration: 5
+order: 1
+---
+
+## What is Ruby on Rails?
+
+Ruby on Rails, often simply called Rails, is a powerful web application framework written in the Ruby programming language. Created by David Heinemeier Hansson in 2004, Rails follows the principle of "Convention over Configuration" - meaning it makes assumptions about what you need, so you can focus on building your app rather than setting up boilerplate code.
+
+## Why Choose Rails?
+
+Rails is perfect for building web applications quickly and efficiently. Here's why developers love it:
+
+- **Fast Development**: Build features in hours, not days
+- **Clean Code**: Ruby's elegant syntax makes code readable and maintainable
+- **Batteries Included**: Everything you need comes built-in
+- **Active Community**: Thousands of gems (libraries) available
+- **Proven at Scale**: Used by GitHub, Shopify, Airbnb, and Basecamp
+
+## The MVC Architecture
+
+Rails follows the Model-View-Controller (MVC) pattern:
+
+```ruby
+# Model - Handles data and business logic
+class User < ApplicationRecord
+  validates :email, presence: true
+end
+
+# Controller - Processes requests and returns responses
+class UsersController < ApplicationController
+  def show
+    @user = User.find(params[:id])
+  end
+end
+
+# View - Displays data to the user (in app/views/users/show.html.erb)
+```
+
+Think of it like a restaurant:
+- **Model** = The kitchen (prepares the data)
+- **Controller** = The waiter (takes orders, delivers food)
+- **View** = The plate presentation (how it looks to the customer)
+
+## Rails Philosophy
+
+Rails is built on two main principles:
+
+### 1. Convention over Configuration (CoC)
+Instead of configuring everything manually, Rails uses sensible defaults:
+
+```ruby
+# Rails automatically knows:
+# - Model 'User' uses table 'users'
+# - Controller 'UsersController' serves views from 'app/views/users/'
+# - URL '/users' maps to UsersController#index
+```
+
+### 2. Don't Repeat Yourself (DRY)
+Write code once, use it everywhere:
+
+```ruby
+# Instead of repeating validation logic everywhere,
+# define it once in your model
+class Article < ApplicationRecord
+  validates :title, presence: true, length: { minimum: 5 }
+  # This validation works everywhere automatically!
+end
+```
+
+## What You'll Build
+
+Throughout this course, you'll learn to build complete web applications with:
+
+- User authentication and authorization
+- Database models with relationships
+- RESTful APIs
+- File uploads with Active Storage
+- Email notifications
+- Background jobs
+- And much more!
+
+Let's get started by setting up your development environment.
+

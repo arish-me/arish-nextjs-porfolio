@@ -1,0 +1,275 @@
+---
+title: View Helpers
+chapterSlug: views-and-templates
+duration: 12
+order: 2
+---
+
+## View Helpers
+
+View helpers are methods available in your views that help format data, generate URLs, create form elements, and more. Rails provides many built-in helpers, and you can create your own.
+
+## URL Helpers
+
+```erb
+<!-- Link helpers -->
+<%= link_to "Home", root_path %>
+<%= link_to "Article", @article %>
+<%= link_to "Edit", edit_article_path(@article) %>
+<%= link_to "Delete", @article, method: :delete, data: { confirm: "Are you sure?" } %>
+
+<!-- With classes -->
+<%= link_to "Articles", articles_path, class: "btn btn-primary" %>
+
+<!-- With block for complex content -->
+<%= link_to @article do %>
+  <h3><%= @article.title %></h3>
+  <span><%= @article.author.name %></span>
+<% end %>
+
+<!-- URL helpers (without link) -->
+<%= article_path(@article) %>     <!-- /articles/1 -->
+<%= article_url(@article) %>      <!-- http://example.com/articles/1 -->
+<%= new_article_path %>           <!-- /articles/new -->
+<%= edit_article_path(@article) %> <!-- /articles/1/edit -->
+
+<!-- Button to (creates a form) -->
+<%= button_to "Delete", @article, method: :delete %>
+<%= button_to "Subscribe", subscribe_path, method: :post %>
+```
+
+## Text Helpers
+
+```erb
+<!-- Truncate -->
+<%= truncate(@article.body, length: 100) %>
+<%= truncate(@article.body, length: 100, separator: ' ') %>
+<%= truncate(@article.body, length: 100, omission: '... (more)') %>
+
+<!-- Simple format (converts newlines to <br> and paragraphs) -->
+<%= simple_format(@article.body) %>
+
+<!-- Pluralize -->
+<%= pluralize(@articles.count, 'article') %>
+<!-- "5 articles" or "1 article" -->
+
+<!-- Highlight -->
+<%= highlight(@article.body, 'keyword') %>
+<!-- Wraps matches in <mark> tags -->
+
+<!-- Excerpt -->
+<%= excerpt(@article.body, 'keyword', radius: 50) %>
+<!-- Shows text around the keyword -->
+
+<!-- Word wrap -->
+<%= word_wrap(@long_text, line_width: 80) %>
+
+<!-- Strip tags -->
+<%= strip_tags(@html_content) %>
+
+<!-- Strip links -->
+<%= strip_links(@html_with_links) %>
+```
+
+## Number Helpers
+
+```erb
+<!-- Currency -->
+<%= number_to_currency(1234.50) %>
+<!-- $1,234.50 -->
+<%= number_to_currency(1234.50, unit: "€", format: "%n %u") %>
+<!-- 1,234.50 € -->
+
+<!-- Percentage -->
+<%= number_to_percentage(75.5) %>
+<!-- 75.500% -->
+<%= number_to_percentage(75.5, precision: 0) %>
+<!-- 76% -->
+
+<!-- Delimiter -->
+<%= number_with_delimiter(1234567) %>
+<!-- 1,234,567 -->
+
+<!-- Precision -->
+<%= number_with_precision(3.14159, precision: 2) %>
+<!-- 3.14 -->
+
+<!-- Human readable -->
+<%= number_to_human(1234567) %>
+<!-- 1.23 Million -->
+
+<!-- File size -->
+<%= number_to_human_size(1234567) %>
+<!-- 1.18 MB -->
+
+<!-- Phone -->
+<%= number_to_phone(5551234567) %>
+<!-- 555-123-4567 -->
+```
+
+## Date and Time Helpers
+
+```erb
+<!-- Time ago -->
+<%= time_ago_in_words(@article.created_at) %>
+<!-- "3 days ago" -->
+
+<!-- Distance in words -->
+<%= distance_of_time_in_words(Time.now, @event.starts_at) %>
+<!-- "about 2 hours" -->
+
+<!-- Date formatting with strftime -->
+<%= @article.created_at.strftime("%B %d, %Y") %>
+<!-- "January 15, 2024" -->
+
+<!-- Using I18n localize -->
+<%= l(@article.created_at, format: :long) %>
+<%= l(@article.created_at, format: :short) %>
+
+<!-- Time tag (with HTML5 time element) -->
+<%= time_tag(@article.created_at) %>
+<!-- <time datetime="2024-01-15T10:30:00Z">January 15, 2024</time> -->
+
+<%= time_tag(@article.created_at) do %>
+  Published <%= time_ago_in_words(@article.created_at) %> ago
+<% end %>
+```
+
+## Asset Helpers
+
+```erb
+<!-- Images -->
+<%= image_tag "logo.png" %>
+<%= image_tag "logo.png", alt: "Company Logo", class: "logo" %>
+<%= image_tag "logo.png", size: "100x100" %>
+<%= image_tag @user.avatar, width: 50, height: 50 %>
+
+<!-- Image path -->
+<%= image_path "icon.png" %>
+<!-- /assets/icon-abc123.png -->
+
+<!-- Stylesheets -->
+<%= stylesheet_link_tag "application" %>
+<%= stylesheet_link_tag "print", media: "print" %>
+
+<!-- JavaScript -->
+<%= javascript_include_tag "application" %>
+<%= javascript_include_tag "custom", defer: true %>
+
+<!-- Favicon -->
+<%= favicon_link_tag "favicon.ico" %>
+
+<!-- Audio/Video -->
+<%= audio_tag "sound.mp3" %>
+<%= video_tag "movie.mp4", controls: true %>
+```
+
+## Tag Helpers
+
+```erb
+<!-- Content tag -->
+<%= content_tag :div, "Hello", class: "greeting" %>
+<!-- <div class="greeting">Hello</div> -->
+
+<%= content_tag :ul, class: "list" do %>
+  <li>Item 1</li>
+  <li>Item 2</li>
+<% end %>
+
+<!-- Tag builder (Rails 5.1+) -->
+<%= tag.div "Hello", class: "greeting" %>
+<%= tag.p class: "intro" do %>
+  Welcome to our site!
+<% end %>
+
+<!-- Self-closing tags -->
+<%= tag.br %>
+<%= tag.hr %>
+<%= tag.img src: "photo.jpg", alt: "Photo" %>
+
+<!-- Data attributes -->
+<%= tag.div data: { controller: "modal", action: "click->modal#open" } %>
+<!-- <div data-controller="modal" data-action="click->modal#open"></div> -->
+```
+
+## Conditional Classes
+
+```erb
+<!-- Rails 6.1+ class helper -->
+<div class="<%= class_names('base', active: @active, hidden: @hidden) %>">
+<!-- active and hidden only added if their values are truthy -->
+
+<!-- Array syntax -->
+<div class="<%= ['card', ('featured' if @article.featured?)].compact.join(' ') %>">
+```
+
+## Custom Helpers
+
+```ruby
+# app/helpers/application_helper.rb
+module ApplicationHelper
+  def full_title(page_title = "")
+    base_title = "My App"
+    page_title.empty? ? base_title : "#{page_title} | #{base_title}"
+  end
+  
+  def nav_link(text, path)
+    css_class = current_page?(path) ? "nav-link active" : "nav-link"
+    link_to text, path, class: css_class
+  end
+  
+  def format_date(date)
+    date.strftime("%B %d, %Y") if date
+  end
+  
+  def avatar_for(user, size: 50)
+    if user.avatar.attached?
+      image_tag user.avatar, size: "#{size}x#{size}", class: "avatar"
+    else
+      image_tag "default_avatar.png", size: "#{size}x#{size}", class: "avatar"
+    end
+  end
+  
+  def markdown(text)
+    renderer = Redcarpet::Render::HTML.new
+    markdown = Redcarpet::Markdown.new(renderer)
+    markdown.render(text).html_safe
+  end
+end
+```
+
+```erb
+<title><%= full_title(@article&.title) %></title>
+
+<nav>
+  <%= nav_link "Home", root_path %>
+  <%= nav_link "Articles", articles_path %>
+</nav>
+
+<%= avatar_for(@user, size: 100) %>
+<%= format_date(@article.published_at) %>
+<%= markdown(@article.body) %>
+```
+
+## Model-Specific Helpers
+
+```ruby
+# app/helpers/articles_helper.rb
+module ArticlesHelper
+  def article_status_badge(article)
+    if article.published?
+      tag.span "Published", class: "badge badge-success"
+    else
+      tag.span "Draft", class: "badge badge-warning"
+    end
+  end
+  
+  def reading_time(article)
+    minutes = (article.body.split.size / 200.0).ceil
+    "#{minutes} min read"
+  end
+end
+```
+
+View helpers keep your templates clean and maintainable!
+

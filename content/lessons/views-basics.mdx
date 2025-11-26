@@ -1,0 +1,334 @@
+---
+title: Views Basics
+chapterSlug: rails-fundamentals
+duration: 10
+order: 4
+---
+
+## Views in Rails
+
+Views are the V in MVC. They're responsible for generating the HTML that gets sent to the user's browser. Rails uses ERB (Embedded Ruby) by default for templating.
+
+## ERB Syntax
+
+ERB allows you to embed Ruby code in HTML:
+
+```erb
+<!-- Output tag - displays result -->
+<%= expression %>
+
+<!-- Execution tag - runs code without output -->
+<% code %>
+
+<!-- Comment tag -->
+<%# This is a comment %>
+```
+
+### Examples
+
+```erb
+<!-- Display a variable -->
+<h1><%= @article.title %></h1>
+
+<!-- Conditional logic -->
+<% if @user.admin? %>
+  <span class="badge">Admin</span>
+<% end %>
+
+<!-- Loops -->
+<ul>
+  <% @articles.each do |article| %>
+    <li><%= article.title %></li>
+  <% end %>
+</ul>
+```
+
+## Instance Variables
+
+Controllers pass data to views through instance variables:
+
+```ruby
+# app/controllers/articles_controller.rb
+class ArticlesController < ApplicationController
+  def show
+    @article = Article.find(params[:id])
+    @comments = @article.comments.recent
+  end
+end
+```
+
+```erb
+<!-- app/views/articles/show.html.erb -->
+<article>
+  <h1><%= @article.title %></h1>
+  <div class="content">
+    <%= @article.body %>
+  </div>
+  
+  <section class="comments">
+    <h2><%= @comments.count %> Comments</h2>
+    <% @comments.each do |comment| %>
+      <div class="comment">
+        <strong><%= comment.author %></strong>
+        <p><%= comment.body %></p>
+      </div>
+    <% end %>
+  </section>
+</article>
+```
+
+## Layouts
+
+Layouts wrap your views with common HTML structure:
+
+```erb
+<!-- app/views/layouts/application.html.erb -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= content_for(:title) || 'My App' %></title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag 'application' %>
+  <%= javascript_include_tag 'application', defer: true %>
+</head>
+<body>
+  <header>
+    <%= render 'shared/navigation' %>
+  </header>
+  
+  <main>
+    <%= yield %>
+  </main>
+  
+  <footer>
+    <%= render 'shared/footer' %>
+  </footer>
+</body>
+</html>
+```
+
+### Custom Layouts
+
+```ruby
+# Use a different layout for the entire controller
+class AdminController < ApplicationController
+  layout 'admin'
+end
+
+# Use different layout for specific action
+class ArticlesController < ApplicationController
+  def print
+    @article = Article.find(params[:id])
+    render layout: 'print'
+  end
+end
+```
+
+### Content For
+
+Pass content from views to layouts:
+
+```erb
+<!-- app/views/articles/show.html.erb -->
+<% content_for :title do %>
+  <%= @article.title %> - My Blog
+<% end %>
+
+<% content_for :sidebar do %>
+  <div class="related-articles">
+    <%= render @article.related %>
+  </div>
+<% end %>
+
+<article>
+  <h1><%= @article.title %></h1>
+  <%= @article.body %>
+</article>
+```
+
+```erb
+<!-- app/views/layouts/application.html.erb -->
+<head>
+  <title><%= yield :title %></title>
+</head>
+<body>
+  <main><%= yield %></main>
+  <aside><%= yield :sidebar %></aside>
+</body>
+```
+
+## Partials
+
+Partials are reusable view fragments. Their filenames start with an underscore:
+
+```erb
+<!-- app/views/articles/_article.html.erb -->
+<article class="article-card">
+  <h2><%= link_to article.title, article %></h2>
+  <p><%= truncate(article.body, length: 150) %></p>
+  <footer>
+    By <%= article.author.name %> • 
+    <%= time_ago_in_words(article.created_at) %> ago
+  </footer>
+</article>
+```
+
+### Rendering Partials
+
+```erb
+<!-- Render a single partial -->
+<%= render 'article', article: @article %>
+<%= render partial: 'article', locals: { article: @article } %>
+
+<!-- Render a collection -->
+<%= render @articles %>
+<!-- Same as: -->
+<%= render partial: 'article', collection: @articles %>
+
+<!-- With custom variable name -->
+<%= render partial: 'article', collection: @articles, as: :post %>
+
+<!-- With spacer -->
+<%= render partial: 'article', collection: @articles, spacer_template: 'separator' %>
+
+<!-- From another controller -->
+<%= render 'shared/navigation' %>
+<%= render 'comments/form', comment: @comment %>
+```
+
+### Partial with Object
+
+```erb
+<!-- When you pass an object matching the partial name -->
+<%= render @article %>
+<!-- Rails looks for app/views/articles/_article.html.erb -->
+<!-- and passes local variable 'article' -->
+```
+
+## View Helpers
+
+Helpers are methods available in all views:
+
+### Link Helpers
+
+```erb
+<%= link_to 'Home', root_path %>
+<%= link_to 'Article', @article %>
+<%= link_to 'Edit', edit_article_path(@article), class: 'btn' %>
+<%= link_to 'Delete', @article, method: :delete, data: { confirm: 'Sure?' } %>
+
+<!-- With block for complex content -->
+<%= link_to @article do %>
+  <h3><%= @article.title %></h3>
+  <span><%= @article.author.name %></span>
+<% end %>
+```
+
+### Image Helpers
+
+```erb
+<%= image_tag 'logo.png' %>
+<%= image_tag 'avatar.jpg', class: 'rounded', alt: 'User avatar' %>
+<%= image_tag user.avatar.url, size: '100x100' %>
+```
+
+### Text Helpers
+
+```erb
+<%= truncate(@article.body, length: 100) %>
+<%= truncate(@article.body, length: 100, separator: ' ') %>
+
+<%= simple_format(@article.body) %>  <!-- Converts \n to <br> and wraps in <p> -->
+
+<%= pluralize(5, 'comment') %>  <!-- "5 comments" -->
+<%= pluralize(1, 'comment') %>  <!-- "1 comment" -->
+
+<%= highlight(@article.body, 'keyword') %>  <!-- Highlights matches -->
+<%= excerpt(@article.body, 'keyword', radius: 50) %>  <!-- Excerpt around keyword -->
+```
+
+### Number Helpers
+
+```erb
+<%= number_to_currency(1234.50) %>  <!-- $1,234.50 -->
+<%= number_to_percentage(75.5) %>   <!-- 75.500% -->
+<%= number_with_delimiter(1234567) %>  <!-- 1,234,567 -->
+<%= number_to_human(1234567) %>     <!-- 1.23 Million -->
+<%= number_to_human_size(1234567) %>  <!-- 1.18 MB -->
+```
+
+### Date/Time Helpers
+
+```erb
+<%= time_ago_in_words(@article.created_at) %>  <!-- "3 days ago" -->
+<%= distance_of_time_in_words(Time.now, @event.starts_at) %>
+
+<%= @article.created_at.strftime("%B %d, %Y") %>  <!-- "January 15, 2024" -->
+
+<!-- With I18n -->
+<%= l(@article.created_at, format: :long) %>
+```
+
+## Custom Helpers
+
+Create your own helpers:
+
+```ruby
+# app/helpers/articles_helper.rb
+module ArticlesHelper
+  def reading_time(article)
+    minutes = (article.body.split.size / 200.0).ceil
+    "#{minutes} min read"
+  end
+  
+  def article_status_badge(article)
+    status = article.published? ? 'published' : 'draft'
+    content_tag :span, status.titleize, class: "badge badge-#{status}"
+  end
+end
+```
+
+```erb
+<!-- Use in views -->
+<%= reading_time(@article) %>
+<%= article_status_badge(@article) %>
+```
+
+## Safe HTML Output
+
+Rails automatically escapes HTML to prevent XSS attacks:
+
+```erb
+<%= "<script>alert('xss')</script>" %>
+<!-- Output: &lt;script&gt;alert('xss')&lt;/script&gt; -->
+
+<!-- Mark as safe (be careful!) -->
+<%= "<b>Bold</b>".html_safe %>
+<%= raw "<b>Bold</b>" %>
+
+<!-- Better: use sanitize -->
+<%= sanitize @article.body, tags: %w(b i strong em a) %>
+```
+
+## JSON Views
+
+For API responses:
+
+```ruby
+# app/views/articles/show.json.jbuilder
+json.id @article.id
+json.title @article.title
+json.body @article.body
+json.author do
+  json.name @article.author.name
+  json.email @article.author.email
+end
+json.comments @article.comments do |comment|
+  json.id comment.id
+  json.body comment.body
+end
+```
+
+Views make your data presentable to users - keep them clean and focused on display!
+

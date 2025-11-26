@@ -1,0 +1,332 @@
+---
+title: Sending Emails with Action Mailer
+chapterSlug: action-mailer
+duration: 12
+order: 1
+---
+
+## Action Mailer
+
+Action Mailer allows you to send emails from your Rails application. It works like controllers but for emails instead of web responses.
+
+## Creating a Mailer
+
+```bash
+rails generate mailer UserMailer welcome password_reset
+```
+
+This creates:
+- `app/mailers/user_mailer.rb`
+- `app/views/user_mailer/welcome.html.erb`
+- `app/views/user_mailer/welcome.text.erb`
+- `app/views/user_mailer/password_reset.html.erb`
+- `app/views/user_mailer/password_reset.text.erb`
+
+## Basic Mailer
+
+```ruby
+# app/mailers/user_mailer.rb
+class UserMailer < ApplicationMailer
+  def welcome(user)
+    @user = user
+    @login_url = login_url
+    
+    mail(
+      to: @user.email,
+      subject: "Welcome to Our App!"
+    )
+  end
+  
+  def password_reset(user)
+    @user = user
+    @reset_url = password_reset_url(token: @user.reset_token)
+    
+    mail(
+      to: @user.email,
+      subject: "Password Reset Instructions"
+    )
+  end
+end
+```
+
+## Email Templates
+
+### HTML Template
+
+```erb
+<!-- app/views/user_mailer/welcome.html.erb -->
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+    .header { background: #4F46E5; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; }
+    .button { 
+      display: inline-block; 
+      background: #4F46E5; 
+      color: white; 
+      padding: 12px 24px; 
+      text-decoration: none; 
+      border-radius: 4px; 
+    }
+    .footer { padding: 20px; text-align: center; color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Welcome to Our App!</h1>
+    </div>
+    <div class="content">
+      <p>Hi <%= @user.name %>,</p>
+      <p>Thanks for signing up! We're excited to have you on board.</p>
+      <p>Click the button below to get started:</p>
+      <p>
+        <a href="<%= @login_url %>" class="button">Log In Now</a>
+      </p>
+      <p>If you have any questions, just reply to this email.</p>
+      <p>Cheers,<br>The Team</p>
+    </div>
+    <div class="footer">
+      <p>© <%= Date.current.year %> Our App. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
+```
+
+### Text Template
+
+```erb
+<!-- app/views/user_mailer/welcome.text.erb -->
+Welcome to Our App!
+==================
+
+Hi <%= @user.name %>,
+
+Thanks for signing up! We're excited to have you on board.
+
+Get started by logging in:
+<%= @login_url %>
+
+If you have any questions, just reply to this email.
+
+Cheers,
+The Team
+
+--
+© <%= Date.current.year %> Our App. All rights reserved.
+```
+
+## Sending Emails
+
+### Send Immediately
+
+```ruby
+# Sends synchronously (blocks the request)
+UserMailer.welcome(@user).deliver_now
+```
+
+### Send in Background (Recommended)
+
+```ruby
+# Queues for background processing
+UserMailer.welcome(@user).deliver_later
+
+# With delay
+UserMailer.welcome(@user).deliver_later(wait: 1.hour)
+
+# At specific time
+UserMailer.welcome(@user).deliver_later(wait_until: Date.tomorrow.noon)
+```
+
+## Mail Options
+
+```ruby
+class UserMailer < ApplicationMailer
+  def notification(user, subject:, body:)
+    @user = user
+    @body = body
+    
+    mail(
+      to: @user.email,
+      from: "notifications@example.com",
+      cc: "admin@example.com",
+      bcc: "logs@example.com",
+      reply_to: "support@example.com",
+      subject: subject
+    )
+  end
+  
+  def with_attachment(user, document)
+    @user = user
+    
+    # Attach file
+    attachments['document.pdf'] = File.read(document.path)
+    
+    # Attach with options
+    attachments['report.csv'] = {
+      mime_type: 'text/csv',
+      content: generate_csv
+    }
+    
+    # Inline attachment (for images in HTML)
+    attachments.inline['logo.png'] = File.read('app/assets/images/logo.png')
+    
+    mail(to: @user.email, subject: 'Your Document')
+  end
+end
+```
+
+Using inline attachments in HTML:
+
+```erb
+<%= image_tag attachments['logo.png'].url %>
+```
+
+## Configuration
+
+### Development (Letter Opener)
+
+```ruby
+# Gemfile
+gem 'letter_opener', group: :development
+
+# config/environments/development.rb
+config.action_mailer.delivery_method = :letter_opener
+config.action_mailer.perform_deliveries = true
+```
+
+### Production (SMTP)
+
+```ruby
+# config/environments/production.rb
+config.action_mailer.delivery_method = :smtp
+config.action_mailer.smtp_settings = {
+  address: 'smtp.example.com',
+  port: 587,
+  domain: 'example.com',
+  user_name: ENV['SMTP_USERNAME'],
+  password: ENV['SMTP_PASSWORD'],
+  authentication: 'plain',
+  enable_starttls_auto: true
+}
+```
+
+### SendGrid
+
+```ruby
+config.action_mailer.smtp_settings = {
+  address: 'smtp.sendgrid.net',
+  port: 587,
+  domain: 'yourdomain.com',
+  user_name: 'apikey',
+  password: ENV['SENDGRID_API_KEY'],
+  authentication: :plain,
+  enable_starttls_auto: true
+}
+```
+
+### Postmark
+
+```ruby
+# Gemfile
+gem 'postmark-rails'
+
+# config/environments/production.rb
+config.action_mailer.delivery_method = :postmark
+config.action_mailer.postmark_settings = {
+  api_token: ENV['POSTMARK_API_TOKEN']
+}
+```
+
+## Application Mailer
+
+Set defaults for all mailers:
+
+```ruby
+# app/mailers/application_mailer.rb
+class ApplicationMailer < ActionMailer::Base
+  default from: 'notifications@example.com',
+          reply_to: 'support@example.com'
+          
+  layout 'mailer'
+  
+  # Helper methods available to all mailers
+  helper :application
+  
+  private
+  
+  def user_email(user)
+    mail(to: email_address_with_name(user.email, user.name))
+  end
+end
+```
+
+## Email Layout
+
+```erb
+<!-- app/views/layouts/mailer.html.erb -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+  <style>
+    /* Global email styles */
+    body { font-family: Arial, sans-serif; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <%= yield %>
+</body>
+</html>
+```
+
+## Callbacks
+
+```ruby
+class UserMailer < ApplicationMailer
+  before_action :set_user
+  after_action :log_delivery
+  
+  def welcome
+    mail(to: @user.email, subject: 'Welcome!')
+  end
+  
+  private
+  
+  def set_user
+    @user = params[:user]
+  end
+  
+  def log_delivery
+    Rails.logger.info "Sending #{action_name} email to #{@user.email}"
+  end
+end
+
+# Using with params
+UserMailer.with(user: @user).welcome.deliver_later
+```
+
+## Preview Emails
+
+```ruby
+# test/mailers/previews/user_mailer_preview.rb
+class UserMailerPreview < ActionMailer::Preview
+  def welcome
+    user = User.first || User.new(name: 'Test', email: 'test@example.com')
+    UserMailer.welcome(user)
+  end
+  
+  def password_reset
+    user = User.first
+    UserMailer.password_reset(user)
+  end
+end
+```
+
+View at: `http://localhost:3000/rails/mailers/user_mailer/welcome`
+
+Action Mailer makes sending beautiful emails from Rails straightforward!
+

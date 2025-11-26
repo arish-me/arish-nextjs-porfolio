@@ -1,0 +1,274 @@
+---
+title: Ruby Data Types
+chapterSlug: ruby-basics
+duration: 10
+order: 1
+---
+
+## Ruby Data Types
+
+Ruby is a dynamically typed language, meaning you don't need to declare variable types. Let's explore the fundamental data types you'll use in Rails.
+
+## Strings
+
+Strings are sequences of characters. Ruby offers several ways to create them:
+
+```ruby
+# Single quotes (literal)
+name = 'John Doe'
+
+# Double quotes (allows interpolation and escape characters)
+greeting = "Hello, #{name}!"  # => "Hello, John Doe!"
+
+# Multi-line strings
+description = <<~TEXT
+  This is a multi-line string.
+  It preserves line breaks.
+  Very useful for long text.
+TEXT
+
+# Common string methods
+name = "  Ruby on Rails  "
+
+name.length        # => 17
+name.upcase        # => "  RUBY ON RAILS  "
+name.downcase      # => "  ruby on rails  "
+name.capitalize    # => "  ruby on rails  "
+name.strip         # => "Ruby on Rails"
+name.split(" ")    # => ["Ruby", "on", "Rails"]
+name.include?("Ruby") # => true
+name.gsub("Rails", "Framework") # => "  Ruby on Framework  "
+```
+
+### String Interpolation
+
+```ruby
+user = "Alice"
+age = 25
+
+# Using interpolation (double quotes required)
+message = "#{user} is #{age} years old"
+# => "Alice is 25 years old"
+
+# You can include any Ruby expression
+price = 19.99
+puts "Total: $#{'%.2f' % (price * 1.1)}"
+# => "Total: $21.99"
+```
+
+## Numbers
+
+Ruby has two main number types: Integers and Floats.
+
+```ruby
+# Integers
+count = 42
+negative = -17
+big_number = 1_000_000  # Underscores for readability
+
+# Floats (decimal numbers)
+price = 19.99
+pi = 3.14159
+
+# Arithmetic operations
+10 + 3    # => 13 (addition)
+10 - 3    # => 7 (subtraction)
+10 * 3    # => 30 (multiplication)
+10 / 3    # => 3 (integer division)
+10.0 / 3  # => 3.333... (float division)
+10 % 3    # => 1 (modulo/remainder)
+10 ** 3   # => 1000 (exponentiation)
+
+# Useful methods
+-5.abs         # => 5
+3.14.round     # => 3
+3.14.ceil      # => 4
+3.14.floor     # => 3
+5.even?        # => false
+5.odd?         # => true
+10.between?(5, 15) # => true
+```
+
+## Booleans
+
+Booleans represent true or false values:
+
+```ruby
+is_active = true
+is_deleted = false
+
+# In Ruby, only nil and false are falsy
+# Everything else is truthy (including 0 and empty strings)
+
+if 0
+  puts "0 is truthy in Ruby!"
+end
+
+# Comparison operators
+5 == 5     # => true (equality)
+5 != 3     # => true (not equal)
+5 > 3      # => true (greater than)
+5 < 3      # => false (less than)
+5 >= 5     # => true (greater or equal)
+5 <= 5     # => true (less or equal)
+
+# Logical operators
+true && false  # => false (and)
+true || false  # => true (or)
+!true          # => false (not)
+```
+
+## Symbols
+
+Symbols are immutable, reusable identifiers. They're more memory-efficient than strings:
+
+```ruby
+# Symbols start with a colon
+status = :active
+role = :admin
+
+# Symbols are commonly used as hash keys
+user = {
+  name: "John",      # Same as :name => "John"
+  email: "john@example.com",
+  role: :admin
+}
+
+# Comparing symbols is faster than strings
+:active == :active  # => true (comparing object IDs)
+"active" == "active" # => true (comparing characters)
+
+# Converting between symbols and strings
+:hello.to_s   # => "hello"
+"hello".to_sym # => :hello
+```
+
+## Arrays
+
+Arrays are ordered collections that can hold any type of object:
+
+```ruby
+# Creating arrays
+numbers = [1, 2, 3, 4, 5]
+names = ["Alice", "Bob", "Charlie"]
+mixed = [1, "two", :three, 4.0]
+
+# Shorthand for string arrays
+fruits = %w[apple banana cherry]  # => ["apple", "banana", "cherry"]
+
+# Accessing elements
+numbers[0]     # => 1 (first element)
+numbers[-1]    # => 5 (last element)
+numbers[1..3]  # => [2, 3, 4] (range)
+numbers.first  # => 1
+numbers.last   # => 5
+
+# Modifying arrays
+numbers << 6          # Add to end: [1, 2, 3, 4, 5, 6]
+numbers.push(7)       # Same: [1, 2, 3, 4, 5, 6, 7]
+numbers.unshift(0)    # Add to front: [0, 1, 2, 3, 4, 5, 6, 7]
+numbers.pop           # Remove last: returns 7
+numbers.shift         # Remove first: returns 0
+
+# Useful array methods
+[1, 2, 3].length      # => 3
+[1, 2, 3].empty?      # => false
+[1, 2, 2, 3].uniq     # => [1, 2, 3]
+[3, 1, 2].sort        # => [1, 2, 3]
+[1, 2, 3].reverse     # => [3, 2, 1]
+[1, 2, 3].include?(2) # => true
+[1, 2, 3].join(", ")  # => "1, 2, 3"
+```
+
+## Hashes
+
+Hashes are key-value collections (like dictionaries in other languages):
+
+```ruby
+# Creating hashes
+user = {
+  name: "John",
+  age: 30,
+  email: "john@example.com"
+}
+
+# Old syntax (still valid)
+user = { :name => "John", :age => 30 }
+
+# Accessing values
+user[:name]    # => "John"
+user[:age]     # => 30
+user[:missing] # => nil
+
+# With default value
+scores = Hash.new(0)
+scores[:player1] += 10  # Works without error
+
+# Modifying hashes
+user[:city] = "New York"  # Add new key
+user[:age] = 31           # Update existing key
+user.delete(:email)       # Remove a key
+
+# Useful hash methods
+user.keys       # => [:name, :age, :city]
+user.values     # => ["John", 31, "New York"]
+user.key?(:name) # => true
+user.value?("John") # => true
+user.merge({ country: "USA" }) # Combine hashes
+```
+
+## Nil
+
+`nil` represents the absence of a value:
+
+```ruby
+value = nil
+
+# Checking for nil
+value.nil?     # => true
+value == nil   # => true (but .nil? is preferred)
+
+# Safe navigation operator (Ruby 2.3+)
+user = nil
+user&.name  # => nil (no error)
+
+# Default values
+name = nil
+name || "Anonymous"  # => "Anonymous"
+
+# Dig method for nested hashes
+data = { user: { profile: { name: "John" } } }
+data.dig(:user, :profile, :name)  # => "John"
+data.dig(:user, :settings, :theme) # => nil (no error)
+```
+
+## Type Conversion
+
+Ruby provides methods to convert between types:
+
+```ruby
+# To String
+42.to_s           # => "42"
+3.14.to_s         # => "3.14"
+:symbol.to_s      # => "symbol"
+[1, 2, 3].to_s    # => "[1, 2, 3]"
+
+# To Integer
+"42".to_i         # => 42
+"3.14".to_i       # => 3
+"hello".to_i      # => 0
+
+# To Float
+"3.14".to_f       # => 3.14
+42.to_f           # => 42.0
+
+# To Symbol
+"hello".to_sym    # => :hello
+
+# To Array
+(1..5).to_a       # => [1, 2, 3, 4, 5]
+{ a: 1 }.to_a     # => [[:a, 1]]
+```
+
+Understanding these data types is fundamental to working with Ruby and Rails!
+

@@ -1,0 +1,303 @@
+---
+title: Asset Pipeline and CSS
+chapterSlug: rails-fundamentals
+duration: 10
+order: 5
+---
+
+## The Asset Pipeline
+
+The asset pipeline provides a framework for managing JavaScript, CSS, and images in your Rails application. Rails 7+ uses modern tools like Propshaft, Import Maps, and optionally Tailwind CSS.
+
+## Modern Rails Asset Management
+
+Rails 7+ offers several options for managing frontend assets:
+
+### Import Maps (Default)
+
+Import maps allow you to use JavaScript modules directly in the browser without bundling:
+
+```ruby
+# config/importmap.rb
+pin "application"
+pin "@hotwired/turbo-rails", to: "turbo.min.js"
+pin "@hotwired/stimulus", to: "stimulus.min.js"
+pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
+pin_all_from "app/javascript/controllers", under: "controllers"
+```
+
+```javascript
+// app/javascript/application.js
+import "@hotwired/turbo-rails"
+import "controllers"
+```
+
+### Adding JavaScript Libraries
+
+```bash
+# Add a package via import maps
+bin/importmap pin lodash
+```
+
+## CSS in Rails 7+
+
+### CSS Bundling with Tailwind
+
+Generate a new app with Tailwind:
+
+```bash
+rails new myapp --css=tailwind
+```
+
+Or add to existing app:
+
+```bash
+bundle add tailwindcss-rails
+rails tailwindcss:install
+```
+
+```html
+<!-- app/views/layouts/application.html.erb -->
+<%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+<%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+```
+
+### Tailwind Configuration
+
+```javascript
+// config/tailwind.config.js
+module.exports = {
+  content: [
+    './app/views/**/*.html.erb',
+    './app/helpers/**/*.rb',
+    './app/assets/stylesheets/**/*.css',
+    './app/javascript/**/*.js'
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3B82F6',
+        secondary: '#10B981'
+      }
+    }
+  },
+  plugins: []
+}
+```
+
+### Custom CSS
+
+```css
+/* app/assets/stylesheets/application.css */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* Custom styles */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded font-semibold;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+}
+```
+
+## Image Assets
+
+### Image Tag Helper
+
+```erb
+<%= image_tag "logo.png" %>
+<%= image_tag "hero.jpg", class: "w-full h-64 object-cover" %>
+<%= image_tag "avatar.png", alt: "User avatar", size: "50x50" %>
+```
+
+### Images in CSS
+
+```css
+.hero {
+  background-image: url('hero.jpg');
+}
+```
+
+### Active Storage Images
+
+For user-uploaded images:
+
+```erb
+<%= image_tag @user.avatar if @user.avatar.attached? %>
+<%= image_tag @user.avatar.variant(resize_to_limit: [100, 100]) %>
+```
+
+## Stimulus Controllers
+
+Stimulus is Rails' modest JavaScript framework:
+
+```bash
+rails generate stimulus hello
+```
+
+```javascript
+// app/javascript/controllers/hello_controller.js
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["name", "output"]
+  
+  greet() {
+    this.outputTarget.textContent = `Hello, ${this.nameTarget.value}!`
+  }
+}
+```
+
+```erb
+<!-- Using the controller -->
+<div data-controller="hello">
+  <input data-hello-target="name" type="text">
+  <button data-action="click->hello#greet">Greet</button>
+  <span data-hello-target="output"></span>
+</div>
+```
+
+### Common Stimulus Patterns
+
+```javascript
+// Toggle visibility
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["content"]
+  
+  toggle() {
+    this.contentTarget.classList.toggle("hidden")
+  }
+}
+
+// Form validation
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["email", "submit"]
+  
+  validate() {
+    const isValid = this.emailTarget.value.includes("@")
+    this.submitTarget.disabled = !isValid
+  }
+}
+```
+
+## Turbo for Fast Navigation
+
+Turbo makes your app feel like a SPA without writing JavaScript:
+
+### Turbo Drive
+
+Automatically converts links and forms to AJAX:
+
+```erb
+<!-- Regular link - Turbo Drive intercepts this -->
+<%= link_to "Articles", articles_path %>
+
+<!-- Disable Turbo for specific link -->
+<%= link_to "External", "https://example.com", data: { turbo: false } %>
+```
+
+### Turbo Frames
+
+Update only part of the page:
+
+```erb
+<!-- articles/index.html.erb -->
+<%= turbo_frame_tag "articles" do %>
+  <% @articles.each do |article| %>
+    <%= render article %>
+  <% end %>
+  
+  <%= link_to "Load More", articles_path(page: @page + 1) %>
+<% end %>
+```
+
+### Turbo Streams
+
+Real-time updates:
+
+```ruby
+# articles_controller.rb
+def create
+  @article = Article.create(article_params)
+  
+  respond_to do |format|
+    format.turbo_stream
+    format.html { redirect_to articles_path }
+  end
+end
+```
+
+```erb
+<!-- app/views/articles/create.turbo_stream.erb -->
+<%= turbo_stream.prepend "articles", @article %>
+<%= turbo_stream.update "new_article_form", partial: "articles/form" %>
+```
+
+## Production Asset Compilation
+
+```bash
+# Precompile assets for production
+rails assets:precompile
+
+# Clean old assets
+rails assets:clean
+
+# Full clean
+rails assets:clobber
+```
+
+### Asset Digest and Fingerprinting
+
+Rails automatically adds fingerprints to assets for cache busting:
+
+```html
+<!-- Development -->
+<link href="/stylesheets/application.css">
+
+<!-- Production -->
+<link href="/assets/application-a1b2c3d4.css">
+```
+
+## CDN Configuration
+
+```ruby
+# config/environments/production.rb
+config.asset_host = "https://assets.example.com"
+```
+
+## Common Patterns
+
+### Conditional CSS Classes
+
+```erb
+<div class="card <%= 'featured' if @article.featured? %>">
+  <%= @article.title %>
+</div>
+
+<%= content_tag :div, @article.title, 
+    class: ['card', ('featured' if @article.featured?)] %>
+```
+
+### Dynamic Styles
+
+```erb
+<div style="background-color: <%= @user.theme_color %>;">
+  Profile
+</div>
+```
+
+Modern Rails asset management is simpler and more powerful than ever!
+

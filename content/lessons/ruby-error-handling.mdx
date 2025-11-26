@@ -1,0 +1,322 @@
+---
+title: Error Handling
+chapterSlug: ruby-basics
+duration: 8
+order: 6
+---
+
+## Error Handling in Ruby
+
+Proper error handling makes your applications robust and user-friendly. Ruby provides a clean syntax for handling exceptions.
+
+## Basic Exception Handling
+
+```ruby
+begin
+  # Code that might raise an exception
+  result = 10 / 0
+rescue
+  # Handle the exception
+  puts "An error occurred!"
+end
+```
+
+## Catching Specific Exceptions
+
+```ruby
+begin
+  # Try to open a file
+  file = File.open("nonexistent.txt")
+rescue Errno::ENOENT
+  puts "File not found!"
+rescue Errno::EACCES
+  puts "Permission denied!"
+rescue => e
+  puts "Unknown error: #{e.message}"
+end
+```
+
+## Common Exception Classes
+
+```ruby
+# Ruby's exception hierarchy
+# Exception
+#   ├── NoMemoryError
+#   ├── ScriptError
+#   │   ├── LoadError
+#   │   └── SyntaxError
+#   └── StandardError (default for rescue)
+#       ├── ArgumentError
+#       ├── IOError
+#       ├── NameError
+#       │   └── NoMethodError
+#       ├── RuntimeError
+#       ├── TypeError
+#       └── ZeroDivisionError
+
+# Examples of different exceptions
+begin
+  nil.upcase
+rescue NoMethodError => e
+  puts "Method error: #{e.message}"
+end
+
+begin
+  Integer("hello")
+rescue ArgumentError => e
+  puts "Invalid argument: #{e.message}"
+end
+
+begin
+  "hello" + 5
+rescue TypeError => e
+  puts "Type error: #{e.message}"
+end
+```
+
+## The Complete Rescue Block
+
+```ruby
+begin
+  # Try to do something risky
+  file = File.open("config.txt")
+  data = file.read
+  
+rescue Errno::ENOENT => e
+  # Handle file not found
+  puts "File not found: #{e.message}"
+  data = "default value"
+  
+rescue => e
+  # Handle any other error
+  puts "Error: #{e.class} - #{e.message}"
+  raise  # Re-raise the exception
+  
+else
+  # Runs if NO exception occurred
+  puts "File read successfully!"
+  
+ensure
+  # ALWAYS runs (like finally in other languages)
+  file&.close
+  puts "Cleanup complete"
+end
+```
+
+## Raising Exceptions
+
+```ruby
+# Raise a RuntimeError
+raise "Something went wrong!"
+
+# Raise a specific exception
+raise ArgumentError, "Age must be positive"
+
+# Raise with backtrace
+raise StandardError.new("Error!").tap { |e| e.set_backtrace(caller) }
+
+# Common pattern in methods
+def divide(a, b)
+  raise ArgumentError, "Cannot divide by zero" if b == 0
+  a / b
+end
+
+begin
+  divide(10, 0)
+rescue ArgumentError => e
+  puts e.message
+end
+```
+
+## Custom Exception Classes
+
+```ruby
+# Define custom exceptions
+class ApplicationError < StandardError; end
+
+class ValidationError < ApplicationError
+  attr_reader :field
+  
+  def initialize(message, field = nil)
+    super(message)
+    @field = field
+  end
+end
+
+class AuthenticationError < ApplicationError; end
+class AuthorizationError < ApplicationError; end
+
+# Using custom exceptions
+class User
+  def save
+    raise ValidationError.new("Email is required", :email) if email.blank?
+    raise ValidationError.new("Name is too short", :name) if name.length < 2
+    # ... save logic
+  end
+end
+
+# Handling custom exceptions
+begin
+  user.save
+rescue ValidationError => e
+  puts "Validation failed on #{e.field}: #{e.message}"
+rescue ApplicationError => e
+  puts "Application error: #{e.message}"
+end
+```
+
+## Retry
+
+Automatically retry failed operations:
+
+```ruby
+attempts = 0
+
+begin
+  attempts += 1
+  puts "Attempt #{attempts}"
+  
+  # Simulate network error
+  raise "Network error" if attempts < 3
+  
+  puts "Success!"
+rescue
+  retry if attempts < 5
+  raise  # Give up after 5 attempts
+end
+```
+
+## Retry with Exponential Backoff
+
+```ruby
+def fetch_with_retry(url, max_attempts: 5)
+  attempts = 0
+  
+  begin
+    attempts += 1
+    response = Net::HTTP.get(URI(url))
+    return response
+    
+  rescue Net::OpenTimeout, Net::ReadTimeout => e
+    if attempts < max_attempts
+      sleep_time = 2 ** attempts  # 2, 4, 8, 16, 32 seconds
+      puts "Attempt #{attempts} failed, retrying in #{sleep_time}s..."
+      sleep(sleep_time)
+      retry
+    else
+      raise "Failed after #{max_attempts} attempts: #{e.message}"
+    end
+  end
+end
+```
+
+## Exception Handling in Methods
+
+```ruby
+# Inline rescue (use sparingly)
+result = potentially_failing_method rescue default_value
+
+# Better: explicit handling
+def find_user(id)
+  User.find(id)
+rescue ActiveRecord::RecordNotFound
+  nil
+end
+
+# Method-level rescue
+def process_data
+  # method body
+rescue => e
+  log_error(e)
+  raise
+end
+```
+
+## Rails-Specific Error Handling
+
+```ruby
+# In controllers
+class UsersController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
+  rescue_from ActionController::ParameterMissing, with: :bad_request
+  
+  def show
+    @user = User.find(params[:id])
+  end
+  
+  private
+  
+  def record_not_found
+    render json: { error: "Record not found" }, status: :not_found
+  end
+  
+  def bad_request(exception)
+    render json: { error: exception.message }, status: :bad_request
+  end
+end
+
+# In models
+class User < ApplicationRecord
+  def transfer_funds(amount, recipient)
+    transaction do
+      self.balance -= amount
+      recipient.balance += amount
+      save!
+      recipient.save!
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    errors.add(:base, "Transfer failed: #{e.message}")
+    false
+  end
+end
+```
+
+## Best Practices
+
+```ruby
+# 1. Be specific about what you rescue
+# Bad
+rescue Exception  # Catches EVERYTHING including SyntaxError
+
+# Good
+rescue StandardError  # Catches most runtime errors
+
+# 2. Don't suppress exceptions silently
+# Bad
+begin
+  risky_operation
+rescue
+  # Silent failure - debugging nightmare!
+end
+
+# Good
+begin
+  risky_operation
+rescue => e
+  Rails.logger.error "Operation failed: #{e.message}"
+  Rails.logger.error e.backtrace.join("\n")
+end
+
+# 3. Use ensure for cleanup
+file = File.open("data.txt")
+begin
+  process(file)
+ensure
+  file.close  # Always close the file
+end
+
+# 4. Prefer guard clauses over exceptions for expected conditions
+# Instead of:
+def process_user(user)
+  raise "User is nil" if user.nil?
+end
+
+# Do this:
+def process_user(user)
+  return if user.nil?
+  # process...
+end
+```
+
+Good error handling is the difference between a crash and a graceful recovery!
+

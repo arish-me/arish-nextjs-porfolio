@@ -1,0 +1,348 @@
+---
+title: RESTful Controllers
+chapterSlug: controllers-and-actions
+duration: 12
+order: 2
+---
+
+## RESTful Controllers
+
+REST (Representational State Transfer) is an architectural style that Rails embraces fully. RESTful controllers follow conventions that make your code predictable and maintainable.
+
+## The Seven RESTful Actions
+
+```ruby
+class ArticlesController < ApplicationController
+  # GET /articles
+  def index
+    @articles = Article.all
+  end
+  
+  # GET /articles/:id
+  def show
+    @article = Article.find(params[:id])
+  end
+  
+  # GET /articles/new
+  def new
+    @article = Article.new
+  end
+  
+  # POST /articles
+  def create
+    @article = Article.new(article_params)
+    
+    if @article.save
+      redirect_to @article, notice: "Article created!"
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+  
+  # GET /articles/:id/edit
+  def edit
+    @article = Article.find(params[:id])
+  end
+  
+  # PATCH/PUT /articles/:id
+  def update
+    @article = Article.find(params[:id])
+    
+    if @article.update(article_params)
+      redirect_to @article, notice: "Article updated!"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+  
+  # DELETE /articles/:id
+  def destroy
+    @article = Article.find(params[:id])
+    @article.destroy
+    redirect_to articles_url, notice: "Article deleted!"
+  end
+  
+  private
+  
+  def article_params
+    params.require(:article).permit(:title, :body, :published)
+  end
+end
+```
+
+## RESTful Routes
+
+```ruby
+# config/routes.rb
+Rails.application.routes.draw do
+  resources :articles
+end
+```
+
+This generates:
+
+| HTTP Verb | Path | Action | Purpose |
+|-----------|------|--------|---------|
+| GET | /articles | index | List all |
+| GET | /articles/new | new | Form for new |
+| POST | /articles | create | Create new |
+| GET | /articles/:id | show | Show one |
+| GET | /articles/:id/edit | edit | Form to edit |
+| PATCH/PUT | /articles/:id | update | Update one |
+| DELETE | /articles/:id | destroy | Delete one |
+
+## Nested Resources
+
+```ruby
+# Routes
+resources :articles do
+  resources :comments
+end
+
+# Controller
+class CommentsController < ApplicationController
+  before_action :set_article
+  
+  # GET /articles/:article_id/comments
+  def index
+    @comments = @article.comments
+  end
+  
+  # POST /articles/:article_id/comments
+  def create
+    @comment = @article.comments.build(comment_params)
+    
+    if @comment.save
+      redirect_to @article, notice: "Comment added!"
+    else
+      render "articles/show"
+    end
+  end
+  
+  # DELETE /articles/:article_id/comments/:id
+  def destroy
+    @comment = @article.comments.find(params[:id])
+    @comment.destroy
+    redirect_to @article, notice: "Comment deleted!"
+  end
+  
+  private
+  
+  def set_article
+    @article = Article.find(params[:article_id])
+  end
+  
+  def comment_params
+    params.require(:comment).permit(:body)
+  end
+end
+```
+
+## Shallow Nesting
+
+Avoid deeply nested routes:
+
+```ruby
+# Routes
+resources :articles do
+  resources :comments, shallow: true
+end
+
+# Generates:
+# /articles/:article_id/comments     (index, new, create)
+# /comments/:id                      (show, edit, update, destroy)
+```
+
+## Custom Actions
+
+### Member Actions (on a specific resource)
+
+```ruby
+# Routes
+resources :articles do
+  member do
+    post :publish
+    post :unpublish
+    get :preview
+  end
+end
+
+# Or single action
+resources :articles do
+  post :publish, on: :member
+end
+
+# Controller
+class ArticlesController < ApplicationController
+  # POST /articles/:id/publish
+  def publish
+    @article = Article.find(params[:id])
+    @article.update(published: true, published_at: Time.current)
+    redirect_to @article, notice: "Article published!"
+  end
+  
+  # GET /articles/:id/preview
+  def preview
+    @article = Article.find(params[:id])
+    render layout: "preview"
+  end
+end
+```
+
+### Collection Actions (on the collection)
+
+```ruby
+# Routes
+resources :articles do
+  collection do
+    get :search
+    get :published
+    get :drafts
+    delete :clear_old
+  end
+end
+
+# Controller
+class ArticlesController < ApplicationController
+  # GET /articles/search
+  def search
+    @articles = Article.where("title LIKE ?", "%#{params[:q]}%")
+    render :index
+  end
+  
+  # GET /articles/published
+  def published
+    @articles = Article.where(published: true)
+    render :index
+  end
+  
+  # DELETE /articles/clear_old
+  def clear_old
+    Article.where("created_at < ?", 1.year.ago).destroy_all
+    redirect_to articles_path, notice: "Old articles cleared!"
+  end
+end
+```
+
+## Respond To Different Formats
+
+```ruby
+class ArticlesController < ApplicationController
+  def index
+    @articles = Article.all
+    
+    respond_to do |format|
+      format.html # renders index.html.erb
+      format.json { render json: @articles }
+      format.xml { render xml: @articles }
+      format.csv { send_data @articles.to_csv }
+    end
+  end
+  
+  def show
+    @article = Article.find(params[:id])
+    
+    respond_to do |format|
+      format.html
+      format.json { render json: @article }
+      format.pdf do
+        pdf = ArticlePdf.new(@article)
+        send_data pdf.render, filename: "#{@article.slug}.pdf"
+      end
+    end
+  end
+end
+```
+
+## Turbo Stream Responses (Rails 7+)
+
+```ruby
+class CommentsController < ApplicationController
+  def create
+    @article = Article.find(params[:article_id])
+    @comment = @article.comments.build(comment_params)
+    
+    if @comment.save
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to @article }
+      end
+    else
+      render :new
+    end
+  end
+end
+```
+
+```erb
+<!-- app/views/comments/create.turbo_stream.erb -->
+<%= turbo_stream.prepend "comments", @comment %>
+<%= turbo_stream.update "comment_form", partial: "comments/form", locals: { comment: Comment.new } %>
+```
+
+## Error Handling
+
+```ruby
+class ArticlesController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, with: :not_found
+  rescue_from ActionController::ParameterMissing, with: :bad_request
+  
+  def show
+    @article = Article.find(params[:id])
+  end
+  
+  private
+  
+  def not_found
+    respond_to do |format|
+      format.html { render "errors/not_found", status: :not_found }
+      format.json { render json: { error: "Not found" }, status: :not_found }
+    end
+  end
+  
+  def bad_request(exception)
+    render json: { error: exception.message }, status: :bad_request
+  end
+end
+```
+
+## Skinny Controllers
+
+Keep controllers focused. Move logic to models or services:
+
+```ruby
+# Fat controller (bad)
+class ArticlesController < ApplicationController
+  def create
+    @article = Article.new(article_params)
+    @article.user = current_user
+    @article.published_at = Time.current if params[:publish]
+    @article.slug = @article.title.parameterize
+    
+    if @article.save
+      ArticleMailer.new_article(@article).deliver_later
+      AdminNotifier.notify(@article)
+      redirect_to @article
+    else
+      render :new
+    end
+  end
+end
+
+# Skinny controller (good)
+class ArticlesController < ApplicationController
+  def create
+    @article = current_user.articles.build(article_params)
+    
+    if @article.save
+      @article.notify_subscribers
+      redirect_to @article
+    else
+      render :new
+    end
+  end
+end
+```
+
+RESTful controllers make your Rails applications predictable and easy to maintain!
+

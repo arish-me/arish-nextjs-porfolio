@@ -1,0 +1,345 @@
+---
+title: Migrations
+chapterSlug: models-and-active-record
+duration: 12
+order: 2
+---
+
+## Database Migrations
+
+Migrations are Ruby classes that make it easy to modify your database schema over time. They're like version control for your database.
+
+## Creating Migrations
+
+### With Model Generator
+
+```bash
+rails generate model Product name:string price:decimal description:text
+```
+
+### Standalone Migration
+
+```bash
+rails generate migration AddCategoryToProducts category:string
+```
+
+### Migration Naming Conventions
+
+Rails infers actions from migration names:
+
+```bash
+# Add columns
+rails g migration AddFieldsToUsers age:integer bio:text
+# Generates: add_column :users, :age, :integer
+
+# Remove columns
+rails g migration RemoveAgeFromUsers age:integer
+# Generates: remove_column :users, :age
+
+# Create table
+rails g migration CreateProducts name:string
+# Generates: create_table :products
+
+# Add reference
+rails g migration AddUserRefToArticles user:references
+# Generates: add_reference :articles, :user
+```
+
+## Migration Structure
+
+```ruby
+class CreateProducts < ActiveRecord::Migration[7.1]
+  def change
+    create_table :products do |t|
+      t.string :name
+      t.decimal :price, precision: 10, scale: 2
+      t.text :description
+      
+      t.timestamps
+    end
+  end
+end
+```
+
+## Available Column Types
+
+```ruby
+create_table :examples do |t|
+  # Strings and text
+  t.string :title                    # VARCHAR(255)
+  t.string :code, limit: 10          # VARCHAR(10)
+  t.text :body                       # TEXT
+  
+  # Numbers
+  t.integer :count                   # INT
+  t.bigint :big_number              # BIGINT
+  t.float :score                     # FLOAT
+  t.decimal :price, precision: 10, scale: 2  # DECIMAL(10,2)
+  
+  # Boolean
+  t.boolean :active, default: true   # BOOLEAN
+  
+  # Date and time
+  t.date :birth_date                 # DATE
+  t.time :start_time                 # TIME
+  t.datetime :published_at           # DATETIME
+  t.timestamp :last_login            # TIMESTAMP
+  
+  # Binary and JSON
+  t.binary :data                     # BLOB
+  t.json :metadata                   # JSON
+  t.jsonb :settings                  # JSONB (PostgreSQL)
+  
+  # Special types
+  t.references :user, foreign_key: true  # user_id with FK
+  t.belongs_to :category             # Same as references
+  
+  t.timestamps                       # created_at and updated_at
+end
+```
+
+## Common Migration Methods
+
+### Adding Columns
+
+```ruby
+class AddFieldsToUsers < ActiveRecord::Migration[7.1]
+  def change
+    add_column :users, :phone, :string
+    add_column :users, :age, :integer, default: 0
+    add_column :users, :verified, :boolean, default: false, null: false
+  end
+end
+```
+
+### Removing Columns
+
+```ruby
+class RemoveAgeFromUsers < ActiveRecord::Migration[7.1]
+  def change
+    remove_column :users, :age, :integer
+  end
+end
+```
+
+### Renaming Columns
+
+```ruby
+class RenameNameToFullName < ActiveRecord::Migration[7.1]
+  def change
+    rename_column :users, :name, :full_name
+  end
+end
+```
+
+### Changing Column Types
+
+```ruby
+class ChangeDescriptionToText < ActiveRecord::Migration[7.1]
+  def change
+    change_column :products, :description, :text
+  end
+end
+
+# Reversible change
+class ChangeDescriptionToText < ActiveRecord::Migration[7.1]
+  def up
+    change_column :products, :description, :text
+  end
+  
+  def down
+    change_column :products, :description, :string
+  end
+end
+```
+
+### Adding Indexes
+
+```ruby
+class AddIndexToUsers < ActiveRecord::Migration[7.1]
+  def change
+    # Simple index
+    add_index :users, :email
+    
+    # Unique index
+    add_index :users, :email, unique: true
+    
+    # Composite index
+    add_index :articles, [:user_id, :created_at]
+    
+    # Named index
+    add_index :users, :email, name: 'idx_users_email'
+    
+    # Conditional index (PostgreSQL)
+    add_index :users, :email, where: "active = true"
+  end
+end
+```
+
+### Adding References
+
+```ruby
+class AddUserToArticles < ActiveRecord::Migration[7.1]
+  def change
+    add_reference :articles, :user, null: false, foreign_key: true
+  end
+end
+```
+
+### Creating Join Tables
+
+```ruby
+class CreateArticlesTags < ActiveRecord::Migration[7.1]
+  def change
+    create_join_table :articles, :tags do |t|
+      t.index :article_id
+      t.index :tag_id
+    end
+  end
+end
+```
+
+## Running Migrations
+
+```bash
+# Run all pending migrations
+rails db:migrate
+
+# Run specific migration
+rails db:migrate VERSION=20240115000000
+
+# Rollback last migration
+rails db:rollback
+
+# Rollback multiple migrations
+rails db:rollback STEP=3
+
+# Check migration status
+rails db:migrate:status
+
+# Redo last migration (rollback + migrate)
+rails db:migrate:redo
+
+# Reset database (drop, create, migrate)
+rails db:reset
+```
+
+## Reversible Migrations
+
+```ruby
+class ChangeProductsPrice < ActiveRecord::Migration[7.1]
+  def change
+    # Rails can automatically reverse these:
+    add_column :products, :discount, :decimal
+    rename_column :products, :name, :title
+    add_index :products, :title
+  end
+end
+
+# For non-reversible changes, use up/down:
+class ConvertPriceToInteger < ActiveRecord::Migration[7.1]
+  def up
+    change_column :products, :price, :integer
+  end
+  
+  def down
+    change_column :products, :price, :decimal
+  end
+end
+
+# Or use reversible block:
+class AddConstraint < ActiveRecord::Migration[7.1]
+  def change
+    reversible do |dir|
+      dir.up do
+        execute "ALTER TABLE products ADD CONSTRAINT price_positive CHECK (price > 0)"
+      end
+      dir.down do
+        execute "ALTER TABLE products DROP CONSTRAINT price_positive"
+      end
+    end
+  end
+end
+```
+
+## Data Migrations
+
+Sometimes you need to migrate data too:
+
+```ruby
+class AddDefaultCategory < ActiveRecord::Migration[7.1]
+  def up
+    # Add column
+    add_column :products, :category, :string
+    
+    # Update existing records
+    Product.reset_column_information
+    Product.update_all(category: 'general')
+    
+    # Add constraint
+    change_column_null :products, :category, false
+  end
+  
+  def down
+    remove_column :products, :category
+  end
+end
+```
+
+## Schema File
+
+After migrations, Rails updates `db/schema.rb`:
+
+```ruby
+# db/schema.rb
+ActiveRecord::Schema[7.1].define(version: 2024_01_15_000000) do
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+  end
+end
+```
+
+Load schema directly (faster than running all migrations):
+```bash
+rails db:schema:load
+```
+
+## Best Practices
+
+```ruby
+# 1. Always use reversible migrations
+# Bad
+class AddStatus < ActiveRecord::Migration[7.1]
+  def change
+    execute "UPDATE users SET status = 'active'"  # Not reversible!
+  end
+end
+
+# Good
+class AddStatus < ActiveRecord::Migration[7.1]
+  def up
+    execute "UPDATE users SET status = 'active'"
+  end
+  def down
+    execute "UPDATE users SET status = NULL"
+  end
+end
+
+# 2. Use change_column_null for null constraints
+change_column_null :users, :email, false
+
+# 3. Add foreign key constraints
+add_foreign_key :articles, :users
+add_foreign_key :comments, :articles, on_delete: :cascade
+
+# 4. Add indexes for foreign keys and frequently queried columns
+add_index :articles, :user_id
+add_index :users, :email, unique: true
+```
+
+Migrations keep your database schema in sync across all environments!
+

@@ -1,0 +1,306 @@
+---
+title: Essential Rails Commands
+chapterSlug: getting-started
+duration: 8
+order: 5
+---
+
+## Essential Rails Commands
+
+Rails provides powerful command-line tools that make development fast and efficient. Let's explore the most important commands you'll use daily.
+
+## Server Commands
+
+### Starting the Development Server
+
+```bash
+# Start the server on default port 3000
+rails server
+# Shorthand
+rails s
+
+# Start on a different port
+rails s -p 4000
+
+# Bind to all interfaces (useful in Docker)
+rails s -b 0.0.0.0
+```
+
+### Rails Console
+
+The console lets you interact with your application in real-time:
+
+```bash
+# Start the console
+rails console
+# Shorthand
+rails c
+
+# Start in sandbox mode (changes are rolled back)
+rails c --sandbox
+```
+
+Inside the console:
+
+```ruby
+# Create a record
+user = User.create(name: "John", email: "john@example.com")
+
+# Query records
+User.all
+User.find(1)
+User.where(active: true)
+
+# Update a record
+user.update(name: "Jane")
+
+# Delete a record
+user.destroy
+
+# Reload the console (after code changes)
+reload!
+```
+
+## Generator Commands
+
+Generators create boilerplate code for you:
+
+### Generate a Model
+
+```bash
+rails generate model Article title:string body:text published:boolean
+# Shorthand
+rails g model Article title:string body:text published:boolean
+```
+
+This creates:
+- `app/models/article.rb` - The model file
+- `db/migrate/xxx_create_articles.rb` - Database migration
+- `test/models/article_test.rb` - Test file
+
+### Generate a Controller
+
+```bash
+rails g controller Articles index show new create edit update destroy
+```
+
+This creates:
+- `app/controllers/articles_controller.rb` - Controller with actions
+- `app/views/articles/` - View templates for each action
+- Routes (if using `--skip-routes` is not specified)
+- Helper and test files
+
+### Generate a Scaffold
+
+Scaffolds generate a complete CRUD interface:
+
+```bash
+rails g scaffold Product name:string price:decimal description:text
+```
+
+This creates model, migration, controller, views, routes, and tests - everything for a complete CRUD feature!
+
+### Generate a Migration
+
+```bash
+# Create a new table
+rails g migration CreateProducts name:string price:decimal
+
+# Add a column to existing table
+rails g migration AddCategoryToProducts category:string
+
+# Add an index
+rails g migration AddIndexToProductsName
+
+# Remove a column
+rails g migration RemovePriceFromProducts price:decimal
+```
+
+### Other Useful Generators
+
+```bash
+# Generate a mailer
+rails g mailer UserMailer welcome_email password_reset
+
+# Generate a job
+rails g job SendNewsletter
+
+# Generate a channel (Action Cable)
+rails g channel Notifications
+
+# See all available generators
+rails g --help
+```
+
+## Database Commands
+
+### Creating and Managing Databases
+
+```bash
+# Create the database
+rails db:create
+
+# Drop the database
+rails db:drop
+
+# Run pending migrations
+rails db:migrate
+
+# Rollback the last migration
+rails db:rollback
+
+# Rollback multiple migrations
+rails db:rollback STEP=3
+
+# Check migration status
+rails db:migrate:status
+
+# Reset database (drop, create, migrate)
+rails db:reset
+
+# Seed the database
+rails db:seed
+
+# Setup database (create, migrate, seed)
+rails db:setup
+```
+
+### Migration Shortcuts
+
+```bash
+# Migrate to a specific version
+rails db:migrate VERSION=20240101000000
+
+# Redo the last migration (rollback + migrate)
+rails db:migrate:redo
+```
+
+## Route Commands
+
+```bash
+# Display all routes
+rails routes
+
+# Filter routes by controller
+rails routes -c articles
+
+# Filter routes by HTTP method
+rails routes -g POST
+
+# Show route for a specific path
+rails routes | grep users
+```
+
+## Asset Commands
+
+```bash
+# Precompile assets for production
+rails assets:precompile
+
+# Clean old compiled assets
+rails assets:clean
+
+# Clobber (remove all compiled assets)
+rails assets:clobber
+```
+
+## Testing Commands
+
+```bash
+# Run all tests
+rails test
+
+# Run specific test file
+rails test test/models/user_test.rb
+
+# Run specific test by line number
+rails test test/models/user_test.rb:15
+
+# Run system tests
+rails test:system
+```
+
+## Rake Tasks
+
+```bash
+# List all available tasks
+rails -T
+
+# List tasks matching a pattern
+rails -T db
+
+# Create a custom task
+rails g task my_namespace my_task
+```
+
+Custom rake task example:
+
+```ruby
+# lib/tasks/maintenance.rake
+namespace :maintenance do
+  desc "Clean up old records"
+  task cleanup: :environment do
+    puts "Cleaning up old records..."
+    Article.where('created_at < ?', 1.year.ago).destroy_all
+    puts "Done!"
+  end
+end
+
+# Run with: rails maintenance:cleanup
+```
+
+## Destroying Generated Files
+
+Undo any generator command with `destroy`:
+
+```bash
+rails destroy model Article
+rails destroy controller Articles
+rails destroy scaffold Product
+# Shorthand
+rails d model Article
+```
+
+## Credentials Commands
+
+```bash
+# Edit credentials (opens in editor)
+rails credentials:edit
+
+# Edit environment-specific credentials
+rails credentials:edit --environment production
+
+# Show credential value
+rails credentials:show
+```
+
+## Quick Reference Card
+
+```bash
+# Development
+rails s                    # Start server
+rails c                    # Console
+rails routes               # Show routes
+
+# Generators
+rails g model Name         # Generate model
+rails g controller Name    # Generate controller
+rails g scaffold Name      # Generate scaffold
+rails g migration Name     # Generate migration
+
+# Database
+rails db:create            # Create database
+rails db:migrate           # Run migrations
+rails db:rollback          # Undo last migration
+rails db:seed              # Seed data
+rails db:reset             # Reset database
+
+# Testing
+rails test                 # Run tests
+
+# Cleanup
+rails d model Name         # Destroy generated files
+```
+
+Master these commands, and you'll be navigating Rails like a pro!
+

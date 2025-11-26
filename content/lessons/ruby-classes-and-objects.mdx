@@ -1,0 +1,358 @@
+---
+title: Classes and Objects
+chapterSlug: ruby-basics
+duration: 12
+order: 4
+---
+
+## Classes and Objects in Ruby
+
+Ruby is a pure object-oriented language - everything is an object! Understanding classes and objects is essential for mastering Rails, where models, controllers, and everything else are classes.
+
+## Creating a Class
+
+```ruby
+class User
+  # Class body
+end
+
+# Creating an instance (object)
+user = User.new
+```
+
+## Instance Variables and Methods
+
+```ruby
+class User
+  # Initialize method (constructor)
+  def initialize(name, email)
+    @name = name    # Instance variable
+    @email = email  # Instance variable
+  end
+  
+  # Instance method
+  def greet
+    "Hello, I'm #{@name}!"
+  end
+  
+  # Getter method
+  def name
+    @name
+  end
+  
+  # Setter method
+  def name=(new_name)
+    @name = new_name
+  end
+end
+
+user = User.new("John", "john@example.com")
+user.greet        # => "Hello, I'm John!"
+user.name         # => "John"
+user.name = "Jane"
+user.name         # => "Jane"
+```
+
+## Attribute Accessors
+
+Ruby provides shortcuts for getters and setters:
+
+```ruby
+class User
+  # Creates getter and setter for name and email
+  attr_accessor :name, :email
+  
+  # Creates only getter
+  attr_reader :created_at
+  
+  # Creates only setter
+  attr_writer :password
+  
+  def initialize(name, email)
+    @name = name
+    @email = email
+    @created_at = Time.now
+  end
+end
+
+user = User.new("John", "john@example.com")
+user.name           # => "John" (getter)
+user.name = "Jane"  # Setter
+user.created_at     # => 2024-01-15 10:30:00 (read-only)
+user.password = "secret"  # Write-only
+```
+
+## Class Methods and Variables
+
+```ruby
+class User
+  # Class variable (shared across all instances)
+  @@count = 0
+  
+  def initialize(name)
+    @name = name
+    @@count += 1
+  end
+  
+  # Class method
+  def self.count
+    @@count
+  end
+  
+  # Alternative syntax for class methods
+  class << self
+    def description
+      "A user in the system"
+    end
+  end
+end
+
+User.new("John")
+User.new("Jane")
+User.count        # => 2
+User.description  # => "A user in the system"
+```
+
+## Inheritance
+
+```ruby
+class Animal
+  attr_accessor :name
+  
+  def initialize(name)
+    @name = name
+  end
+  
+  def speak
+    "Some sound"
+  end
+end
+
+class Dog < Animal
+  def speak
+    "Woof!"
+  end
+  
+  def fetch
+    "#{@name} is fetching the ball!"
+  end
+end
+
+class Cat < Animal
+  def speak
+    "Meow!"
+  end
+end
+
+dog = Dog.new("Buddy")
+dog.speak   # => "Woof!"
+dog.fetch   # => "Buddy is fetching the ball!"
+dog.name    # => "Buddy" (inherited from Animal)
+
+cat = Cat.new("Whiskers")
+cat.speak   # => "Meow!"
+```
+
+## Super Keyword
+
+Call the parent class method:
+
+```ruby
+class Animal
+  def initialize(name)
+    @name = name
+  end
+  
+  def info
+    "Name: #{@name}"
+  end
+end
+
+class Dog < Animal
+  def initialize(name, breed)
+    super(name)  # Call parent's initialize
+    @breed = breed
+  end
+  
+  def info
+    "#{super}, Breed: #{@breed}"  # Call parent's info
+  end
+end
+
+dog = Dog.new("Buddy", "Golden Retriever")
+dog.info  # => "Name: Buddy, Breed: Golden Retriever"
+```
+
+## Modules and Mixins
+
+Modules let you share code between classes:
+
+```ruby
+# Module for shared behavior
+module Printable
+  def print_info
+    puts "Printing #{self.class.name} information..."
+    instance_variables.each do |var|
+      puts "#{var}: #{instance_variable_get(var)}"
+    end
+  end
+end
+
+module Timestampable
+  def created_at
+    @created_at ||= Time.now
+  end
+  
+  def updated_at
+    @updated_at
+  end
+  
+  def touch
+    @updated_at = Time.now
+  end
+end
+
+class User
+  include Printable      # Include as instance methods
+  include Timestampable
+  
+  attr_accessor :name, :email
+  
+  def initialize(name, email)
+    @name = name
+    @email = email
+  end
+end
+
+user = User.new("John", "john@example.com")
+user.print_info
+user.created_at
+user.touch
+```
+
+### Include vs Extend
+
+```ruby
+module Greetable
+  def greet
+    "Hello!"
+  end
+end
+
+class User
+  include Greetable  # Adds as instance methods
+end
+
+class Admin
+  extend Greetable   # Adds as class methods
+end
+
+User.new.greet   # => "Hello!" (instance method)
+Admin.greet      # => "Hello!" (class method)
+```
+
+## Namespacing with Modules
+
+```ruby
+module Admin
+  class User
+    def role
+      "admin"
+    end
+  end
+end
+
+module Public
+  class User
+    def role
+      "public"
+    end
+  end
+end
+
+Admin::User.new.role   # => "admin"
+Public::User.new.role  # => "public"
+```
+
+## Object Comparison
+
+```ruby
+class User
+  attr_reader :id, :name
+  
+  def initialize(id, name)
+    @id = id
+    @name = name
+  end
+  
+  # Compare by ID
+  def ==(other)
+    self.class == other.class && id == other.id
+  end
+  
+  # For use in hashes
+  def eql?(other)
+    self == other
+  end
+  
+  def hash
+    id.hash
+  end
+end
+
+user1 = User.new(1, "John")
+user2 = User.new(1, "John Doe")
+user3 = User.new(2, "Jane")
+
+user1 == user2  # => true (same ID)
+user1 == user3  # => false (different ID)
+```
+
+## Struct (Quick Classes)
+
+For simple data objects:
+
+```ruby
+# Quick way to create a class
+User = Struct.new(:name, :email) do
+  def greeting
+    "Hello, #{name}!"
+  end
+end
+
+user = User.new("John", "john@example.com")
+user.name      # => "John"
+user.greeting  # => "Hello, John!"
+
+# Keyword arguments version
+User = Struct.new(:name, :email, keyword_init: true)
+user = User.new(name: "John", email: "john@example.com")
+```
+
+## Ruby Object Hierarchy
+
+```ruby
+# Everything inherits from Object
+class User
+end
+
+User.ancestors
+# => [User, Object, Kernel, BasicObject]
+
+# Check inheritance
+User.superclass        # => Object
+1.class                # => Integer
+1.class.superclass     # => Numeric
+"hello".class          # => String
+[].class               # => Array
+{}.class               # => Hash
+
+# Check if object is an instance
+user = User.new
+user.is_a?(User)       # => true
+user.is_a?(Object)     # => true
+user.instance_of?(User)  # => true (exact class only)
+```
+
+Classes and objects form the foundation of Ruby. Rails uses these concepts everywhere - from models to controllers to views!
+

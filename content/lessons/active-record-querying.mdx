@@ -1,0 +1,335 @@
+---
+title: Querying the Database
+chapterSlug: models-and-active-record
+duration: 15
+order: 5
+---
+
+## Active Record Querying
+
+Active Record provides a powerful interface for querying your database. It generates efficient SQL while keeping your code readable and Ruby-like.
+
+## Basic Queries
+
+### Finding Records
+
+```ruby
+# Find by ID
+user = User.find(1)             # Raises ActiveRecord::RecordNotFound
+user = User.find([1, 2, 3])     # Returns array
+
+# Find by ID without exception
+user = User.find_by(id: 1)      # Returns nil if not found
+user = User.find_by!(id: 1)     # Raises exception
+
+# Find by any attribute
+user = User.find_by(email: "john@example.com")
+user = User.find_by(email: "john@example.com", active: true)
+
+# First and last
+user = User.first
+user = User.last
+user = User.first(5)            # Array of first 5
+
+# Take (no ordering)
+user = User.take                # Returns any record
+users = User.take(5)            # Any 5 records
+```
+
+### Retrieving All Records
+
+```ruby
+# Get all records
+users = User.all
+
+# Iterate without loading all into memory
+User.find_each do |user|
+  # Process user
+end
+
+User.find_each(batch_size: 500) do |user|
+  # Process in batches of 500
+end
+
+User.find_in_batches do |users|
+  # users is an array of up to 1000 records
+end
+```
+
+## Where Conditions
+
+### Basic Conditions
+
+```ruby
+# Hash conditions
+users = User.where(active: true)
+users = User.where(active: true, role: 'admin')
+users = User.where(status: nil)
+
+# String conditions (be careful with SQL injection!)
+users = User.where("age > 18")
+users = User.where("name LIKE ?", "%john%")
+users = User.where("age > ? AND role = ?", 18, 'user')
+
+# Named placeholders
+users = User.where("created_at > :date", date: 1.week.ago)
+
+# Array conditions
+users = User.where(role: ['admin', 'moderator'])
+users = User.where(id: [1, 2, 3, 4, 5])
+
+# Range conditions
+users = User.where(age: 18..65)
+users = User.where(created_at: 1.week.ago..Time.current)
+
+# Not conditions
+users = User.where.not(role: 'admin')
+users = User.where.not(id: [1, 2, 3])
+```
+
+### OR Conditions
+
+```ruby
+users = User.where(role: 'admin').or(User.where(role: 'moderator'))
+
+# Rails 7+ shorthand
+users = User.where(role: 'admin').or(User.where(role: 'moderator'))
+```
+
+### Missing and Associated
+
+```ruby
+# Find records without associated records
+posts = Post.where.missing(:comments)
+
+# Find records with associated records
+posts = Post.where.associated(:comments)
+```
+
+## Ordering
+
+```ruby
+# Single column
+users = User.order(:name)
+users = User.order(name: :asc)
+users = User.order(name: :desc)
+users = User.order(:name, :email)
+
+# Multiple columns
+users = User.order(role: :asc, name: :asc)
+
+# String (be careful with SQL injection)
+users = User.order("name DESC")
+users = User.order(Arel.sql("LOWER(name)"))  # Safe SQL expression
+
+# With nulls
+users = User.order(Arel.sql("name NULLS LAST"))
+```
+
+## Selecting Columns
+
+```ruby
+# Select specific columns
+users = User.select(:id, :name, :email)
+
+# Custom select
+users = User.select("name, email, COUNT(*) as count")
+
+# Distinct
+roles = User.select(:role).distinct
+emails = User.distinct.pluck(:email)
+```
+
+## Limiting and Offsetting
+
+```ruby
+# Limit results
+users = User.limit(10)
+
+# Offset (for pagination)
+users = User.limit(10).offset(20)
+
+# Shorthand for first/last with limit
+users = User.first(5)
+users = User.last(5)
+```
+
+## Grouping and Aggregates
+
+### Group By
+
+```ruby
+# Count users by role
+User.group(:role).count
+# => { "admin" => 5, "user" => 100, "moderator" => 10 }
+
+# Group with having
+User.group(:role).having("count(*) > ?", 5).count
+
+# Multiple groupings
+Order.group(:status, :payment_method).count
+```
+
+### Aggregate Functions
+
+```ruby
+# Count
+User.count
+User.where(active: true).count
+
+# Sum
+Order.sum(:total)
+Order.where(status: 'completed').sum(:total)
+
+# Average
+Product.average(:price)
+
+# Minimum and Maximum
+Product.minimum(:price)
+Product.maximum(:price)
+
+# Multiple aggregates
+Order.select("SUM(total) as total, AVG(total) as average").take
+```
+
+## Joining Tables
+
+### Inner Join
+
+```ruby
+# Join with another table
+posts = Post.joins(:user)
+posts = Post.joins(:user, :comments)
+
+# Nested joins
+posts = Post.joins(comments: :user)
+
+# With conditions
+posts = Post.joins(:user).where(users: { active: true })
+
+# String join (for complex joins)
+posts = Post.joins("INNER JOIN users ON users.id = posts.user_id")
+```
+
+### Left Outer Join
+
+```ruby
+# Include records without matches
+users = User.left_joins(:posts)
+users = User.left_outer_joins(:posts)
+
+# Find users without posts
+users = User.left_joins(:posts).where(posts: { id: nil })
+```
+
+### Includes (Eager Loading)
+
+```ruby
+# Prevent N+1 queries
+posts = Post.includes(:user)
+posts.each do |post|
+  puts post.user.name  # No additional query
+end
+
+# Multiple associations
+posts = Post.includes(:user, :comments)
+
+# Nested eager loading
+posts = Post.includes(comments: :user)
+
+# With conditions (uses JOIN)
+posts = Post.includes(:user).where(users: { active: true }).references(:users)
+```
+
+## Pluck and IDs
+
+```ruby
+# Get array of values (more efficient than map)
+emails = User.pluck(:email)
+# => ["john@example.com", "jane@example.com"]
+
+names_and_emails = User.pluck(:name, :email)
+# => [["John", "john@example.com"], ["Jane", "jane@example.com"]]
+
+# Get IDs
+ids = User.ids
+# => [1, 2, 3, 4, 5]
+
+# Pluck with conditions
+admin_emails = User.where(role: 'admin').pluck(:email)
+```
+
+## Exists and Any
+
+```ruby
+# Check if any records exist
+User.exists?
+User.exists?(1)
+User.exists?(email: "john@example.com")
+User.where(active: true).exists?
+
+# Check using any?
+User.where(role: 'admin').any?
+User.where(role: 'admin').none?
+User.where(role: 'admin').one?
+User.where(role: 'admin').many?
+```
+
+## Chaining Queries
+
+```ruby
+# Queries are lazy - only executed when needed
+users = User.where(active: true)
+            .where(role: 'admin')
+            .order(:name)
+            .limit(10)
+
+# Executed when:
+users.to_a        # Convert to array
+users.each        # Iterate
+users.first       # Get first record
+users.count       # Get count
+users.pluck(:id)  # Get values
+```
+
+## Merge Queries
+
+```ruby
+# Combine queries from different models
+recent = Post.where("created_at > ?", 1.week.ago)
+published = Post.where(published: true)
+
+Post.merge(recent).merge(published)
+```
+
+## None and All
+
+```ruby
+# Return no records (useful for conditionals)
+def search(params)
+  result = User.all
+  result = result.none if params[:query].blank?
+  result = result.where("name LIKE ?", "%#{params[:query]}%") if params[:query]
+  result
+end
+
+# Unscope
+User.where(active: true).unscope(:where)  # Removes all where conditions
+User.order(:name).unscope(:order)          # Removes order
+```
+
+## Raw SQL
+
+```ruby
+# Find by SQL
+users = User.find_by_sql("SELECT * FROM users WHERE role = 'admin'")
+
+# Execute raw SQL
+ActiveRecord::Base.connection.execute("UPDATE users SET active = true")
+
+# Select with raw SQL
+users = User.select("name, email, UPPER(role) as role_upper")
+```
+
+Mastering queries is essential for building performant Rails applications!
+

@@ -1,0 +1,352 @@
+---
+title: Building APIs with Rails
+chapterSlug: api-development
+duration: 12
+order: 1
+---
+
+## Building APIs with Rails
+
+Rails is excellent for building RESTful APIs. You can create a full API or add API endpoints to an existing application.
+
+## API-Only Applications
+
+Create a new API-only Rails app:
+
+```bash
+rails new my_api --api
+```
+
+This creates a lighter application without views, helpers, and assets.
+
+## API Controllers
+
+### Basic JSON Response
+
+```ruby
+# app/controllers/api/v1/articles_controller.rb
+module Api
+  module V1
+    class ArticlesController < ApplicationController
+      def index
+        @articles = Article.all
+        render json: @articles
+      end
+      
+      def show
+        @article = Article.find(params[:id])
+        render json: @article
+      end
+      
+      def create
+        @article = Article.new(article_params)
+        
+        if @article.save
+          render json: @article, status: :created
+        else
+          render json: { errors: @article.errors }, status: :unprocessable_entity
+        end
+      end
+      
+      def update
+        @article = Article.find(params[:id])
+        
+        if @article.update(article_params)
+          render json: @article
+        else
+          render json: { errors: @article.errors }, status: :unprocessable_entity
+        end
+      end
+      
+      def destroy
+        @article = Article.find(params[:id])
+        @article.destroy
+        head :no_content
+      end
+      
+      private
+      
+      def article_params
+        params.require(:article).permit(:title, :body, :published)
+      end
+    end
+  end
+end
+```
+
+### Routes
+
+```ruby
+# config/routes.rb
+Rails.application.routes.draw do
+  namespace :api do
+    namespace :v1 do
+      resources :articles
+      resources :users, only: [:index, :show]
+    end
+  end
+end
+```
+
+## API Base Controller
+
+```ruby
+# app/controllers/api/v1/base_controller.rb
+module Api
+  module V1
+    class BaseController < ApplicationController
+      # Skip CSRF for API
+      skip_before_action :verify_authenticity_token
+      
+      # Rescue from common errors
+      rescue_from ActiveRecord::RecordNotFound, with: :not_found
+      rescue_from ActiveRecord::RecordInvalid, with: :unprocessable_entity
+      rescue_from ActionController::ParameterMissing, with: :bad_request
+      
+      private
+      
+      def not_found(exception)
+        render json: { error: exception.message }, status: :not_found
+      end
+      
+      def unprocessable_entity(exception)
+        render json: { errors: exception.record.errors }, status: :unprocessable_entity
+      end
+      
+      def bad_request(exception)
+        render json: { error: exception.message }, status: :bad_request
+      end
+    end
+  end
+end
+
+# Inherit in other controllers
+class Api::V1::ArticlesController < Api::V1::BaseController
+  # ...
+end
+```
+
+## JSON Serialization
+
+### Using as_json
+
+```ruby
+class Article < ApplicationRecord
+  def as_json(options = {})
+    super(options.merge(
+      only: [:id, :title, :body, :published, :created_at],
+      include: { user: { only: [:id, :name] } },
+      methods: [:reading_time]
+    ))
+  end
+end
+```
+
+### Using Jbuilder
+
+```ruby
+# app/views/api/v1/articles/show.json.jbuilder
+json.id @article.id
+json.title @article.title
+json.body @article.body
+json.published @article.published
+json.created_at @article.created_at
+
+json.author do
+  json.id @article.user.id
+  json.name @article.user.name
+end
+
+json.tags @article.tags do |tag|
+  json.id tag.id
+  json.name tag.name
+end
+```
+
+```ruby
+# app/views/api/v1/articles/index.json.jbuilder
+json.articles @articles do |article|
+  json.id article.id
+  json.title article.title
+  json.published article.published
+end
+
+json.meta do
+  json.total @articles.total_count
+  json.page @articles.current_page
+  json.per_page @articles.limit_value
+end
+```
+
+### Using Active Model Serializers
+
+```ruby
+# Gemfile
+gem 'active_model_serializers'
+
+# app/serializers/article_serializer.rb
+class ArticleSerializer < ActiveModel::Serializer
+  attributes :id, :title, :body, :published, :created_at
+  
+  belongs_to :user
+  has_many :tags
+  
+  attribute :reading_time do
+    object.reading_time
+  end
+end
+
+# Controller
+def show
+  @article = Article.find(params[:id])
+  render json: @article
+end
+```
+
+## API Authentication
+
+### Token-Based Authentication
+
+```ruby
+# Migration
+rails generate migration AddApiTokenToUsers api_token:string:uniq
+
+# app/models/user.rb
+class User < ApplicationRecord
+  has_secure_token :api_token
+end
+
+# app/controllers/api/v1/base_controller.rb
+class Api::V1::BaseController < ApplicationController
+  before_action :authenticate_api_user!
+  
+  private
+  
+  def authenticate_api_user!
+    token = request.headers['Authorization']&.split(' ')&.last
+    @current_user = User.find_by(api_token: token)
+    
+    unless @current_user
+      render json: { error: 'Unauthorized' }, status: :unauthorized
+    end
+  end
+  
+  def current_user
+    @current_user
+  end
+end
+```
+
+### JWT Authentication
+
+```ruby
+# Gemfile
+gem 'jwt'
+
+# app/lib/json_web_token.rb
+class JsonWebToken
+  SECRET_KEY = Rails.application.secrets.secret_key_base
+  
+  def self.encode(payload, exp = 24.hours.from_now)
+    payload[:exp] = exp.to_i
+    JWT.encode(payload, SECRET_KEY)
+  end
+  
+  def self.decode(token)
+    decoded = JWT.decode(token, SECRET_KEY)[0]
+    HashWithIndifferentAccess.new(decoded)
+  rescue JWT::DecodeError
+    nil
+  end
+end
+
+# app/controllers/api/v1/authentication_controller.rb
+class Api::V1::AuthenticationController < Api::V1::BaseController
+  skip_before_action :authenticate_api_user!
+  
+  def login
+    user = User.find_by(email: params[:email])
+    
+    if user&.authenticate(params[:password])
+      token = JsonWebToken.encode(user_id: user.id)
+      render json: { token: token, exp: 24.hours.from_now }
+    else
+      render json: { error: 'Invalid credentials' }, status: :unauthorized
+    end
+  end
+end
+
+# Authenticate with JWT
+def authenticate_api_user!
+  header = request.headers['Authorization']
+  token = header.split(' ').last if header
+  decoded = JsonWebToken.decode(token)
+  
+  if decoded
+    @current_user = User.find(decoded[:user_id])
+  else
+    render json: { error: 'Unauthorized' }, status: :unauthorized
+  end
+end
+```
+
+## CORS Configuration
+
+```ruby
+# Gemfile
+gem 'rack-cors'
+
+# config/initializers/cors.rb
+Rails.application.config.middleware.insert_before 0, Rack::Cors do
+  allow do
+    origins '*'
+    
+    resource '*',
+      headers: :any,
+      methods: [:get, :post, :put, :patch, :delete, :options, :head],
+      expose: ['Authorization']
+  end
+end
+```
+
+## Rate Limiting
+
+```ruby
+# Gemfile
+gem 'rack-attack'
+
+# config/initializers/rack_attack.rb
+class Rack::Attack
+  throttle('api/ip', limit: 100, period: 1.minute) do |req|
+    req.ip if req.path.start_with?('/api')
+  end
+  
+  throttle('api/token', limit: 1000, period: 1.hour) do |req|
+    req.env['HTTP_AUTHORIZATION'] if req.path.start_with?('/api')
+  end
+end
+```
+
+## Pagination
+
+```ruby
+# Gemfile
+gem 'kaminari'
+
+# Controller
+def index
+  @articles = Article.page(params[:page]).per(params[:per_page] || 25)
+  
+  render json: {
+    articles: @articles,
+    meta: {
+      current_page: @articles.current_page,
+      total_pages: @articles.total_pages,
+      total_count: @articles.total_count
+    }
+  }
+end
+```
+
+Rails makes building APIs clean and maintainable!
+

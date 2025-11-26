@@ -1,0 +1,186 @@
+---
+title: Installing Rails
+chapterSlug: getting-started
+duration: 5
+order: 3
+---
+
+## Installing Ruby on Rails
+
+Now that Ruby is installed, let's install Rails. Rails is distributed as a Ruby gem, making installation straightforward.
+
+## Install the Rails Gem
+
+Open your terminal and run:
+
+```bash
+gem install rails
+```
+
+This installs the latest stable version of Rails along with all its dependencies.
+
+### Installing a Specific Version
+
+If you need a specific Rails version:
+
+```bash
+# Install Rails 7.1
+gem install rails -v 7.1.0
+
+# Install the latest Rails 7.x
+gem install rails -v '~> 7.0'
+```
+
+## Verify the Installation
+
+Check that Rails is installed correctly:
+
+```bash
+rails -v
+# Output: Rails 7.1.3 (or your installed version)
+```
+
+## Additional Dependencies
+
+Rails needs a few more tools to work properly:
+
+### Node.js and Yarn
+
+Rails uses Node.js for JavaScript processing and Yarn for package management:
+
+```bash
+# macOS (using Homebrew)
+brew install node yarn
+
+# Ubuntu/Debian
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+npm install -g yarn
+
+# Verify installation
+node -v
+yarn -v
+```
+
+### Database
+
+Rails supports multiple databases. SQLite comes built-in for development:
+
+```bash
+# SQLite is usually pre-installed on macOS
+sqlite3 --version
+
+# On Ubuntu/Debian
+sudo apt install sqlite3 libsqlite3-dev
+```
+
+For production, you'll likely want PostgreSQL:
+
+```bash
+# macOS
+brew install postgresql
+brew services start postgresql
+
+# Ubuntu/Debian
+sudo apt install postgresql postgresql-contrib libpq-dev
+sudo service postgresql start
+```
+
+## Create Your First Rails App
+
+Let's test the installation by creating a new Rails application:
+
+```bash
+# Create a new Rails app
+rails new my_first_app
+
+# Navigate into the app directory
+cd my_first_app
+
+# Start the development server
+rails server
+```
+
+Now open your browser and visit `http://localhost:3000`. You should see the Rails welcome page!
+
+## Understanding What Rails Generated
+
+When you run `rails new`, it creates a complete application structure:
+
+```
+my_first_app/
+├── app/                    # Your application code
+│   ├── controllers/        # Handle HTTP requests
+│   ├── models/             # Database models
+│   ├── views/              # HTML templates
+│   └── ...
+├── config/                 # Configuration files
+│   ├── routes.rb           # URL routing
+│   └── database.yml        # Database settings
+├── db/                     # Database files
+│   ├── migrate/            # Database migrations
+│   └── seeds.rb            # Seed data
+├── Gemfile                 # Gem dependencies
+└── ...
+```
+
+## Rails New Options
+
+Customize your app when creating it:
+
+```bash
+# Use PostgreSQL instead of SQLite
+rails new myapp --database=postgresql
+
+# Skip Git initialization
+rails new myapp --skip-git
+
+# Use Tailwind CSS
+rails new myapp --css=tailwind
+
+# Skip Action Mailer
+rails new myapp --skip-action-mailer
+
+# API-only application (no views)
+rails new myapp --api
+
+# See all options
+rails new --help
+```
+
+## Quick Development Tips
+
+### Start the Server
+
+```bash
+rails server
+# or shorthand
+rails s
+```
+
+### Rails Console (Interactive Ruby with your app loaded)
+
+```bash
+rails console
+# or
+rails c
+```
+
+### Database Commands
+
+```bash
+# Create database
+rails db:create
+
+# Run migrations
+rails db:migrate
+
+# Seed the database
+rails db:seed
+
+# Reset database (drop, create, migrate, seed)
+rails db:reset
+```
+
+You now have Rails installed and ready to build amazing web applications!
+

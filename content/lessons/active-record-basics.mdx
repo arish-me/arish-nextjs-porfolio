@@ -1,0 +1,299 @@
+---
+title: Active Record Basics
+chapterSlug: models-and-active-record
+duration: 10
+order: 1
+---
+
+## Active Record Basics
+
+Active Record is Rails' ORM (Object-Relational Mapping) that connects your Ruby objects to database tables. It makes database operations feel like working with plain Ruby objects.
+
+## What is Active Record?
+
+Active Record follows the Active Record pattern where:
+- Each database table maps to a Ruby class
+- Each row in the table maps to an object of that class
+- Each column maps to an attribute of that object
+
+```ruby
+# Table: users
+# | id | name  | email           | created_at |
+# |----|-------|-----------------|------------|
+# | 1  | John  | john@email.com  | 2024-01-15 |
+# | 2  | Jane  | jane@email.com  | 2024-01-16 |
+
+# Ruby class
+class User < ApplicationRecord
+end
+
+# Object
+user = User.find(1)
+user.name   # => "John"
+user.email  # => "john@email.com"
+```
+
+## Creating a Model
+
+### Using the Generator
+
+```bash
+rails generate model User name:string email:string age:integer active:boolean
+
+# Creates:
+# app/models/user.rb
+# db/migrate/xxx_create_users.rb
+# test/models/user_test.rb
+```
+
+### The Model File
+
+```ruby
+# app/models/user.rb
+class User < ApplicationRecord
+  # Model code goes here
+end
+```
+
+### The Migration File
+
+```ruby
+# db/migrate/20240115000000_create_users.rb
+class CreateUsers < ActiveRecord::Migration[7.1]
+  def change
+    create_table :users do |t|
+      t.string :name
+      t.string :email
+      t.integer :age
+      t.boolean :active, default: true
+
+      t.timestamps  # Adds created_at and updated_at
+    end
+  end
+end
+```
+
+## Naming Conventions
+
+Rails uses naming conventions to connect models to tables:
+
+| Model (Singular) | Table (Plural) |
+|-----------------|----------------|
+| User | users |
+| Article | articles |
+| Person | people |
+| LineItem | line_items |
+
+Override with:
+```ruby
+class User < ApplicationRecord
+  self.table_name = "my_users"
+  self.primary_key = "user_id"
+end
+```
+
+## CRUD Operations
+
+### Create
+
+```ruby
+# Method 1: new + save
+user = User.new
+user.name = "John"
+user.email = "john@example.com"
+user.save  # Returns true/false
+
+# Method 2: new with hash
+user = User.new(name: "John", email: "john@example.com")
+user.save
+
+# Method 3: create (new + save in one step)
+user = User.create(name: "John", email: "john@example.com")
+
+# Method 4: create! (raises exception on failure)
+user = User.create!(name: "John", email: "john@example.com")
+```
+
+### Read
+
+```ruby
+# Find by ID
+user = User.find(1)           # Raises error if not found
+user = User.find_by(id: 1)    # Returns nil if not found
+
+# Find by attribute
+user = User.find_by(email: "john@example.com")
+user = User.find_by!(email: "john@example.com")  # Raises if not found
+
+# Find all
+users = User.all
+
+# Find with conditions
+users = User.where(active: true)
+users = User.where("age > ?", 18)
+users = User.where("name LIKE ?", "%John%")
+
+# First and last
+first_user = User.first
+last_user = User.last
+
+# Count
+User.count
+User.where(active: true).count
+```
+
+### Update
+
+```ruby
+# Method 1: Find, modify, save
+user = User.find(1)
+user.name = "Jane"
+user.save
+
+# Method 2: update
+user = User.find(1)
+user.update(name: "Jane")
+
+# Method 3: update! (raises on failure)
+user.update!(name: "Jane")
+
+# Update all matching records
+User.where(active: false).update_all(active: true)
+
+# Update single attribute (skips validations)
+user.update_attribute(:name, "Jane")
+
+# Update column directly (skips callbacks and validations)
+user.update_column(:name, "Jane")
+```
+
+### Delete
+
+```ruby
+# Delete a single record (runs callbacks)
+user = User.find(1)
+user.destroy
+
+# Delete by ID
+User.destroy(1)
+
+# Delete all matching
+User.where(active: false).destroy_all
+
+# Delete without callbacks
+user.delete
+User.delete(1)
+User.where(active: false).delete_all
+```
+
+## Working with Records
+
+### Checking State
+
+```ruby
+user = User.new
+
+user.new_record?   # => true (not saved yet)
+user.persisted?    # => false
+
+user.save
+
+user.new_record?   # => false
+user.persisted?    # => true
+
+user.changed?      # => false
+user.name = "New Name"
+user.changed?      # => true
+user.name_changed? # => true
+user.changes       # => {"name"=>["John", "New Name"]}
+
+# Check if record exists
+User.exists?(1)
+User.exists?(email: "john@example.com")
+User.where(active: true).exists?
+```
+
+### Reloading
+
+```ruby
+user = User.find(1)
+# Someone else updates the record in the database
+user.reload  # Refresh from database
+```
+
+### Attributes
+
+```ruby
+user = User.find(1)
+
+# Get all attributes as a hash
+user.attributes
+# => {"id"=>1, "name"=>"John", "email"=>"john@example.com", ...}
+
+# Access attributes
+user[:name]
+user.name
+user.read_attribute(:name)
+
+# Set attributes
+user[:name] = "Jane"
+user.name = "Jane"
+user.write_attribute(:name, "Jane")
+
+# Assign multiple (doesn't save)
+user.assign_attributes(name: "Jane", email: "jane@example.com")
+user.save
+```
+
+## Date and Time Columns
+
+```ruby
+# timestamps are automatically added
+class CreatePosts < ActiveRecord::Migration[7.1]
+  def change
+    create_table :posts do |t|
+      t.string :title
+      t.datetime :published_at
+      t.date :event_date
+      t.time :start_time
+      
+      t.timestamps  # created_at and updated_at
+    end
+  end
+end
+
+# Using date/time
+post = Post.create(
+  title: "My Post",
+  published_at: Time.current,
+  event_date: Date.today,
+  start_time: Time.current
+)
+
+post.created_at  # When created
+post.updated_at  # When last updated (auto-updated)
+```
+
+## Touch
+
+Update the `updated_at` timestamp:
+
+```ruby
+user.touch                    # Update updated_at to now
+user.touch(:last_login_at)    # Update specific timestamp column
+```
+
+## Increment and Decrement
+
+```ruby
+# Increment counter
+article.increment(:views_count)
+article.increment!(:views_count)  # Saves immediately
+
+# Decrement
+product.decrement(:stock)
+product.decrement!(:stock)
+```
+
+Active Record makes database operations intuitive and Ruby-like!
+

@@ -1,0 +1,325 @@
+---
+title: Rendering Responses
+chapterSlug: controllers-and-actions
+duration: 10
+order: 3
+---
+
+## Rendering Responses
+
+Controllers are responsible for creating responses to send back to the browser. Rails provides many ways to render content.
+
+## Render vs Redirect
+
+```ruby
+class ArticlesController < ApplicationController
+  def create
+    @article = Article.new(article_params)
+    
+    if @article.save
+      # Redirect: sends 302, browser makes new request
+      redirect_to @article
+    else
+      # Render: returns response immediately, no new request
+      render :new, status: :unprocessable_entity
+    end
+  end
+end
+```
+
+## Rendering Templates
+
+### Default Rendering
+
+```ruby
+class ArticlesController < ApplicationController
+  def show
+    @article = Article.find(params[:id])
+    # Automatically renders app/views/articles/show.html.erb
+  end
+end
+```
+
+### Explicit Rendering
+
+```ruby
+class ArticlesController < ApplicationController
+  def show
+    @article = Article.find(params[:id])
+    
+    # Render same template explicitly
+    render :show
+    
+    # Render different template
+    render :special_show
+    
+    # Render template from another controller
+    render "products/show"
+    
+    # Render with absolute path
+    render file: "/path/to/template"
+  end
+end
+```
+
+### Render Options
+
+```ruby
+# With status code
+render :new, status: :unprocessable_entity  # 422
+render :error, status: :not_found           # 404
+render :error, status: 500                  # Numeric codes work too
+
+# Without layout
+render :show, layout: false
+
+# With different layout
+render :show, layout: "admin"
+
+# With locals
+render :show, locals: { article: @article, author: @author }
+
+# Set content type
+render :show, content_type: "text/plain"
+```
+
+## Rendering Non-HTML
+
+### JSON
+
+```ruby
+def show
+  @article = Article.find(params[:id])
+  
+  # Simple JSON
+  render json: @article
+  
+  # With options
+  render json: @article, only: [:id, :title, :body]
+  
+  # With includes
+  render json: @article, include: :comments
+  
+  # Custom structure
+  render json: {
+    article: @article,
+    meta: { generated_at: Time.current }
+  }
+  
+  # With status
+  render json: { error: "Not found" }, status: :not_found
+end
+```
+
+### Other Formats
+
+```ruby
+def show
+  @article = Article.find(params[:id])
+  
+  # Plain text
+  render plain: "Hello World"
+  
+  # HTML string
+  render html: "<h1>Hello</h1>".html_safe
+  
+  # XML
+  render xml: @article
+  
+  # Raw body
+  render body: "Raw content"
+  
+  # Nothing (empty response)
+  head :ok
+  head :no_content
+  head :created
+end
+```
+
+## Respond To Multiple Formats
+
+```ruby
+class ArticlesController < ApplicationController
+  def index
+    @articles = Article.all
+    
+    respond_to do |format|
+      format.html # renders index.html.erb
+      format.json { render json: @articles }
+      format.xml { render xml: @articles }
+      format.csv { render plain: @articles.to_csv }
+      format.pdf { send_pdf }
+    end
+  end
+  
+  private
+  
+  def send_pdf
+    pdf = ArticlesPdf.new(@articles)
+    send_data pdf.render,
+              filename: "articles.pdf",
+              type: "application/pdf",
+              disposition: "inline"
+  end
+end
+```
+
+## Rendering Partials
+
+```ruby
+def show
+  @article = Article.find(params[:id])
+  
+  # Render partial as response
+  render partial: "article"
+  
+  # With locals
+  render partial: "article", locals: { article: @article }
+  
+  # Collection
+  render partial: "article", collection: @articles
+  
+  # With layout for partial
+  render partial: "article", layout: "card"
+end
+```
+
+## Streaming Responses
+
+```ruby
+class ReportsController < ApplicationController
+  include ActionController::Live
+  
+  def download
+    response.headers["Content-Type"] = "text/csv"
+    response.headers["Content-Disposition"] = 'attachment; filename="report.csv"'
+    
+    response.stream.write "id,name,email\n"
+    
+    User.find_each do |user|
+      response.stream.write "#{user.id},#{user.name},#{user.email}\n"
+    end
+  ensure
+    response.stream.close
+  end
+end
+```
+
+## Sending Files
+
+```ruby
+class DownloadsController < ApplicationController
+  def show
+    # Send existing file
+    send_file Rails.root.join("files", "document.pdf"),
+              filename: "document.pdf",
+              type: "application/pdf",
+              disposition: "attachment"  # or "inline"
+    
+    # Send generated data
+    send_data generate_csv,
+              filename: "report.csv",
+              type: "text/csv"
+  end
+  
+  private
+  
+  def generate_csv
+    CSV.generate do |csv|
+      csv << ["ID", "Name", "Email"]
+      User.find_each do |user|
+        csv << [user.id, user.name, user.email]
+      end
+    end
+  end
+end
+```
+
+## Redirects
+
+```ruby
+class ArticlesController < ApplicationController
+  def create
+    @article = Article.new(article_params)
+    
+    if @article.save
+      # Redirect to show action
+      redirect_to @article
+      
+      # Or explicit path
+      redirect_to article_path(@article)
+      
+      # With flash message
+      redirect_to @article, notice: "Created!"
+      redirect_to @article, alert: "Warning!"
+      
+      # With custom flash
+      redirect_to @article, flash: { success: "Great job!" }
+      
+      # External URL
+      redirect_to "https://example.com"
+      
+      # Back to previous page
+      redirect_back(fallback_location: root_path)
+      
+      # With status
+      redirect_to @article, status: :see_other  # 303
+    end
+  end
+end
+```
+
+## Flash Messages
+
+```ruby
+class ArticlesController < ApplicationController
+  def create
+    @article = Article.new(article_params)
+    
+    if @article.save
+      flash[:notice] = "Article created!"
+      redirect_to @article
+    else
+      flash.now[:alert] = "Please fix errors"
+      render :new
+    end
+  end
+  
+  def update
+    # Keep flash for one more request
+    flash.keep(:notice)
+    redirect_to articles_path
+  end
+end
+```
+
+```erb
+<!-- In layout -->
+<% flash.each do |type, message| %>
+  <div class="alert alert-<%= type %>">
+    <%= message %>
+  </div>
+<% end %>
+```
+
+## Head (Status Only)
+
+```ruby
+class ArticlesController < ApplicationController
+  def check
+    if Article.exists?(params[:id])
+      head :ok
+    else
+      head :not_found
+    end
+  end
+  
+  def destroy
+    Article.find(params[:id]).destroy
+    head :no_content  # 204
+  end
+end
+```
+
+Proper rendering makes your controllers communicate effectively with clients!
+

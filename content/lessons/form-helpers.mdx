@@ -1,0 +1,287 @@
+---
+title: Form Helpers
+chapterSlug: forms-and-validations
+duration: 12
+order: 1
+---
+
+## Rails Form Helpers
+
+Rails provides powerful form helpers that make building forms easy and secure. They automatically handle CSRF protection, model binding, and error display.
+
+## form_with Helper
+
+The modern way to create forms in Rails:
+
+```erb
+<!-- Resource-based form (for model) -->
+<%= form_with model: @article do |form| %>
+  <%= form.text_field :title %>
+  <%= form.text_area :body %>
+  <%= form.submit %>
+<% end %>
+
+<!-- URL-based form -->
+<%= form_with url: search_path, method: :get do |form| %>
+  <%= form.text_field :query %>
+  <%= form.submit "Search" %>
+<% end %>
+```
+
+### Generated HTML
+
+```html
+<form action="/articles" method="post" data-turbo="true">
+  <input type="hidden" name="authenticity_token" value="..." />
+  <input type="text" name="article[title]" id="article_title" />
+  <textarea name="article[body]" id="article_body"></textarea>
+  <input type="submit" value="Create Article" />
+</form>
+```
+
+## Common Form Fields
+
+### Text Fields
+
+```erb
+<%= form_with model: @user do |f| %>
+  <!-- Basic text field -->
+  <%= f.text_field :name %>
+  
+  <!-- With placeholder and class -->
+  <%= f.text_field :name, placeholder: "Enter name", class: "form-control" %>
+  
+  <!-- Email field -->
+  <%= f.email_field :email %>
+  
+  <!-- Password field -->
+  <%= f.password_field :password %>
+  
+  <!-- Hidden field -->
+  <%= f.hidden_field :referrer, value: "homepage" %>
+  
+  <!-- Phone field -->
+  <%= f.telephone_field :phone %>
+  
+  <!-- URL field -->
+  <%= f.url_field :website %>
+  
+  <!-- Number field -->
+  <%= f.number_field :age, min: 0, max: 120 %>
+  
+  <!-- Range field -->
+  <%= f.range_field :rating, min: 1, max: 5 %>
+<% end %>
+```
+
+### Text Areas
+
+```erb
+<%= f.text_area :body %>
+<%= f.text_area :body, rows: 10, cols: 50 %>
+<%= f.text_area :body, size: "50x10" %>
+<%= f.text_area :description, class: "rich-editor", data: { controller: "editor" } %>
+```
+
+### Select Fields
+
+```erb
+<!-- Basic select -->
+<%= f.select :category, ["Technology", "Sports", "Music"] %>
+
+<!-- With blank option -->
+<%= f.select :category, ["Technology", "Sports", "Music"], 
+    include_blank: "Select a category" %>
+
+<!-- With prompt -->
+<%= f.select :category, ["Technology", "Sports", "Music"], 
+    prompt: "Choose one..." %>
+
+<!-- From collection -->
+<%= f.collection_select :category_id, Category.all, :id, :name %>
+
+<!-- With selected value -->
+<%= f.select :status, [["Draft", "draft"], ["Published", "published"]], 
+    selected: "draft" %>
+
+<!-- Grouped options -->
+<%= f.grouped_collection_select :city_id, Country.all, :cities, :name, :id, :name %>
+```
+
+### Checkboxes and Radio Buttons
+
+```erb
+<!-- Single checkbox -->
+<%= f.check_box :terms_accepted %>
+<%= f.label :terms_accepted, "I accept the terms" %>
+
+<!-- Checkbox with custom values -->
+<%= f.check_box :active, {}, "yes", "no" %>
+
+<!-- Multiple checkboxes from collection -->
+<%= f.collection_check_boxes :tag_ids, Tag.all, :id, :name do |b| %>
+  <div class="checkbox">
+    <%= b.check_box %>
+    <%= b.label %>
+  </div>
+<% end %>
+
+<!-- Radio buttons -->
+<%= f.radio_button :gender, "male" %>
+<%= f.label :gender_male, "Male" %>
+<%= f.radio_button :gender, "female" %>
+<%= f.label :gender_female, "Female" %>
+
+<!-- Radio from collection -->
+<%= f.collection_radio_buttons :role_id, Role.all, :id, :name do |b| %>
+  <div class="radio">
+    <%= b.radio_button %>
+    <%= b.label %>
+  </div>
+<% end %>
+```
+
+### Date and Time Fields
+
+```erb
+<!-- Date field (HTML5) -->
+<%= f.date_field :birth_date %>
+
+<!-- Time field -->
+<%= f.time_field :start_time %>
+
+<!-- Datetime field -->
+<%= f.datetime_local_field :published_at %>
+
+<!-- Date select (Rails dropdowns) -->
+<%= f.date_select :birth_date, start_year: 1900, end_year: Date.today.year %>
+
+<!-- Time select -->
+<%= f.time_select :start_time, minute_step: 15 %>
+
+<!-- Datetime select -->
+<%= f.datetime_select :event_at %>
+```
+
+### File Uploads
+
+```erb
+<!-- File field -->
+<%= f.file_field :avatar %>
+
+<!-- Multiple files -->
+<%= f.file_field :documents, multiple: true %>
+
+<!-- With accept type -->
+<%= f.file_field :image, accept: "image/*" %>
+```
+
+## Labels
+
+```erb
+<%= f.label :name %>
+<!-- <label for="user_name">Name</label> -->
+
+<%= f.label :name, "Full Name" %>
+<!-- <label for="user_name">Full Name</label> -->
+
+<%= f.label :name, class: "form-label" %>
+
+<%= f.label :name do %>
+  <strong>Name</strong> <small>(required)</small>
+<% end %>
+```
+
+## Form Options
+
+```erb
+<%= form_with model: @article, 
+    local: true,           # Disable Turbo/AJAX
+    url: custom_path,      # Custom URL
+    method: :patch,        # HTTP method
+    class: "my-form",      # CSS class
+    id: "article-form",    # HTML ID
+    data: { turbo: false }, # Disable Turbo
+    html: { novalidate: true } do |f| %>
+<% end %>
+```
+
+## Nested Attributes
+
+For associated models:
+
+```ruby
+# Model
+class Article < ApplicationRecord
+  has_many :comments
+  accepts_nested_attributes_for :comments, 
+    allow_destroy: true, 
+    reject_if: :all_blank
+end
+```
+
+```erb
+<%= form_with model: @article do |f| %>
+  <%= f.text_field :title %>
+  
+  <h3>Comments</h3>
+  <%= f.fields_for :comments do |comment_form| %>
+    <div class="comment-fields">
+      <%= comment_form.text_area :body %>
+      <%= comment_form.check_box :_destroy %>
+      <%= comment_form.label :_destroy, "Remove" %>
+    </div>
+  <% end %>
+  
+  <%= f.submit %>
+<% end %>
+```
+
+## Displaying Validation Errors
+
+```erb
+<%= form_with model: @user do |f| %>
+  <% if @user.errors.any? %>
+    <div class="error-messages">
+      <h2><%= pluralize(@user.errors.count, "error") %> prevented saving:</h2>
+      <ul>
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  
+  <div class="field <%= 'has-error' if @user.errors[:name].any? %>">
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+    <% if @user.errors[:name].any? %>
+      <span class="error"><%= @user.errors[:name].first %></span>
+    <% end %>
+  </div>
+<% end %>
+```
+
+## Form Styling with Tailwind
+
+```erb
+<%= form_with model: @user, class: "space-y-6" do |f| %>
+  <div>
+    <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
+    <%= f.text_field :name, 
+        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+  </div>
+  
+  <div>
+    <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
+    <%= f.email_field :email, 
+        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+  </div>
+  
+  <%= f.submit "Save", 
+      class: "inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700" %>
+<% end %>
+```
+
+Forms are a core part of Rails applications - master these helpers!
+

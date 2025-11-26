@@ -1,0 +1,332 @@
+---
+title: Polymorphic Associations
+chapterSlug: active-record-associations
+duration: 10
+order: 4
+---
+
+## Polymorphic Associations
+
+Polymorphic associations allow a model to belong to more than one other model using a single association. This is useful when multiple models share similar relationships.
+
+## Why Polymorphic Associations?
+
+Imagine you want comments on both articles and photos. Without polymorphism:
+
+```ruby
+# You'd need separate tables and models
+class ArticleComment < ApplicationRecord
+  belongs_to :article
+end
+
+class PhotoComment < ApplicationRecord
+  belongs_to :photo
+end
+```
+
+With polymorphism, you need just one Comment model:
+
+```ruby
+class Comment < ApplicationRecord
+  belongs_to :commentable, polymorphic: true
+end
+
+class Article < ApplicationRecord
+  has_many :comments, as: :commentable
+end
+
+class Photo < ApplicationRecord
+  has_many :comments, as: :commentable
+end
+```
+
+## Setting Up Polymorphic Associations
+
+### Migration
+
+```ruby
+class CreateComments < ActiveRecord::Migration[7.1]
+  def change
+    create_table :comments do |t|
+      t.text :body
+      t.references :commentable, polymorphic: true, null: false
+      t.timestamps
+    end
+    
+    # This creates:
+    # - commentable_id (integer)
+    # - commentable_type (string)
+    # - index on both columns
+  end
+end
+```
+
+### Models
+
+```ruby
+class Comment < ApplicationRecord
+  belongs_to :commentable, polymorphic: true
+end
+
+class Article < ApplicationRecord
+  has_many :comments, as: :commentable, dependent: :destroy
+end
+
+class Photo < ApplicationRecord
+  has_many :comments, as: :commentable, dependent: :destroy
+end
+
+class Video < ApplicationRecord
+  has_many :comments, as: :commentable, dependent: :destroy
+end
+```
+
+## Using Polymorphic Associations
+
+```ruby
+# Create comments on different models
+article = Article.create(title: "My Article")
+photo = Photo.create(url: "photo.jpg")
+
+# Add comments
+article.comments.create(body: "Great article!")
+photo.comments.create(body: "Nice photo!")
+
+# Access comments
+article.comments                    # Comments for this article
+photo.comments                      # Comments for this photo
+
+# Access the parent from comment
+comment = Comment.first
+comment.commentable                 # Returns Article or Photo
+comment.commentable_type            # => "Article" or "Photo"
+comment.commentable_id              # => 1
+
+# Check the type
+comment.commentable.is_a?(Article)  # => true
+comment.commentable_type == "Article"
+```
+
+## Real-World Examples
+
+### Attachments
+
+```ruby
+class Attachment < ApplicationRecord
+  belongs_to :attachable, polymorphic: true
+  
+  has_one_attached :file
+end
+
+class Project < ApplicationRecord
+  has_many :attachments, as: :attachable, dependent: :destroy
+end
+
+class Task < ApplicationRecord
+  has_many :attachments, as: :attachable, dependent: :destroy
+end
+
+class Message < ApplicationRecord
+  has_many :attachments, as: :attachable, dependent: :destroy
+end
+
+# Usage
+project.attachments.create(file: uploaded_file)
+task.attachments.create(file: uploaded_file)
+```
+
+### Activity Feed / Events
+
+```ruby
+class Event < ApplicationRecord
+  belongs_to :eventable, polymorphic: true
+  belongs_to :user
+  
+  # action could be: 'created', 'updated', 'deleted', 'liked', etc.
+end
+
+class Article < ApplicationRecord
+  has_many :events, as: :eventable
+  
+  after_create { events.create(user: Current.user, action: 'created') }
+  after_update { events.create(user: Current.user, action: 'updated') }
+end
+
+class Comment < ApplicationRecord
+  has_many :events, as: :eventable
+  
+  after_create { events.create(user: Current.user, action: 'created') }
+end
+
+# Get recent activity
+Event.includes(:eventable, :user)
+     .order(created_at: :desc)
+     .limit(20)
+```
+
+### Likes / Favorites
+
+```ruby
+class Like < ApplicationRecord
+  belongs_to :likeable, polymorphic: true
+  belongs_to :user
+  
+  validates :user_id, uniqueness: { scope: [:likeable_type, :likeable_id] }
+end
+
+class Article < ApplicationRecord
+  has_many :likes, as: :likeable, dependent: :destroy
+  has_many :liking_users, through: :likes, source: :user
+  
+  def liked_by?(user)
+    likes.exists?(user: user)
+  end
+end
+
+class Comment < ApplicationRecord
+  has_many :likes, as: :likeable, dependent: :destroy
+  has_many :liking_users, through: :likes, source: :user
+end
+
+# Usage
+article.likes.create(user: current_user)
+article.liked_by?(current_user)
+article.likes.count
+```
+
+### Tags
+
+```ruby
+class Tagging < ApplicationRecord
+  belongs_to :taggable, polymorphic: true
+  belongs_to :tag
+end
+
+class Tag < ApplicationRecord
+  has_many :taggings, dependent: :destroy
+  
+  # Get all items with this tag
+  def items
+    taggings.map(&:taggable)
+  end
+end
+
+class Article < ApplicationRecord
+  has_many :taggings, as: :taggable, dependent: :destroy
+  has_many :tags, through: :taggings
+end
+
+class Photo < ApplicationRecord
+  has_many :taggings, as: :taggable, dependent: :destroy
+  has_many :tags, through: :taggings
+end
+```
+
+### Addresses
+
+```ruby
+class Address < ApplicationRecord
+  belongs_to :addressable, polymorphic: true
+  
+  validates :street, :city, :zip, presence: true
+end
+
+class User < ApplicationRecord
+  has_many :addresses, as: :addressable, dependent: :destroy
+  has_one :primary_address, -> { where(primary: true) }, 
+          as: :addressable, class_name: 'Address'
+end
+
+class Company < ApplicationRecord
+  has_many :addresses, as: :addressable, dependent: :destroy
+  has_one :headquarters, -> { where(type: 'headquarters') },
+          as: :addressable, class_name: 'Address'
+end
+
+class Order < ApplicationRecord
+  has_one :shipping_address, as: :addressable, class_name: 'Address'
+  has_one :billing_address, as: :addressable, class_name: 'Address'
+end
+```
+
+## Querying Polymorphic Associations
+
+```ruby
+# Find all comments for a specific type
+Comment.where(commentable_type: "Article")
+
+# Find comments for a specific article
+Comment.where(commentable: article)
+Comment.where(commentable_type: "Article", commentable_id: article.id)
+
+# Eager loading (note: can be tricky)
+Comment.includes(:commentable).where(commentable_type: "Article")
+
+# Find items with specific comments
+Article.joins(:comments).where(comments: { approved: true })
+```
+
+## STI vs Polymorphic
+
+Sometimes Single Table Inheritance is a better choice:
+
+```ruby
+# Polymorphic: when the child model (Comment) can belong to multiple parents
+# STI: when you have variations of the same model
+
+# STI example
+class Notification < ApplicationRecord
+  # type column distinguishes subclasses
+end
+
+class EmailNotification < Notification
+  def send!
+    # Send email
+  end
+end
+
+class SmsNotification < Notification
+  def send!
+    # Send SMS
+  end
+end
+```
+
+## Best Practices
+
+```ruby
+# 1. Always add index on polymorphic columns
+add_index :comments, [:commentable_type, :commentable_id]
+
+# 2. Consider using concerns for shared behavior
+module Commentable
+  extend ActiveSupport::Concern
+  
+  included do
+    has_many :comments, as: :commentable, dependent: :destroy
+  end
+  
+  def recent_comments
+    comments.order(created_at: :desc).limit(5)
+  end
+end
+
+class Article < ApplicationRecord
+  include Commentable
+end
+
+class Photo < ApplicationRecord
+  include Commentable
+end
+
+# 3. Be careful with eager loading
+# This works but loads all types separately
+Comment.includes(:commentable)
+
+# More efficient for specific type
+Comment.where(commentable_type: 'Article')
+       .includes(:commentable)
+```
+
+Polymorphic associations are powerful for building flexible, DRY models!
+

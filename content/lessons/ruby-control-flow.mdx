@@ -1,0 +1,321 @@
+---
+title: Control Flow
+chapterSlug: ruby-basics
+duration: 8
+order: 2
+---
+
+## Control Flow in Ruby
+
+Control flow statements let you control how your program executes based on conditions. Ruby offers elegant and readable ways to handle conditionals and loops.
+
+## If/Else Statements
+
+The most common way to handle conditions:
+
+```ruby
+age = 25
+
+if age >= 18
+  puts "You are an adult"
+elsif age >= 13
+  puts "You are a teenager"
+else
+  puts "You are a child"
+end
+
+# Single line (for simple conditions)
+puts "Welcome!" if age >= 18
+
+# Ternary operator
+status = age >= 18 ? "adult" : "minor"
+```
+
+## Unless Statement
+
+`unless` is the opposite of `if` - it executes when the condition is false:
+
+```ruby
+logged_in = false
+
+unless logged_in
+  puts "Please log in"
+end
+
+# Same as:
+if !logged_in
+  puts "Please log in"
+end
+
+# Single line
+redirect_to login_path unless logged_in
+```
+
+## Case Statement
+
+Perfect for multiple conditions on the same variable:
+
+```ruby
+day = "Monday"
+
+case day
+when "Monday"
+  puts "Start of the work week"
+when "Friday"
+  puts "TGIF!"
+when "Saturday", "Sunday"
+  puts "Weekend!"
+else
+  puts "Regular day"
+end
+
+# Case with ranges
+age = 25
+
+case age
+when 0..12
+  "child"
+when 13..19
+  "teenager"
+when 20..64
+  "adult"
+else
+  "senior"
+end
+
+# Case with types
+value = "hello"
+
+case value
+when String
+  puts "It's a string"
+when Integer
+  puts "It's a number"
+when Array
+  puts "It's an array"
+end
+```
+
+## Loops
+
+### While Loop
+
+```ruby
+count = 0
+
+while count < 5
+  puts count
+  count += 1
+end
+# Output: 0, 1, 2, 3, 4
+```
+
+### Until Loop
+
+```ruby
+count = 0
+
+until count >= 5
+  puts count
+  count += 1
+end
+# Output: 0, 1, 2, 3, 4
+```
+
+### For Loop (rarely used in Ruby)
+
+```ruby
+for i in 1..5
+  puts i
+end
+```
+
+### Loop with Break
+
+```ruby
+count = 0
+
+loop do
+  count += 1
+  puts count
+  break if count >= 5
+end
+```
+
+## Iterators (The Ruby Way)
+
+Ruby developers prefer iterators over traditional loops:
+
+### Each
+
+```ruby
+# Iterating over arrays
+fruits = ["apple", "banana", "cherry"]
+
+fruits.each do |fruit|
+  puts "I love #{fruit}!"
+end
+
+# With index
+fruits.each_with_index do |fruit, index|
+  puts "#{index + 1}. #{fruit}"
+end
+
+# Iterating over hashes
+user = { name: "John", age: 30 }
+
+user.each do |key, value|
+  puts "#{key}: #{value}"
+end
+```
+
+### Times
+
+```ruby
+5.times do |i|
+  puts "Iteration #{i}"
+end
+# Output: Iteration 0, 1, 2, 3, 4
+
+# Without block variable
+3.times { puts "Hello!" }
+```
+
+### Upto and Downto
+
+```ruby
+1.upto(5) { |n| puts n }    # 1, 2, 3, 4, 5
+5.downto(1) { |n| puts n }  # 5, 4, 3, 2, 1
+```
+
+### Step
+
+```ruby
+# Count by 2s
+0.step(10, 2) { |n| puts n }
+# Output: 0, 2, 4, 6, 8, 10
+```
+
+## Loop Control
+
+### Break
+
+Exit the loop immediately:
+
+```ruby
+numbers = [1, 2, 3, 4, 5]
+
+numbers.each do |n|
+  break if n == 3
+  puts n
+end
+# Output: 1, 2
+```
+
+### Next
+
+Skip to the next iteration:
+
+```ruby
+numbers = [1, 2, 3, 4, 5]
+
+numbers.each do |n|
+  next if n.even?
+  puts n
+end
+# Output: 1, 3, 5
+```
+
+### Redo
+
+Restart the current iteration:
+
+```ruby
+count = 0
+
+5.times do |i|
+  count += 1
+  puts "Attempt #{count} for iteration #{i}"
+  redo if count < 3 && i == 0
+end
+```
+
+## Guard Clauses
+
+Use early returns to simplify code:
+
+```ruby
+# Instead of nested ifs
+def process_order(order)
+  if order
+    if order.valid?
+      if order.items.any?
+        # Process the order
+      end
+    end
+  end
+end
+
+# Use guard clauses
+def process_order(order)
+  return unless order
+  return unless order.valid?
+  return if order.items.empty?
+  
+  # Process the order (the happy path)
+end
+```
+
+## Truthy and Falsy Values
+
+Remember Ruby's unique truthiness:
+
+```ruby
+# Only nil and false are falsy
+# Everything else is truthy (including 0, "", and [])
+
+if 0
+  puts "0 is truthy!"  # This prints!
+end
+
+if ""
+  puts "Empty string is truthy!"  # This prints!
+end
+
+if []
+  puts "Empty array is truthy!"  # This prints!
+end
+
+# Use .present? and .blank? in Rails for better checks
+# (from Active Support)
+"".blank?     # => true
+"hello".blank? # => false
+nil.blank?    # => true
+[].blank?     # => true
+
+"hello".present? # => true
+"".present?      # => false
+```
+
+## Logical Operators
+
+```ruby
+# && (and) - returns first falsy value or last value
+nil && "hello"     # => nil
+false && "hello"   # => false
+"hi" && "hello"    # => "hello"
+
+# || (or) - returns first truthy value or last value
+nil || "hello"     # => "hello"
+false || "hello"   # => "hello"
+"hi" || "hello"    # => "hi"
+
+# Common pattern: default values
+name = params[:name] || "Anonymous"
+
+# Safe assignment
+@user ||= User.find(params[:id])  # Only assigns if @user is nil/false
+```
+
+Control flow in Ruby is designed to be readable and expressive. Use these patterns to write clean, maintainable code!
+

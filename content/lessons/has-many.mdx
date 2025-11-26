@@ -1,0 +1,302 @@
+---
+title: Has Many Associations
+chapterSlug: active-record-associations
+duration: 12
+order: 2
+---
+
+## has_many Association
+
+`has_many` is the most common association in Rails. It indicates a one-to-many relationship where one model has multiple instances of another model.
+
+## Basic has_many
+
+```ruby
+class User < ApplicationRecord
+  has_many :articles
+end
+
+class Article < ApplicationRecord
+  belongs_to :user
+end
+
+# Migration
+class CreateArticles < ActiveRecord::Migration[7.1]
+  def change
+    create_table :articles do |t|
+      t.string :title
+      t.text :body
+      t.references :user, null: false, foreign_key: true
+      t.timestamps
+    end
+  end
+end
+```
+
+## Using has_many
+
+### Reading Associated Records
+
+```ruby
+user = User.find(1)
+
+# Get all articles
+user.articles              # => Collection of articles
+user.articles.count        # => 5
+user.articles.size         # => 5 (uses counter_cache if available)
+user.articles.length       # => 5 (loads all records)
+user.articles.empty?       # => false
+user.articles.any?         # => true
+
+# Access specific articles
+user.articles.first        # => First article
+user.articles.last         # => Last article
+user.articles.find(5)      # => Article with id 5
+user.articles[0]           # => First article (loads all!)
+
+# Chain with scopes and conditions
+user.articles.published
+user.articles.where(published: true)
+user.articles.order(created_at: :desc)
+user.articles.limit(10)
+```
+
+### Creating Associated Records
+
+```ruby
+user = User.find(1)
+
+# Build (doesn't save)
+article = user.articles.build(title: "New Article")
+article.user_id  # => 1 (automatically set)
+article.save
+
+# Create (saves immediately)
+article = user.articles.create(title: "New Article")
+
+# Create with bang (raises on failure)
+article = user.articles.create!(title: "New Article")
+
+# Create multiple
+user.articles.create([
+  { title: "Article 1" },
+  { title: "Article 2" }
+])
+```
+
+### Modifying Associations
+
+```ruby
+user = User.find(1)
+
+# Add existing articles
+user.articles << Article.find(5)
+user.articles.push(Article.find(6))
+
+# Replace all articles
+user.articles = [Article.find(1), Article.find(2)]
+
+# Remove article (sets foreign key to nil)
+user.articles.delete(Article.find(5))
+
+# Remove all articles
+user.articles.clear
+
+# Destroy articles (also deletes from database)
+user.articles.destroy(Article.find(5))
+user.articles.destroy_all
+
+# Check if exists
+user.articles.exists?
+user.articles.exists?(5)
+user.articles.include?(some_article)
+```
+
+## has_many Options
+
+### Class Name and Foreign Key
+
+```ruby
+class User < ApplicationRecord
+  # Different class name
+  has_many :posts, class_name: "Article"
+  
+  # Different foreign key
+  has_many :articles, foreign_key: "author_id"
+  
+  # Both
+  has_many :written_articles, class_name: "Article", foreign_key: "author_id"
+end
+```
+
+### Dependent Option
+
+What happens to associated records when the parent is destroyed:
+
+```ruby
+class User < ApplicationRecord
+  # Destroy all articles when user is destroyed
+  has_many :articles, dependent: :destroy
+  
+  # Delete without callbacks
+  has_many :articles, dependent: :delete_all
+  
+  # Set foreign key to null
+  has_many :articles, dependent: :nullify
+  
+  # Raise error if any exist
+  has_many :articles, dependent: :restrict_with_exception
+  
+  # Add error to parent, prevent deletion
+  has_many :articles, dependent: :restrict_with_error
+end
+
+user.destroy  # Also destroys all user.articles
+```
+
+### Ordering and Conditions
+
+```ruby
+class User < ApplicationRecord
+  # Default ordering
+  has_many :articles, -> { order(created_at: :desc) }
+  
+  # With conditions
+  has_many :published_articles, -> { where(published: true) }, class_name: "Article"
+  has_many :draft_articles, -> { where(published: false) }, class_name: "Article"
+  
+  # Multiple conditions
+  has_many :recent_published_articles, -> { 
+    where(published: true).order(created_at: :desc).limit(5) 
+  }, class_name: "Article"
+  
+  # With scope parameter
+  has_many :articles_after, ->(date) { where("created_at > ?", date) }, class_name: "Article"
+end
+
+user.recent_published_articles
+user.articles_after(1.week.ago)
+```
+
+### Counter Cache
+
+```ruby
+class User < ApplicationRecord
+  has_many :articles
+end
+
+class Article < ApplicationRecord
+  belongs_to :user, counter_cache: true
+end
+
+# Migration
+add_column :users, :articles_count, :integer, default: 0
+
+# Now you can use:
+user.articles_count  # No database query!
+user.articles.size   # Uses counter cache automatically
+```
+
+### Inverse Of
+
+Helps Rails maintain consistency between associated objects:
+
+```ruby
+class User < ApplicationRecord
+  has_many :articles, inverse_of: :user
+end
+
+class Article < ApplicationRecord
+  belongs_to :user, inverse_of: :articles
+end
+
+user = User.first
+article = user.articles.first
+
+user.name = "New Name"
+article.user.name  # => "New Name" (same object in memory)
+```
+
+## Collection Methods
+
+has_many adds many helpful methods:
+
+```ruby
+user.articles              # All articles
+user.articles=(articles)   # Replace all
+user.article_ids           # Array of IDs
+user.article_ids=(ids)     # Replace by IDs
+user.articles.build        # Build new
+user.articles.create       # Create new
+user.articles.create!      # Create new with exception
+user.articles.reload       # Reload from database
+user.articles.size         # Count
+user.articles.length       # Count (loads all)
+user.articles.count        # SQL COUNT
+user.articles.empty?       # Check if empty
+user.articles.any?         # Check if any
+user.articles.many?        # More than one?
+user.articles.include?(a)  # Check membership
+user.articles.exists?      # Any exist?
+user.articles.distinct     # Unique records
+user.articles.reset        # Reset cached collection
+user.articles.find(...)    # Find within collection
+user.articles.where(...)   # Filter collection
+user.articles.destroy_all  # Destroy all
+user.articles.delete_all   # Delete all
+user.articles << article   # Add to collection
+user.articles.delete(a)    # Remove from collection
+user.articles.destroy(a)   # Destroy from collection
+user.articles.clear        # Remove all
+```
+
+## Preloading Associations
+
+Avoid N+1 queries:
+
+```ruby
+# N+1 problem (bad)
+users = User.all
+users.each do |user|
+  puts user.articles.count  # Query for each user!
+end
+
+# Eager loading (good)
+users = User.includes(:articles)
+users.each do |user|
+  puts user.articles.size  # No additional queries
+end
+
+# Preload (similar to includes)
+users = User.preload(:articles)
+
+# Eager load (uses LEFT OUTER JOIN)
+users = User.eager_load(:articles)
+```
+
+## Scopes on Associations
+
+```ruby
+class User < ApplicationRecord
+  has_many :articles do
+    def published
+      where(published: true)
+    end
+    
+    def drafts
+      where(published: false)
+    end
+    
+    def find_by_title(title)
+      find_by(title: title)
+    end
+  end
+end
+
+user.articles.published
+user.articles.drafts
+user.articles.find_by_title("Hello World")
+```
+
+The has_many association is fundamental to building relationships in Rails applications!
+

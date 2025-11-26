@@ -1,0 +1,287 @@
+---
+title: Advanced Active Record Queries
+chapterSlug: active-record-queries
+duration: 12
+order: 1
+---
+
+## Advanced Active Record Queries
+
+Active Record provides a powerful query interface. Let's explore advanced querying techniques that will help you write efficient database queries.
+
+## Query Interface Basics
+
+### Retrieving Single Objects
+
+```ruby
+# Find by ID (raises RecordNotFound if not found)
+user = User.find(1)
+
+# Find by ID without exception
+user = User.find_by(id: 1)  # Returns nil if not found
+
+# Find by any attribute
+user = User.find_by(email: "john@example.com")
+user = User.find_by(email: "john@example.com", active: true)
+
+# Find with exception
+user = User.find_by!(email: "john@example.com")
+
+# First and last
+User.first
+User.last
+User.first(5)  # Array of first 5
+User.take      # Any record (no ordering)
+```
+
+### Conditions with Where
+
+```ruby
+# Hash conditions (recommended)
+User.where(active: true)
+User.where(role: "admin", active: true)
+User.where(status: nil)
+User.where(role: ["admin", "moderator"])
+User.where(age: 18..65)
+User.where(created_at: 1.week.ago..)
+
+# String conditions with placeholders
+User.where("age > ?", 18)
+User.where("name LIKE ?", "%john%")
+User.where("age > ? AND role = ?", 18, "user")
+
+# Named placeholders
+User.where("created_at > :start AND created_at < :end", 
+           start: 1.week.ago, end: Time.current)
+
+# NOT conditions
+User.where.not(role: "admin")
+User.where.not(id: [1, 2, 3])
+
+# OR conditions
+User.where(role: "admin").or(User.where(role: "moderator"))
+
+# Missing associations
+Post.where.missing(:comments)
+
+# Associated records exist
+Post.where.associated(:author)
+```
+
+## Ordering and Limiting
+
+```ruby
+# Ordering
+User.order(:name)
+User.order(name: :asc)
+User.order(name: :desc)
+User.order(:role, name: :desc)
+User.order(Arel.sql("LOWER(name)"))
+
+# Reverse order
+User.order(:name).reverse_order
+
+# Reorder (replace existing order)
+User.order(:name).reorder(:email)
+
+# Limiting
+User.limit(10)
+User.limit(10).offset(20)
+
+# Distinct
+User.select(:role).distinct
+```
+
+## Selecting Specific Fields
+
+```ruby
+# Select specific columns
+User.select(:id, :name, :email)
+User.select("name, email, UPPER(role) as role_upper")
+
+# Pluck (returns array of values, not objects)
+User.pluck(:email)
+# => ["john@example.com", "jane@example.com"]
+
+User.pluck(:id, :email)
+# => [[1, "john@example.com"], [2, "jane@example.com"]]
+
+# IDs only
+User.ids
+# => [1, 2, 3, 4, 5]
+
+# Pick (first matching value)
+User.where(role: "admin").pick(:email)
+# => "admin@example.com"
+```
+
+## Grouping and Aggregates
+
+```ruby
+# Group by
+Order.group(:status).count
+# => {"pending" => 10, "completed" => 50, "cancelled" => 5}
+
+Order.group(:status, :payment_method).count
+
+# Having (filter grouped results)
+Order.group(:user_id).having("COUNT(*) > ?", 5).count
+
+# Aggregate functions
+Product.count
+Product.sum(:price)
+Product.average(:price)
+Product.minimum(:price)
+Product.maximum(:price)
+
+# Aggregate with conditions
+Product.where(active: true).sum(:price)
+
+# Calculate
+Product.calculate(:sum, :price)
+```
+
+## Joins
+
+```ruby
+# Inner join
+User.joins(:articles)
+User.joins(:articles, :comments)
+User.joins(articles: :comments)
+
+# With conditions on joined table
+User.joins(:articles).where(articles: { published: true })
+User.joins(:articles).where("articles.created_at > ?", 1.week.ago)
+
+# Left outer join
+User.left_joins(:articles)
+User.left_outer_joins(:articles)
+
+# Find users without articles
+User.left_joins(:articles).where(articles: { id: nil })
+```
+
+## Eager Loading (N+1 Prevention)
+
+```ruby
+# N+1 problem
+users = User.all
+users.each do |user|
+  puts user.articles.count  # Query for each user!
+end
+
+# Solution: includes
+users = User.includes(:articles)
+users.each do |user|
+  puts user.articles.size  # No additional queries
+end
+
+# Multiple associations
+User.includes(:articles, :comments)
+
+# Nested associations
+User.includes(articles: :comments)
+
+# Preload (always separate queries)
+User.preload(:articles)
+
+# Eager load (always LEFT OUTER JOIN)
+User.eager_load(:articles)
+
+# References (when filtering on includes)
+User.includes(:articles).where(articles: { published: true }).references(:articles)
+```
+
+## Finding in Batches
+
+```ruby
+# Process records in batches (memory efficient)
+User.find_each do |user|
+  user.send_newsletter
+end
+
+# With batch size
+User.find_each(batch_size: 500) do |user|
+  user.process
+end
+
+# Get batches as arrays
+User.find_in_batches(batch_size: 1000) do |users|
+  users.each { |u| u.update_column(:processed, true) }
+end
+
+# Start from specific ID
+User.find_each(start: 1000) do |user|
+  # Process users with id >= 1000
+end
+
+# With order (Rails 7+)
+User.in_batches(order: :desc).each_record do |user|
+  user.archive
+end
+```
+
+## Existence Checks
+
+```ruby
+# Check if any records exist
+User.exists?
+User.exists?(1)
+User.exists?(email: "john@example.com")
+User.where(active: true).exists?
+
+# Check with predicates
+User.any?
+User.none?
+User.one?
+User.many?
+
+# Empty check
+User.where(role: "admin").empty?
+```
+
+## Calculations with Group
+
+```ruby
+# Complex statistics
+Order.group(:status)
+     .select("status, COUNT(*) as count, SUM(total) as revenue")
+     
+# Group by date
+Order.group("DATE(created_at)")
+     .select("DATE(created_at) as date, SUM(total) as daily_total")
+
+# Group by association
+Article.joins(:user)
+       .group("users.name")
+       .count
+```
+
+## Raw SQL
+
+```ruby
+# Find by SQL
+users = User.find_by_sql("SELECT * FROM users WHERE role = 'admin'")
+
+# Execute raw SQL
+ActiveRecord::Base.connection.execute("UPDATE users SET active = true")
+
+# Select with SQL
+User.select("*, CONCAT(first_name, ' ', last_name) as full_name")
+
+# Sanitize SQL
+query = ActiveRecord::Base.sanitize_sql(["SELECT * FROM users WHERE name = ?", name])
+```
+
+## Explain (Query Analysis)
+
+```ruby
+# See query execution plan
+User.where(active: true).explain
+
+# Output shows how database will execute the query
+# Useful for optimizing slow queries
+```
+
+These advanced query techniques will help you write efficient, performant Rails applications!
+

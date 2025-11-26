@@ -1,0 +1,358 @@
+---
+title: Validations
+chapterSlug: models-and-active-record
+duration: 12
+order: 3
+---
+
+## Active Record Validations
+
+Validations ensure that only valid data is saved to your database. They run automatically before `save`, `create`, and `update`.
+
+## When Validations Run
+
+```ruby
+# Validations are triggered by these methods:
+user.save
+user.save!
+user.create
+user.create!
+user.update(attributes)
+user.update!(attributes)
+user.valid?
+
+# These skip validations:
+user.save(validate: false)
+user.update_attribute(:name, "value")
+user.update_column(:name, "value")
+user.update_columns(name: "value")
+User.update_all(name: "value")
+```
+
+## Common Validations
+
+### Presence
+
+```ruby
+class User < ApplicationRecord
+  validates :name, presence: true
+  validates :email, presence: { message: "is required" }
+  
+  # For boolean fields, use inclusion instead
+  validates :terms_accepted, inclusion: { in: [true] }
+end
+```
+
+### Uniqueness
+
+```ruby
+class User < ApplicationRecord
+  validates :email, uniqueness: true
+  
+  # Case insensitive
+  validates :email, uniqueness: { case_sensitive: false }
+  
+  # Scoped uniqueness
+  validates :name, uniqueness: { scope: :organization_id }
+  
+  # Custom message
+  validates :username, uniqueness: { message: "is already taken" }
+end
+```
+
+### Length
+
+```ruby
+class Article < ApplicationRecord
+  validates :title, length: { minimum: 5 }
+  validates :title, length: { maximum: 100 }
+  validates :title, length: { in: 5..100 }
+  validates :title, length: { is: 50 }  # Exact length
+  
+  # Custom messages
+  validates :bio, length: {
+    minimum: 10,
+    maximum: 500,
+    too_short: "must have at least %{count} characters",
+    too_long: "must have at most %{count} characters"
+  }
+end
+```
+
+### Numericality
+
+```ruby
+class Product < ApplicationRecord
+  validates :price, numericality: true
+  validates :price, numericality: { only_integer: true }
+  validates :price, numericality: { greater_than: 0 }
+  validates :price, numericality: { greater_than_or_equal_to: 0 }
+  validates :price, numericality: { less_than: 1000 }
+  validates :price, numericality: { less_than_or_equal_to: 1000 }
+  validates :quantity, numericality: { odd: true }
+  validates :quantity, numericality: { even: true }
+end
+```
+
+### Format
+
+```ruby
+class User < ApplicationRecord
+  validates :email, format: { 
+    with: /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i,
+    message: "must be a valid email address"
+  }
+  
+  validates :phone, format: { 
+    with: /\A\d{10}\z/,
+    message: "must be 10 digits"
+  }
+  
+  validates :username, format: {
+    without: /\s/,
+    message: "cannot contain spaces"
+  }
+end
+```
+
+### Inclusion and Exclusion
+
+```ruby
+class User < ApplicationRecord
+  validates :role, inclusion: { 
+    in: %w[admin editor viewer],
+    message: "%{value} is not a valid role"
+  }
+  
+  validates :username, exclusion: { 
+    in: %w[admin superuser root],
+    message: "%{value} is reserved"
+  }
+end
+```
+
+### Confirmation
+
+```ruby
+class User < ApplicationRecord
+  # User must provide email_confirmation field
+  validates :email, confirmation: true
+  validates :email_confirmation, presence: true
+  
+  # For passwords
+  validates :password, confirmation: true
+  validates :password_confirmation, presence: true
+end
+```
+
+### Acceptance
+
+```ruby
+class User < ApplicationRecord
+  # For checkbox fields (terms of service)
+  validates :terms_of_service, acceptance: true
+  
+  # Custom acceptance value
+  validates :terms, acceptance: { accept: 'yes' }
+end
+```
+
+## Conditional Validations
+
+```ruby
+class User < ApplicationRecord
+  # Only validate if condition is true
+  validates :phone, presence: true, if: :phone_required?
+  validates :company, presence: true, if: -> { role == 'business' }
+  
+  # Unless condition
+  validates :nickname, presence: true, unless: :formal_name?
+  
+  # Multiple conditions
+  validates :age, presence: true, if: [:adult?, :registration_complete?]
+  
+  private
+  
+  def phone_required?
+    role == 'admin'
+  end
+  
+  def formal_name?
+    title.present?
+  end
+end
+```
+
+### On Create or Update
+
+```ruby
+class User < ApplicationRecord
+  validates :password, presence: true, on: :create
+  validates :password, length: { minimum: 8 }, on: :update
+  
+  # Custom context
+  validates :terms, acceptance: true, on: :checkout
+  
+  # Usage with custom context:
+  # user.save(context: :checkout)
+end
+```
+
+## Custom Validations
+
+### Custom Method
+
+```ruby
+class Product < ApplicationRecord
+  validate :price_must_be_positive
+  validate :expiration_date_in_future, on: :create
+  
+  private
+  
+  def price_must_be_positive
+    if price.present? && price <= 0
+      errors.add(:price, "must be greater than zero")
+    end
+  end
+  
+  def expiration_date_in_future
+    if expiration_date.present? && expiration_date <= Date.today
+      errors.add(:expiration_date, "must be in the future")
+    end
+  end
+end
+```
+
+### Custom Validator Class
+
+```ruby
+# app/validators/email_validator.rb
+class EmailValidator < ActiveModel::EachValidator
+  def validate_each(record, attribute, value)
+    unless value =~ /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
+      record.errors.add(attribute, options[:message] || "is not a valid email")
+    end
+  end
+end
+
+# Usage in model
+class User < ApplicationRecord
+  validates :email, email: true
+  validates :backup_email, email: { message: "must be valid" }
+end
+```
+
+### Validates With
+
+```ruby
+class GoodnessValidator < ActiveModel::Validator
+  def validate(record)
+    if record.evil?
+      record.errors.add(:base, "This record is evil")
+    end
+  end
+end
+
+class User < ApplicationRecord
+  validates_with GoodnessValidator
+end
+```
+
+## Working with Errors
+
+```ruby
+user = User.new(name: "", email: "invalid")
+user.valid?  # => false
+
+# Check errors
+user.errors.any?             # => true
+user.errors.empty?           # => false
+user.errors.count            # => 2
+
+# Get all error messages
+user.errors.full_messages    # => ["Name can't be blank", "Email is invalid"]
+user.errors.messages         # => { name: ["can't be blank"], email: ["is invalid"] }
+
+# Get errors for specific attribute
+user.errors[:name]           # => ["can't be blank"]
+user.errors[:email]          # => ["is invalid"]
+
+# Add custom error
+user.errors.add(:base, "Something is wrong")
+user.errors.add(:name, :blank)  # Uses i18n key
+
+# Clear errors
+user.errors.clear
+
+# Check specific attribute
+user.errors.include?(:name)  # => true
+user.errors.added?(:name, :blank)  # => true
+```
+
+## Displaying Errors in Views
+
+```erb
+<%= form_with model: @user do |form| %>
+  <% if @user.errors.any? %>
+    <div class="error-summary">
+      <h2><%= pluralize(@user.errors.count, "error") %> prevented saving:</h2>
+      <ul>
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name %>
+    <% if @user.errors[:name].any? %>
+      <span class="error"><%= @user.errors[:name].first %></span>
+    <% end %>
+  </div>
+<% end %>
+```
+
+## Combining Validations
+
+```ruby
+class User < ApplicationRecord
+  validates :name, 
+            presence: true, 
+            length: { minimum: 2, maximum: 50 }
+  
+  validates :email, 
+            presence: true, 
+            uniqueness: { case_sensitive: false },
+            format: { with: URI::MailTo::EMAIL_REGEXP }
+  
+  validates :password, 
+            presence: true, 
+            length: { minimum: 8 },
+            if: :password_required?
+  
+  validates :age, 
+            numericality: { only_integer: true, greater_than: 0 },
+            allow_nil: true
+            
+  validates :website, 
+            format: { with: URI::regexp(%w[http https]) },
+            allow_blank: true
+end
+```
+
+## Allow Nil and Allow Blank
+
+```ruby
+class User < ApplicationRecord
+  # Skip validation if value is nil
+  validates :age, numericality: true, allow_nil: true
+  
+  # Skip validation if value is blank (nil, "", " ")
+  validates :website, format: { with: URI::regexp }, allow_blank: true
+end
+```
+
+Validations are your first line of defense for data integrity!
+

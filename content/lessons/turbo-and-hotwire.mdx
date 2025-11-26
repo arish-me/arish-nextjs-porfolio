@@ -1,0 +1,306 @@
+---
+title: Turbo and Hotwire
+chapterSlug: views-and-templates
+duration: 15
+order: 3
+---
+
+## Turbo and Hotwire
+
+Hotwire is Rails' approach to building modern, fast web applications with minimal JavaScript. It consists of Turbo (for navigation and updates) and Stimulus (for JavaScript interactions).
+
+## Turbo Drive
+
+Turbo Drive accelerates page loads by converting link clicks and form submissions into AJAX requests:
+
+```erb
+<!-- Links are automatically enhanced -->
+<%= link_to "Articles", articles_path %>
+
+<!-- Disable Turbo for specific link -->
+<%= link_to "External", "https://example.com", data: { turbo: false } %>
+
+<!-- Forms are also enhanced -->
+<%= form_with model: @article do |f| %>
+  <%= f.text_field :title %>
+  <%= f.submit %>
+<% end %>
+
+<!-- Disable Turbo for form -->
+<%= form_with model: @article, data: { turbo: false } do |f| %>
+```
+
+### Turbo Drive Events
+
+```javascript
+// Listen for Turbo events
+document.addEventListener("turbo:load", () => {
+  console.log("Page loaded via Turbo")
+})
+
+document.addEventListener("turbo:before-visit", (event) => {
+  console.log("About to visit:", event.detail.url)
+})
+
+document.addEventListener("turbo:submit-start", (event) => {
+  console.log("Form submission started")
+})
+```
+
+## Turbo Frames
+
+Turbo Frames allow you to update specific parts of the page:
+
+```erb
+<!-- app/views/articles/index.html.erb -->
+<h1>Articles</h1>
+
+<%= turbo_frame_tag "articles" do %>
+  <% @articles.each do |article| %>
+    <%= render article %>
+  <% end %>
+  
+  <%= link_to "Load More", articles_path(page: @page + 1) %>
+<% end %>
+```
+
+### Lazy Loading Frames
+
+```erb
+<!-- Load content lazily -->
+<%= turbo_frame_tag "comments", src: article_comments_path(@article), loading: :lazy do %>
+  <p>Loading comments...</p>
+<% end %>
+```
+
+### Targeting Frames
+
+```erb
+<!-- Link updates a specific frame -->
+<%= turbo_frame_tag "article_#{@article.id}" do %>
+  <h2><%= @article.title %></h2>
+  <%= link_to "Edit", edit_article_path(@article) %>
+<% end %>
+
+<!-- In edit view, wrap in same frame -->
+<%= turbo_frame_tag "article_#{@article.id}" do %>
+  <%= render "form", article: @article %>
+<% end %>
+```
+
+### Breaking Out of Frames
+
+```erb
+<!-- Link targets the whole page -->
+<%= link_to "View Full", @article, data: { turbo_frame: "_top" } %>
+
+<!-- Or target a different frame -->
+<%= link_to "Preview", preview_article_path(@article), data: { turbo_frame: "preview_panel" } %>
+```
+
+## Turbo Streams
+
+Turbo Streams enable real-time updates to the page:
+
+### Stream Actions
+
+```erb
+<!-- Append to a container -->
+<%= turbo_stream.append "articles", @article %>
+
+<!-- Prepend -->
+<%= turbo_stream.prepend "articles", @article %>
+
+<!-- Replace element -->
+<%= turbo_stream.replace @article %>
+
+<!-- Update (replace content, keep element) -->
+<%= turbo_stream.update @article %>
+
+<!-- Remove element -->
+<%= turbo_stream.remove @article %>
+
+<!-- Before/After -->
+<%= turbo_stream.before @article, partial: "articles/article", locals: { article: @new_article } %>
+<%= turbo_stream.after @article, partial: "articles/article", locals: { article: @new_article } %>
+```
+
+### Controller Response
+
+```ruby
+class CommentsController < ApplicationController
+  def create
+    @article = Article.find(params[:article_id])
+    @comment = @article.comments.build(comment_params)
+    
+    if @comment.save
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to @article }
+      end
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+end
+```
+
+```erb
+<!-- app/views/comments/create.turbo_stream.erb -->
+<%= turbo_stream.prepend "comments", @comment %>
+<%= turbo_stream.update "new_comment_form" do %>
+  <%= render "form", comment: Comment.new, article: @article %>
+<% end %>
+<%= turbo_stream.update "comments_count", @article.comments.count %>
+```
+
+### Inline Turbo Streams
+
+```ruby
+def destroy
+  @comment = Comment.find(params[:id])
+  @comment.destroy
+  
+  respond_to do |format|
+    format.turbo_stream { render turbo_stream: turbo_stream.remove(@comment) }
+    format.html { redirect_to @comment.article }
+  end
+end
+```
+
+## Stimulus Controllers
+
+Stimulus adds JavaScript behavior to HTML elements:
+
+### Basic Controller
+
+```javascript
+// app/javascript/controllers/hello_controller.js
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["name", "output"]
+  
+  greet() {
+    this.outputTarget.textContent = `Hello, ${this.nameTarget.value}!`
+  }
+}
+```
+
+```erb
+<div data-controller="hello">
+  <input data-hello-target="name" type="text">
+  <button data-action="click->hello#greet">Greet</button>
+  <span data-hello-target="output"></span>
+</div>
+```
+
+### Common Stimulus Patterns
+
+```javascript
+// Toggle controller
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["content"]
+  static classes = ["hidden"]
+  
+  toggle() {
+    this.contentTarget.classList.toggle(this.hiddenClass)
+  }
+}
+```
+
+```erb
+<div data-controller="toggle" data-toggle-hidden-class="hidden">
+  <button data-action="click->toggle#toggle">Toggle</button>
+  <div data-toggle-target="content">
+    Content to toggle
+  </div>
+</div>
+```
+
+```javascript
+// Form validation controller
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["submit", "email"]
+  
+  validate() {
+    const valid = this.emailTarget.value.includes("@")
+    this.submitTarget.disabled = !valid
+  }
+}
+```
+
+```erb
+<form data-controller="validation">
+  <input type="email" 
+         data-validation-target="email"
+         data-action="input->validation#validate">
+  <button data-validation-target="submit" disabled>Submit</button>
+</form>
+```
+
+### Values and Classes
+
+```javascript
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static values = { 
+    url: String,
+    refreshInterval: { type: Number, default: 5000 }
+  }
+  
+  connect() {
+    this.startRefresh()
+  }
+  
+  startRefresh() {
+    setInterval(() => {
+      fetch(this.urlValue)
+        .then(response => response.text())
+        .then(html => this.element.innerHTML = html)
+    }, this.refreshIntervalValue)
+  }
+}
+```
+
+```erb
+<div data-controller="auto-refresh"
+     data-auto-refresh-url-value="<%= notifications_path %>"
+     data-auto-refresh-refresh-interval-value="10000">
+</div>
+```
+
+## Real-Time with Action Cable
+
+```ruby
+# app/channels/comments_channel.rb
+class CommentsChannel < ApplicationCable::Channel
+  def subscribed
+    stream_from "article_#{params[:article_id]}_comments"
+  end
+end
+
+# Broadcast from model
+class Comment < ApplicationRecord
+  after_create_commit -> {
+    broadcast_prepend_to "article_#{article_id}_comments",
+                         target: "comments",
+                         partial: "comments/comment"
+  }
+end
+```
+
+```erb
+<%= turbo_stream_from "article_#{@article.id}_comments" %>
+<div id="comments">
+  <%= render @article.comments %>
+</div>
+```
+
+Hotwire lets you build dynamic interfaces with minimal JavaScript!
+

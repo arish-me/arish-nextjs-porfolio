@@ -1,0 +1,283 @@
+---
+title: Named Scopes
+chapterSlug: active-record-queries
+duration: 10
+order: 2
+---
+
+## Named Scopes
+
+Scopes allow you to define commonly-used queries as reusable methods. They make your code cleaner and more expressive.
+
+## Defining Scopes
+
+```ruby
+class Article < ApplicationRecord
+  # Basic scope
+  scope :published, -> { where(published: true) }
+  scope :draft, -> { where(published: false) }
+  scope :recent, -> { order(created_at: :desc) }
+  
+  # Scope with argument
+  scope :by_category, ->(category) { where(category: category) }
+  scope :created_after, ->(date) { where("created_at > ?", date) }
+  
+  # Scope with default argument
+  scope :recent_count, ->(count = 10) { order(created_at: :desc).limit(count) }
+end
+```
+
+## Using Scopes
+
+```ruby
+# Use like class methods
+Article.published
+Article.draft
+Article.recent
+
+# With arguments
+Article.by_category("technology")
+Article.created_after(1.week.ago)
+Article.recent_count(5)
+
+# Chain scopes
+Article.published.recent.limit(10)
+Article.published.by_category("technology").recent
+```
+
+## Scopes vs Class Methods
+
+Both achieve the same result:
+
+```ruby
+class Article < ApplicationRecord
+  # As scope
+  scope :published, -> { where(published: true) }
+  
+  # As class method (equivalent)
+  def self.published
+    where(published: true)
+  end
+end
+```
+
+### When to Use Class Methods
+
+```ruby
+class Article < ApplicationRecord
+  # Use class methods for complex logic
+  def self.visible_to(user)
+    if user&.admin?
+      all
+    elsif user
+      where(published: true).or(where(user_id: user.id))
+    else
+      where(published: true)
+    end
+  end
+  
+  # Or when returning non-relation
+  def self.statistics
+    {
+      total: count,
+      published: published.count,
+      draft: draft.count
+    }
+  end
+end
+```
+
+## Common Scope Patterns
+
+### Status Scopes
+
+```ruby
+class Order < ApplicationRecord
+  # Status-based scopes
+  scope :pending, -> { where(status: "pending") }
+  scope :processing, -> { where(status: "processing") }
+  scope :completed, -> { where(status: "completed") }
+  scope :cancelled, -> { where(status: "cancelled") }
+  
+  # Combined status scopes
+  scope :active, -> { where(status: %w[pending processing]) }
+  scope :finished, -> { where(status: %w[completed cancelled]) }
+  
+  # Not status
+  scope :not_cancelled, -> { where.not(status: "cancelled") }
+end
+```
+
+### Time-Based Scopes
+
+```ruby
+class Article < ApplicationRecord
+  scope :today, -> { where(created_at: Date.today.all_day) }
+  scope :yesterday, -> { where(created_at: Date.yesterday.all_day) }
+  scope :this_week, -> { where(created_at: 1.week.ago..) }
+  scope :this_month, -> { where(created_at: 1.month.ago..) }
+  scope :this_year, -> { where(created_at: 1.year.ago..) }
+  
+  scope :between, ->(start_date, end_date) { 
+    where(created_at: start_date..end_date) 
+  }
+  
+  scope :on_date, ->(date) { 
+    where(created_at: date.beginning_of_day..date.end_of_day) 
+  }
+  
+  scope :older_than, ->(days) { where("created_at < ?", days.days.ago) }
+  scope :newer_than, ->(days) { where("created_at > ?", days.days.ago) }
+end
+```
+
+### Ordering Scopes
+
+```ruby
+class Product < ApplicationRecord
+  scope :by_price, ->(direction = :asc) { order(price: direction) }
+  scope :by_name, -> { order(:name) }
+  scope :cheapest_first, -> { order(price: :asc) }
+  scope :expensive_first, -> { order(price: :desc) }
+  scope :newest_first, -> { order(created_at: :desc) }
+  scope :oldest_first, -> { order(created_at: :asc) }
+  scope :most_popular, -> { order(sales_count: :desc) }
+  scope :alphabetical, -> { order(:name) }
+  scope :random, -> { order(Arel.sql("RANDOM()")) }
+end
+```
+
+### Search Scopes
+
+```ruby
+class User < ApplicationRecord
+  scope :search_name, ->(query) { 
+    where("name ILIKE ?", "%#{sanitize_sql_like(query)}%") 
+  }
+  
+  scope :search_email, ->(query) { 
+    where("email ILIKE ?", "%#{sanitize_sql_like(query)}%") 
+  }
+  
+  scope :search, ->(query) {
+    return all if query.blank?
+    
+    search_name(query).or(search_email(query))
+  }
+  
+  scope :filter_by_role, ->(role) {
+    return all if role.blank?
+    where(role: role)
+  }
+end
+```
+
+### Pagination Scope
+
+```ruby
+class Article < ApplicationRecord
+  scope :page, ->(page_number, per_page = 25) {
+    limit(per_page).offset((page_number.to_i - 1) * per_page)
+  }
+end
+
+# Usage
+Article.published.recent.page(2, 10)
+```
+
+## Chaining Scopes
+
+```ruby
+class Article < ApplicationRecord
+  scope :published, -> { where(published: true) }
+  scope :featured, -> { where(featured: true) }
+  scope :recent, -> { order(created_at: :desc) }
+  scope :by_author, ->(author) { where(author_id: author.id) }
+  scope :in_category, ->(category) { where(category: category) }
+end
+
+# Chain multiple scopes
+Article.published
+       .featured
+       .recent
+       .in_category("tech")
+       .limit(10)
+
+# In controller
+def index
+  @articles = Article.published
+                     .in_category(params[:category])
+                     .by_author(params[:author_id])
+                     .recent
+                     .page(params[:page])
+end
+```
+
+## Default Scope
+
+```ruby
+class Article < ApplicationRecord
+  # All queries include this by default
+  default_scope { order(created_at: :desc) }
+  
+  # Or for soft delete
+  default_scope { where(deleted_at: nil) }
+  
+  # Override with unscoped
+  scope :with_deleted, -> { unscope(where: :deleted_at) }
+end
+
+# Usage
+Article.all  # Already ordered
+Article.unscoped.all  # Without default scope
+Article.with_deleted  # Include deleted records
+```
+
+### Warning About Default Scope
+
+```ruby
+# Default scope can cause unexpected behavior
+class Article < ApplicationRecord
+  default_scope { where(published: true) }
+end
+
+# This creates a PUBLISHED article, not draft!
+Article.create(title: "Draft", published: false)
+# The published: true from default scope may override!
+
+# Better: use explicit scopes
+class Article < ApplicationRecord
+  scope :visible, -> { where(published: true) }
+end
+```
+
+## Merging Scopes
+
+```ruby
+class Article < ApplicationRecord
+  scope :recent, -> { where("created_at > ?", 1.week.ago) }
+end
+
+class User < ApplicationRecord
+  scope :active, -> { where(active: true) }
+end
+
+# Merge scopes from different models
+Article.joins(:user).merge(User.active)
+```
+
+## Lambda Scopes with Associations
+
+```ruby
+class User < ApplicationRecord
+  has_many :articles
+  has_many :published_articles, -> { where(published: true) }, class_name: "Article"
+  has_many :recent_articles, -> { order(created_at: :desc).limit(5) }, class_name: "Article"
+end
+
+user.published_articles
+user.recent_articles
+```
+
+Scopes make your models expressive and your controllers clean!
+

@@ -1,0 +1,317 @@
+---
+title: Deploying Rails Applications
+chapterSlug: deployment
+duration: 15
+order: 1
+---
+
+## Deploying Rails Applications
+
+Deploying a Rails application involves several steps: setting up a server, configuring the database, managing assets, and running the application in production mode.
+
+## Production Checklist
+
+Before deploying, ensure:
+- [ ] Database is configured for production
+- [ ] Secret keys are set via environment variables
+- [ ] Assets are precompiled
+- [ ] Proper error handling is in place
+- [ ] Logging is configured
+- [ ] Background jobs are set up (if needed)
+
+## Environment Configuration
+
+### Database
+
+```yaml
+# config/database.yml
+production:
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  database: <%= ENV['DATABASE_NAME'] %>
+  username: <%= ENV['DATABASE_USERNAME'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  host: <%= ENV['DATABASE_HOST'] %>
+```
+
+### Secrets and Credentials
+
+```bash
+# Edit encrypted credentials
+rails credentials:edit
+
+# For production-specific
+rails credentials:edit --environment production
+```
+
+```ruby
+# Access credentials in code
+Rails.application.credentials.secret_key_base
+Rails.application.credentials.dig(:aws, :access_key_id)
+```
+
+### Environment Variables
+
+```ruby
+# config/environments/production.rb
+config.require_master_key = true
+
+# Use environment variables
+config.action_mailer.smtp_settings = {
+  address: ENV['SMTP_ADDRESS'],
+  port: ENV['SMTP_PORT'],
+  user_name: ENV['SMTP_USERNAME'],
+  password: ENV['SMTP_PASSWORD']
+}
+```
+
+## Deploying to Render
+
+### Create render.yaml
+
+```yaml
+# render.yaml
+databases:
+  - name: myapp-db
+    databaseName: myapp_production
+    user: myapp
+
+services:
+  - type: web
+    name: myapp
+    env: ruby
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: myapp-db
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        sync: false
+```
+
+### Build Script
+
+```bash
+#!/usr/bin/env bash
+# bin/render-build.sh
+set -o errexit
+
+bundle install
+bundle exec rails assets:precompile
+bundle exec rails assets:clean
+bundle exec rails db:migrate
+```
+
+## Deploying to Heroku
+
+```bash
+# Install Heroku CLI
+# Create app
+heroku create myapp
+
+# Add PostgreSQL
+heroku addons:create heroku-postgresql:mini
+
+# Set master key
+heroku config:set RAILS_MASTER_KEY=$(cat config/master.key)
+
+# Deploy
+git push heroku main
+
+# Run migrations
+heroku run rails db:migrate
+
+# Open app
+heroku open
+```
+
+### Procfile
+
+```
+# Procfile
+web: bundle exec puma -C config/puma.rb
+worker: bundle exec sidekiq
+release: bundle exec rails db:migrate
+```
+
+## Deploying with Docker
+
+### Dockerfile
+
+```dockerfile
+# Dockerfile
+FROM ruby:3.3.0-slim
+
+# Install dependencies
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+    build-essential libpq-dev nodejs npm && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /rails
+
+# Install gems
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+# Copy application
+COPY . .
+
+# Precompile assets
+RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
+
+EXPOSE 3000
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
+```
+
+### Docker Compose
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails server -b 0.0.0.0"
+    volumes:
+      - .:/rails
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:password@db/myapp_production
+      RAILS_ENV: production
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+
+volumes:
+  postgres_data:
+```
+
+## Deploying to VPS (Ubuntu)
+
+### Server Setup
+
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install dependencies
+sudo apt install -y curl git-core zlib1g-dev build-essential \
+  libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 \
+  libxml2-dev libxslt1-dev libcurl4-openssl-dev \
+  libffi-dev nodejs npm nginx postgresql postgresql-contrib
+
+# Install Ruby (using rbenv)
+git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+source ~/.bashrc
+
+rbenv install 3.3.0
+rbenv global 3.3.0
+gem install bundler
+```
+
+### Nginx Configuration
+
+```nginx
+# /etc/nginx/sites-available/myapp
+upstream puma {
+  server unix:///home/deploy/myapp/shared/tmp/sockets/puma.sock;
+}
+
+server {
+  listen 80;
+  server_name example.com;
+  root /home/deploy/myapp/current/public;
+  
+  location ^~ /assets/ {
+    gzip_static on;
+    expires max;
+    add_header Cache-Control public;
+  }
+  
+  try_files $uri/index.html $uri @puma;
+  
+  location @puma {
+    proxy_pass http://puma;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+  }
+}
+```
+
+### Systemd Service
+
+```ini
+# /etc/systemd/system/puma.service
+[Unit]
+Description=Puma HTTP Server
+After=network.target
+
+[Service]
+Type=simple
+User=deploy
+WorkingDirectory=/home/deploy/myapp/current
+Environment=RAILS_ENV=production
+ExecStart=/home/deploy/.rbenv/bin/rbenv exec bundle exec puma -C config/puma.rb
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## SSL with Let's Encrypt
+
+```bash
+# Install Certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Get certificate
+sudo certbot --nginx -d example.com -d www.example.com
+
+# Auto-renewal
+sudo certbot renew --dry-run
+```
+
+## Monitoring
+
+### Error Tracking
+
+```ruby
+# Gemfile
+gem 'sentry-ruby'
+gem 'sentry-rails'
+
+# config/initializers/sentry.rb
+Sentry.init do |config|
+  config.dsn = ENV['SENTRY_DSN']
+  config.environment = Rails.env
+  config.traces_sample_rate = 0.5
+end
+```
+
+### Performance Monitoring
+
+```ruby
+# Gemfile
+gem 'newrelic_rpm'
+gem 'skylight'
+```
+
+Deployment is just the beginning - monitoring and maintaining your app is equally important!
+

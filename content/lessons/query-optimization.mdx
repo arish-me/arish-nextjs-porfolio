@@ -1,0 +1,304 @@
+---
+title: Query Optimization
+chapterSlug: active-record-queries
+duration: 12
+order: 3
+---
+
+## Query Optimization
+
+Writing efficient queries is crucial for application performance. Let's learn how to identify and fix common performance issues.
+
+## The N+1 Query Problem
+
+The most common performance issue in Rails applications:
+
+```ruby
+# N+1 Problem - BAD
+users = User.all
+users.each do |user|
+  puts user.articles.count  # One query per user!
+end
+# 1 query for users + N queries for articles = N+1 queries
+
+# Solution - GOOD
+users = User.includes(:articles)
+users.each do |user|
+  puts user.articles.size  # No additional queries
+end
+# Only 2 queries total
+```
+
+## Detecting N+1 Queries
+
+### Using Bullet Gem
+
+```ruby
+# Gemfile
+group :development do
+  gem 'bullet'
+end
+
+# config/environments/development.rb
+config.after_initialize do
+  Bullet.enable = true
+  Bullet.alert = true
+  Bullet.bullet_logger = true
+  Bullet.console = true
+  Bullet.rails_logger = true
+end
+```
+
+### Manual Detection
+
+```ruby
+# Enable query logging
+ActiveRecord::Base.logger = Logger.new(STDOUT)
+
+# Check logs for repeated queries
+```
+
+## Eager Loading Strategies
+
+### includes
+
+```ruby
+# Uses separate queries or JOIN depending on conditions
+User.includes(:articles)
+# Query 1: SELECT * FROM users
+# Query 2: SELECT * FROM articles WHERE user_id IN (1, 2, 3...)
+
+# With conditions (uses JOIN)
+User.includes(:articles).where(articles: { published: true }).references(:articles)
+```
+
+### preload
+
+```ruby
+# Always uses separate queries
+User.preload(:articles)
+# Query 1: SELECT * FROM users
+# Query 2: SELECT * FROM articles WHERE user_id IN (1, 2, 3...)
+
+# Cannot filter on preloaded association
+User.preload(:articles).where(articles: { published: true })  # Error!
+```
+
+### eager_load
+
+```ruby
+# Always uses LEFT OUTER JOIN
+User.eager_load(:articles)
+# SELECT users.*, articles.* FROM users 
+# LEFT OUTER JOIN articles ON articles.user_id = users.id
+
+# Good when you need to filter
+User.eager_load(:articles).where(articles: { published: true })
+```
+
+### When to Use Each
+
+```ruby
+# includes - Default choice, Rails picks best strategy
+User.includes(:articles, :comments)
+
+# preload - When you don't filter on associations
+User.preload(:articles)
+
+# eager_load - When filtering on associations
+User.eager_load(:articles).where(articles: { published: true })
+
+# Nested eager loading
+User.includes(articles: [:comments, :tags])
+```
+
+## Counter Cache
+
+Avoid counting associated records repeatedly:
+
+```ruby
+# Without counter cache - hits database each time
+user.articles.count  # SELECT COUNT(*) FROM articles WHERE user_id = 1
+
+# Add counter cache
+class Article < ApplicationRecord
+  belongs_to :user, counter_cache: true
+end
+
+# Migration
+add_column :users, :articles_count, :integer, default: 0, null: false
+
+# Backfill existing data
+User.find_each do |user|
+  User.reset_counters(user.id, :articles)
+end
+
+# Now this is instant
+user.articles_count  # No query!
+user.articles.size   # Uses counter cache automatically
+```
+
+## Database Indexing
+
+### Add Indexes for Frequently Queried Columns
+
+```ruby
+# Migration
+class AddIndexesToUsers < ActiveRecord::Migration[7.1]
+  def change
+    # Single column index
+    add_index :users, :email
+    
+    # Unique index
+    add_index :users, :email, unique: true
+    
+    # Composite index
+    add_index :articles, [:user_id, :created_at]
+    
+    # Partial index (PostgreSQL)
+    add_index :users, :email, where: "active = true"
+    
+    # Index for foreign keys
+    add_index :articles, :user_id
+    add_index :articles, :category_id
+  end
+end
+```
+
+### Check for Missing Indexes
+
+```ruby
+# Gemfile
+gem 'lol_dba'
+
+# Run
+rails db:find_indexes
+```
+
+## Select Only What You Need
+
+```ruby
+# Bad - loads all columns
+users = User.all
+users.map(&:email)
+
+# Good - loads only needed columns
+emails = User.pluck(:email)
+
+# Or if you need objects
+users = User.select(:id, :email)
+users.map(&:email)
+```
+
+## Batching Large Queries
+
+```ruby
+# Bad - loads all records into memory
+User.all.each do |user|
+  user.send_newsletter
+end
+
+# Good - loads in batches
+User.find_each(batch_size: 1000) do |user|
+  user.send_newsletter
+end
+
+# Or get arrays of batches
+User.find_in_batches(batch_size: 1000) do |users|
+  bulk_send_newsletter(users)
+end
+```
+
+## Avoiding SELECT *
+
+```ruby
+# Bad - loads unnecessary columns
+Article.where(published: true).each do |article|
+  puts article.title
+end
+
+# Good - load only what you need
+Article.where(published: true).pluck(:title).each do |title|
+  puts title
+end
+
+# Or with select
+Article.select(:id, :title, :slug).where(published: true)
+```
+
+## Using exists? Instead of count
+
+```ruby
+# Slow - counts all matching records
+if User.where(role: "admin").count > 0
+  # ...
+end
+
+# Fast - stops at first match
+if User.where(role: "admin").exists?
+  # ...
+end
+
+# Also faster
+if User.where(role: "admin").any?
+  # ...
+end
+```
+
+## Caching Query Results
+
+```ruby
+class User < ApplicationRecord
+  def self.admin_count
+    Rails.cache.fetch("admin_count", expires_in: 1.hour) do
+      where(role: "admin").count
+    end
+  end
+end
+
+# Fragment caching in views
+<% cache @article do %>
+  <%= @article.title %>
+  <%= @article.body %>
+<% end %>
+```
+
+## Query Plan Analysis
+
+```ruby
+# See how database executes query
+Article.where(published: true).explain
+
+# Output example:
+# EXPLAIN for: SELECT * FROM articles WHERE published = true
+# Seq Scan on articles  (cost=0.00..1.05 rows=5 width=72)
+#   Filter: (published = true)
+```
+
+## Common Optimizations
+
+```ruby
+# Use where instead of select in Ruby
+# Bad
+users.select { |u| u.active? }
+
+# Good
+User.where(active: true)
+
+# Use update_all for bulk updates
+# Bad
+User.where(role: "guest").each { |u| u.update(role: "user") }
+
+# Good
+User.where(role: "guest").update_all(role: "user")
+
+# Use delete_all when you don't need callbacks
+# Slower (runs callbacks)
+User.where(deleted: true).destroy_all
+
+# Faster (skips callbacks)
+User.where(deleted: true).delete_all
+```
+
+Optimizing queries can dramatically improve your application's performance!
+

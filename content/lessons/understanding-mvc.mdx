@@ -1,0 +1,323 @@
+---
+title: Understanding MVC Architecture
+chapterSlug: rails-fundamentals
+duration: 10
+order: 1
+---
+
+## The MVC Architecture
+
+MVC (Model-View-Controller) is the architectural pattern that Rails is built upon. Understanding MVC is essential for building well-organized Rails applications.
+
+## What is MVC?
+
+MVC separates your application into three interconnected components:
+
+- **Model**: Handles data and business logic
+- **View**: Displays information to the user
+- **Controller**: Coordinates between Model and View
+
+## How MVC Works in Rails
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│   Browser   │────▶│  Controller  │────▶│    Model    │
+│   Request   │     │              │     │             │
+└─────────────┘     └──────────────┘     └─────────────┘
+                           │                    │
+                           │                    │
+                           ▼                    │
+                    ┌─────────────┐             │
+                    │    View     │◀────────────┘
+                    │             │
+                    └─────────────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │  Response   │
+                    │   (HTML)    │
+                    └─────────────┘
+```
+
+## The Request Cycle
+
+Let's trace a request through a Rails app:
+
+### 1. User Makes a Request
+
+```
+GET /articles/1
+```
+
+### 2. Router Matches the Request
+
+```ruby
+# config/routes.rb
+Rails.application.routes.draw do
+  resources :articles
+end
+
+# This routes GET /articles/1 to ArticlesController#show
+```
+
+### 3. Controller Receives the Request
+
+```ruby
+# app/controllers/articles_controller.rb
+class ArticlesController < ApplicationController
+  def show
+    @article = Article.find(params[:id])
+    # params[:id] is "1" from the URL
+  end
+end
+```
+
+### 4. Model Fetches Data
+
+```ruby
+# app/models/article.rb
+class Article < ApplicationRecord
+  # Active Record handles database queries
+  # Article.find(1) generates:
+  # SELECT * FROM articles WHERE id = 1
+end
+```
+
+### 5. View Renders the Response
+
+```erb
+<!-- app/views/articles/show.html.erb -->
+<article>
+  <h1><%= @article.title %></h1>
+  <p><%= @article.body %></p>
+  <small>Published: <%= @article.created_at.strftime("%B %d, %Y") %></small>
+</article>
+```
+
+### 6. HTML Response Sent to Browser
+
+```html
+<article>
+  <h1>My First Article</h1>
+  <p>This is the content of my article...</p>
+  <small>Published: January 15, 2024</small>
+</article>
+```
+
+## Models in Detail
+
+Models handle:
+- Database interactions
+- Data validation
+- Business logic
+- Relationships between data
+
+```ruby
+# app/models/article.rb
+class Article < ApplicationRecord
+  # Relationships
+  belongs_to :author
+  has_many :comments
+  
+  # Validations
+  validates :title, presence: true, length: { minimum: 5 }
+  validates :body, presence: true
+  
+  # Scopes (query shortcuts)
+  scope :published, -> { where(published: true) }
+  scope :recent, -> { order(created_at: :desc) }
+  
+  # Business logic
+  def publish!
+    update(published: true, published_at: Time.current)
+  end
+  
+  def reading_time
+    (body.split.size / 200.0).ceil
+  end
+end
+```
+
+## Views in Detail
+
+Views handle:
+- Displaying data to users
+- HTML structure
+- Presenting formatted content
+
+```erb
+<!-- app/views/articles/index.html.erb -->
+<h1>All Articles</h1>
+
+<% @articles.each do |article| %>
+  <div class="article-card">
+    <h2><%= link_to article.title, article %></h2>
+    <p><%= truncate(article.body, length: 150) %></p>
+    <div class="meta">
+      By <%= article.author.name %> • 
+      <%= article.reading_time %> min read
+    </div>
+  </div>
+<% end %>
+```
+
+## Controllers in Detail
+
+Controllers handle:
+- Receiving HTTP requests
+- Processing user input
+- Calling models for data
+- Selecting which view to render
+
+```ruby
+# app/controllers/articles_controller.rb
+class ArticlesController < ApplicationController
+  before_action :set_article, only: [:show, :edit, :update, :destroy]
+  before_action :authenticate_user!, except: [:index, :show]
+  
+  # GET /articles
+  def index
+    @articles = Article.published.recent.page(params[:page])
+  end
+  
+  # GET /articles/1
+  def show
+  end
+  
+  # GET /articles/new
+  def new
+    @article = Article.new
+  end
+  
+  # POST /articles
+  def create
+    @article = current_user.articles.build(article_params)
+    
+    if @article.save
+      redirect_to @article, notice: 'Article was created!'
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+  
+  # GET /articles/1/edit
+  def edit
+  end
+  
+  # PATCH/PUT /articles/1
+  def update
+    if @article.update(article_params)
+      redirect_to @article, notice: 'Article was updated!'
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+  
+  # DELETE /articles/1
+  def destroy
+    @article.destroy
+    redirect_to articles_url, notice: 'Article was deleted!'
+  end
+  
+  private
+  
+  def set_article
+    @article = Article.find(params[:id])
+  end
+  
+  def article_params
+    params.require(:article).permit(:title, :body, :published)
+  end
+end
+```
+
+## The Golden Rules of MVC
+
+### 1. Fat Models, Skinny Controllers
+
+Put business logic in models, not controllers:
+
+```ruby
+# Bad - logic in controller
+class ArticlesController < ApplicationController
+  def publish
+    @article = Article.find(params[:id])
+    @article.published = true
+    @article.published_at = Time.current
+    @article.save
+    UserMailer.article_published(@article).deliver_later
+  end
+end
+
+# Good - logic in model
+class Article < ApplicationRecord
+  def publish!
+    update(published: true, published_at: Time.current)
+    notify_subscribers
+  end
+  
+  private
+  
+  def notify_subscribers
+    UserMailer.article_published(self).deliver_later
+  end
+end
+
+class ArticlesController < ApplicationController
+  def publish
+    @article = Article.find(params[:id])
+    @article.publish!
+  end
+end
+```
+
+### 2. Don't Put Logic in Views
+
+Views should only display data:
+
+```erb
+<!-- Bad - logic in view -->
+<% if article.published && article.published_at < 7.days.ago %>
+  <span class="badge">New!</span>
+<% end %>
+
+<!-- Good - use a helper or model method -->
+<% if article.recent? %>
+  <span class="badge">New!</span>
+<% end %>
+```
+
+```ruby
+# In the model
+class Article < ApplicationRecord
+  def recent?
+    published && published_at > 7.days.ago
+  end
+end
+```
+
+### 3. Controllers Should Be RESTful
+
+Stick to the standard CRUD actions:
+
+```ruby
+# Standard RESTful actions
+def index   # GET /articles
+def show    # GET /articles/1
+def new     # GET /articles/new
+def create  # POST /articles
+def edit    # GET /articles/1/edit
+def update  # PATCH /articles/1
+def destroy # DELETE /articles/1
+```
+
+## Why MVC Matters
+
+1. **Separation of Concerns**: Each component has a single responsibility
+2. **Testability**: Easy to test each component in isolation
+3. **Maintainability**: Changes in one area don't affect others
+4. **Reusability**: Models and views can be reused across controllers
+5. **Team Collaboration**: Developers can work on different components simultaneously
+
+Understanding MVC is the foundation for everything else in Rails!
+

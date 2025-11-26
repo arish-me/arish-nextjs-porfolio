@@ -1,0 +1,317 @@
+---
+title: Methods in Ruby
+chapterSlug: ruby-basics
+duration: 10
+order: 3
+---
+
+## Methods in Ruby
+
+Methods are reusable blocks of code that perform specific tasks. Ruby methods are elegant and flexible, making your code clean and maintainable.
+
+## Defining Methods
+
+```ruby
+# Basic method
+def greet
+  puts "Hello, World!"
+end
+
+greet  # => Hello, World!
+
+# Method with parameters
+def greet(name)
+  puts "Hello, #{name}!"
+end
+
+greet("Alice")  # => Hello, Alice!
+
+# Method with default parameters
+def greet(name = "Guest")
+  puts "Hello, #{name}!"
+end
+
+greet          # => Hello, Guest!
+greet("Bob")   # => Hello, Bob!
+```
+
+## Return Values
+
+In Ruby, methods automatically return the last expression:
+
+```ruby
+# Implicit return
+def add(a, b)
+  a + b  # This is returned automatically
+end
+
+result = add(3, 5)  # => 8
+
+# Explicit return
+def divide(a, b)
+  return "Cannot divide by zero" if b == 0
+  a / b
+end
+
+divide(10, 2)   # => 5
+divide(10, 0)   # => "Cannot divide by zero"
+
+# Multiple return values
+def min_max(numbers)
+  [numbers.min, numbers.max]
+end
+
+min, max = min_max([3, 1, 4, 1, 5])
+# min => 1, max => 5
+```
+
+## Method Arguments
+
+### Positional Arguments
+
+```ruby
+def create_user(name, email, age)
+  { name: name, email: email, age: age }
+end
+
+create_user("John", "john@example.com", 30)
+```
+
+### Keyword Arguments
+
+```ruby
+# Required keyword arguments
+def create_user(name:, email:)
+  { name: name, email: email }
+end
+
+create_user(name: "John", email: "john@example.com")
+# Order doesn't matter:
+create_user(email: "john@example.com", name: "John")
+
+# Optional keyword arguments with defaults
+def create_user(name:, email:, role: "user", active: true)
+  { name: name, email: email, role: role, active: active }
+end
+
+create_user(name: "John", email: "john@example.com")
+# => { name: "John", email: "john@example.com", role: "user", active: true }
+```
+
+### Splat Operators
+
+```ruby
+# *args - collect remaining positional arguments
+def sum(*numbers)
+  numbers.reduce(0, :+)
+end
+
+sum(1, 2, 3, 4, 5)  # => 15
+
+# **kwargs - collect remaining keyword arguments
+def log(message, **options)
+  puts "#{message} (#{options})"
+end
+
+log("Error occurred", level: :error, timestamp: Time.now)
+
+# Combining all types
+def method(required, optional = "default", *args, keyword:, **kwargs)
+  # required - must be provided
+  # optional - has a default value
+  # *args - array of extra positional args
+  # keyword: - required keyword argument
+  # **kwargs - hash of extra keyword args
+end
+```
+
+## Method Naming Conventions
+
+Ruby has conventions for method names that convey meaning:
+
+```ruby
+# Question mark (?) - returns boolean
+def active?
+  @status == "active"
+end
+
+user.active?  # => true or false
+
+# Bang (!) - modifies object in place or dangerous operation
+name = "hello"
+name.upcase   # => "HELLO" (returns new string)
+name          # => "hello" (original unchanged)
+
+name.upcase!  # => "HELLO" (modifies in place)
+name          # => "HELLO" (original changed)
+
+# Setter methods (=)
+class User
+  def name=(value)
+    @name = value.strip
+  end
+end
+
+user.name = "  John  "  # Calls name= method
+
+# Private methods often start with underscore (convention)
+def _internal_calculation
+  # ...
+end
+```
+
+## Blocks, Procs, and Lambdas
+
+### Blocks
+
+Blocks are chunks of code passed to methods:
+
+```ruby
+# Block with do...end (multi-line)
+[1, 2, 3].each do |number|
+  puts number * 2
+end
+
+# Block with braces (single line)
+[1, 2, 3].each { |number| puts number * 2 }
+
+# Accepting a block in your method
+def with_timing
+  start = Time.now
+  yield  # Execute the block
+  puts "Took #{Time.now - start} seconds"
+end
+
+with_timing do
+  sleep(1)
+  puts "Working..."
+end
+
+# Block with arguments
+def repeat(times)
+  times.times { |i| yield(i) }
+end
+
+repeat(3) { |i| puts "Iteration #{i}" }
+```
+
+### Procs
+
+Procs are saved blocks you can reuse:
+
+```ruby
+# Creating a proc
+double = Proc.new { |n| n * 2 }
+# Or using proc
+double = proc { |n| n * 2 }
+
+double.call(5)    # => 10
+double.(5)        # => 10 (shorthand)
+double[5]         # => 10 (shorthand)
+
+# Using procs with methods
+[1, 2, 3].map(&double)  # => [2, 4, 6]
+
+# Converting methods to procs
+def triple(n)
+  n * 3
+end
+
+[1, 2, 3].map(&method(:triple))  # => [3, 6, 9]
+```
+
+### Lambdas
+
+Lambdas are like procs but stricter:
+
+```ruby
+# Creating a lambda
+multiply = ->(a, b) { a * b }
+# Or
+multiply = lambda { |a, b| a * b }
+
+multiply.call(3, 4)  # => 12
+
+# Differences from procs:
+# 1. Lambdas check argument count
+lam = ->(a, b) { a + b }
+lam.call(1)  # ArgumentError: wrong number of arguments
+
+# 2. return in lambda returns from lambda only
+def test_lambda
+  lam = -> { return "from lambda" }
+  lam.call
+  "from method"
+end
+test_lambda  # => "from method"
+
+def test_proc
+  p = proc { return "from proc" }
+  p.call
+  "from method"  # Never reached
+end
+test_proc  # => "from proc"
+```
+
+## Method Visibility
+
+```ruby
+class User
+  # Public by default
+  def greet
+    puts "Hello!"
+  end
+
+  private
+
+  # Private methods - can only be called within the class
+  def secret_method
+    puts "This is private"
+  end
+
+  protected
+
+  # Protected - can be called by same class or subclasses
+  def internal_method
+    puts "This is protected"
+  end
+end
+
+user = User.new
+user.greet          # Works
+user.secret_method  # NoMethodError: private method called
+```
+
+## Alias Methods
+
+```ruby
+class User
+  def full_name
+    "#{first_name} #{last_name}"
+  end
+  
+  alias_method :name, :full_name
+end
+
+user.full_name  # => "John Doe"
+user.name       # => "John Doe" (same method)
+```
+
+## Method Missing
+
+Handle calls to undefined methods:
+
+```ruby
+class FlexibleObject
+  def method_missing(method_name, *args)
+    puts "You called: #{method_name} with #{args}"
+  end
+end
+
+obj = FlexibleObject.new
+obj.anything("hello", 123)
+# => You called: anything with ["hello", 123]
+```
+
+Methods are the building blocks of Ruby programs. Understanding them deeply will help you write elegant Rails code!
+

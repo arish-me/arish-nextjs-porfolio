@@ -1,0 +1,317 @@
+---
+title: Partials and Layouts
+chapterSlug: views-and-templates
+duration: 12
+order: 1
+---
+
+## Partials and Layouts
+
+Partials and layouts help you organize your views and keep them DRY. Layouts provide the common structure, while partials are reusable view fragments.
+
+## Layouts
+
+Layouts wrap your views with common HTML structure:
+
+```erb
+<!-- app/views/layouts/application.html.erb -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= content_for(:title) || "My App" %></title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+  <%= yield :head %>
+</head>
+<body class="<%= controller_name %> <%= action_name %>">
+  <%= render "shared/navigation" %>
+  
+  <main class="container">
+    <%= render "shared/flash_messages" %>
+    <%= yield %>
+  </main>
+  
+  <%= render "shared/footer" %>
+</body>
+</html>
+```
+
+### Multiple Layouts
+
+```ruby
+class AdminController < ApplicationController
+  layout "admin"
+end
+
+class ArticlesController < ApplicationController
+  layout "blog", only: [:index, :show]
+  
+  # Dynamic layout
+  layout :choose_layout
+  
+  private
+  
+  def choose_layout
+    current_user&.admin? ? "admin" : "application"
+  end
+end
+```
+
+### Disabling Layout
+
+```ruby
+class ApiController < ApplicationController
+  layout false
+end
+
+# Or per action
+def show
+  render layout: false
+end
+```
+
+## Content For
+
+Pass content from views to layouts:
+
+```erb
+<!-- app/views/articles/show.html.erb -->
+<% content_for :title do %>
+  <%= @article.title %> - My Blog
+<% end %>
+
+<% content_for :head do %>
+  <meta name="description" content="<%= @article.excerpt %>">
+<% end %>
+
+<% content_for :sidebar do %>
+  <%= render "related_articles" %>
+<% end %>
+
+<article>
+  <h1><%= @article.title %></h1>
+  <%= @article.body %>
+</article>
+```
+
+```erb
+<!-- In layout -->
+<head>
+  <title><%= yield :title %></title>
+  <%= yield :head %>
+</head>
+<body>
+  <main><%= yield %></main>
+  <aside><%= yield :sidebar %></aside>
+</body>
+```
+
+### Check if Content Exists
+
+```erb
+<% if content_for?(:sidebar) %>
+  <aside><%= yield :sidebar %></aside>
+<% end %>
+```
+
+## Partials
+
+Partials are reusable view fragments. Their filenames start with an underscore:
+
+```erb
+<!-- app/views/articles/_article.html.erb -->
+<article class="article-card">
+  <h2><%= link_to article.title, article %></h2>
+  <p><%= truncate(article.body, length: 150) %></p>
+  <footer>
+    By <%= article.user.name %> •
+    <%= time_ago_in_words(article.created_at) %> ago
+  </footer>
+</article>
+```
+
+### Rendering Partials
+
+```erb
+<!-- Basic render -->
+<%= render "article" %>
+<!-- Looks for _article.html.erb in current view folder -->
+
+<!-- With explicit path -->
+<%= render "shared/header" %>
+<%= render "articles/article" %>
+
+<!-- With local variables -->
+<%= render "article", article: @article %>
+<%= render partial: "article", locals: { article: @article } %>
+```
+
+### Rendering Collections
+
+```erb
+<!-- Long form -->
+<% @articles.each do |article| %>
+  <%= render "article", article: article %>
+<% end %>
+
+<!-- Short form (Rails magic) -->
+<%= render @articles %>
+<!-- Renders _article.html.erb for each article -->
+
+<!-- Explicit collection -->
+<%= render partial: "article", collection: @articles %>
+
+<!-- Custom variable name -->
+<%= render partial: "article", collection: @articles, as: :post %>
+
+<!-- With spacer template -->
+<%= render partial: "article", collection: @articles, spacer_template: "separator" %>
+
+<!-- Empty state -->
+<%= render @articles || render("empty_state") %>
+```
+
+### Passing Objects
+
+```erb
+<!-- When partial name matches model -->
+<%= render @article %>
+<!-- Renders app/views/articles/_article.html.erb with local variable 'article' -->
+
+<!-- This is equivalent to -->
+<%= render partial: "articles/article", locals: { article: @article } %>
+```
+
+## Common Partial Patterns
+
+### Form Partial
+
+```erb
+<!-- app/views/articles/_form.html.erb -->
+<%= form_with model: article do |f| %>
+  <% if article.errors.any? %>
+    <div class="errors">
+      <% article.errors.full_messages.each do |msg| %>
+        <p><%= msg %></p>
+      <% end %>
+    </div>
+  <% end %>
+  
+  <div class="field">
+    <%= f.label :title %>
+    <%= f.text_field :title %>
+  </div>
+  
+  <div class="field">
+    <%= f.label :body %>
+    <%= f.text_area :body %>
+  </div>
+  
+  <%= f.submit %>
+<% end %>
+```
+
+```erb
+<!-- new.html.erb -->
+<h1>New Article</h1>
+<%= render "form", article: @article %>
+
+<!-- edit.html.erb -->
+<h1>Edit Article</h1>
+<%= render "form", article: @article %>
+```
+
+### Navigation Partial
+
+```erb
+<!-- app/views/shared/_navigation.html.erb -->
+<nav class="navbar">
+  <%= link_to "Home", root_path, class: nav_link_class(root_path) %>
+  <%= link_to "Articles", articles_path, class: nav_link_class(articles_path) %>
+  
+  <% if user_signed_in? %>
+    <span>Welcome, <%= current_user.name %></span>
+    <%= button_to "Log Out", logout_path, method: :delete %>
+  <% else %>
+    <%= link_to "Log In", login_path %>
+  <% end %>
+</nav>
+```
+
+### Flash Messages Partial
+
+```erb
+<!-- app/views/shared/_flash_messages.html.erb -->
+<% flash.each do |type, message| %>
+  <div class="alert alert-<%= type %>" data-controller="dismissable">
+    <%= message %>
+    <button data-action="click->dismissable#dismiss">×</button>
+  </div>
+<% end %>
+```
+
+### Card Component Partial
+
+```erb
+<!-- app/views/shared/_card.html.erb -->
+<div class="card">
+  <% if local_assigns[:image] %>
+    <img src="<%= image %>" class="card-img">
+  <% end %>
+  
+  <div class="card-body">
+    <h3 class="card-title"><%= title %></h3>
+    <% if local_assigns[:subtitle] %>
+      <p class="card-subtitle"><%= subtitle %></p>
+    <% end %>
+    <%= yield if block_given? %>
+  </div>
+</div>
+```
+
+```erb
+<%= render "shared/card", title: "My Card", subtitle: "Optional" do %>
+  <p>Card content goes here</p>
+<% end %>
+```
+
+## Local Assigns
+
+Check if a local variable was passed:
+
+```erb
+<!-- _article.html.erb -->
+<article class="<%= local_assigns[:class] || 'default' %>">
+  <h2><%= article.title %></h2>
+  
+  <% if local_assigns[:show_author] %>
+    <span>By <%= article.user.name %></span>
+  <% end %>
+  
+  <%= truncate(article.body, length: local_assigns[:length] || 150) %>
+</article>
+```
+
+```erb
+<%= render "article", article: @article, show_author: true, length: 300 %>
+```
+
+## Nested Layouts
+
+```erb
+<!-- app/views/layouts/admin.html.erb -->
+<%= content_for :body do %>
+  <div class="admin-wrapper">
+    <%= render "admin/sidebar" %>
+    <main class="admin-content">
+      <%= yield %>
+    </main>
+  </div>
+<% end %>
+<%= render template: "layouts/application" %>
+```
+
+Partials and layouts are essential for building maintainable Rails views!
+
