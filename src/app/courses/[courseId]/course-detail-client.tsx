@@ -181,10 +181,6 @@ export default function CourseDetailClient({ course }: CourseDetailClientProps) 
                 <span>{course.duration} minutes total</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span>{course.studentsEnrolled || 0} students enrolled</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span>Updated {course.lastUpdated || 'recently'}</span>
               </div>
