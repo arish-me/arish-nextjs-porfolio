@@ -1,0 +1,160 @@
+---
+title: Installing Git on Mac
+chapterSlug: git-introduction
+duration: 5
+order: 3
+---
+
+## Installing Git on Mac
+
+There are several ways to install Git on macOS. We'll cover the most common methods.
+
+## Method 1: Xcode Command Line Tools (Recommended)
+
+The easiest way to install Git on Mac:
+
+```bash
+# Open Terminal and run:
+xcode-select --install
+```
+
+A dialog will appear asking you to install the command line developer tools. Click **Install** and wait for it to complete.
+
+### Verify Installation
+
+```bash
+git --version
+# Output: git version 2.39.0 (or similar)
+```
+
+## Method 2: Homebrew
+
+If you have Homebrew installed, you can install Git with:
+
+```bash
+# Install Homebrew first (if not installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Git
+brew install git
+```
+
+### Verify Installation
+
+```bash
+git --version
+```
+
+## Method 3: Download from Git Website
+
+1. Go to [git-scm.com/download/mac](https://git-scm.com/download/mac)
+2. Download the installer
+3. Run the installer and follow the prompts
+
+## Configure Git
+
+After installation, configure your identity:
+
+```bash
+# Set your name
+git config --global user.name "Your Name"
+
+# Set your email (use the same email as your GitHub account)
+git config --global user.email "your.email@example.com"
+```
+
+### Verify Configuration
+
+```bash
+git config --list
+# Output:
+# user.name=Your Name
+# user.email=your.email@example.com
+```
+
+## Optional: Set Default Editor
+
+Set your preferred text editor for Git:
+
+```bash
+# For VS Code
+git config --global core.editor "code --wait"
+
+# For Vim
+git config --global core.editor "vim"
+
+# For Nano
+git config --global core.editor "nano"
+```
+
+## Optional: Set Default Branch Name
+
+Modern convention is to use `main` instead of `master`:
+
+```bash
+git config --global init.defaultBranch main
+```
+
+## Verify Everything Works
+
+Create a test repository to verify Git is working:
+
+```bash
+# Create a test directory
+mkdir git-test
+cd git-test
+
+# Initialize a Git repository
+git init
+# Output: Initialized empty Git repository in /path/to/git-test/.git/
+
+# Create a test file
+echo "Hello Git" > test.txt
+
+# Stage and commit
+git add test.txt
+git commit -m "Initial commit"
+# Output: [main (root-commit) abc1234] Initial commit
+
+# Clean up
+cd ..
+rm -rf git-test
+```
+
+## Troubleshooting
+
+### Command Not Found
+
+If `git` command is not found:
+
+```bash
+# Check if it's in /usr/local/bin
+ls /usr/local/bin/git
+
+# Add to PATH if needed
+export PATH="/usr/local/bin:$PATH"
+```
+
+### Permission Denied
+
+If you get permission errors:
+
+```bash
+# Check permissions
+ls -la $(which git)
+
+# Reinstall with Homebrew
+brew reinstall git
+```
+
+## Summary
+
+You've successfully installed Git on your Mac! Key takeaways:
+
+1. **Xcode CLI** is the easiest method
+2. **Homebrew** keeps Git updated easily
+3. **Configure** your name and email
+4. **Test** with a sample repository
+
+Next, let's learn how to install Git on Windows!
+

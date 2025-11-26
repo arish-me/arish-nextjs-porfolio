@@ -1,0 +1,240 @@
+---
+title: Best Practices for Git and GitHub
+chapterSlug: git-best-practices
+duration: 12
+order: 1
+---
+
+## Best Practices for Git and GitHub
+
+A comprehensive guide to professional Git and GitHub workflows.
+
+## Commit Best Practices
+
+### Write Good Commit Messages
+
+```bash
+# Format
+<type>: <subject>
+
+<body>
+
+# Examples
+feat: Add user authentication
+fix: Resolve login timeout issue
+docs: Update API documentation
+refactor: Simplify validation logic
+```
+
+### Commit Often, Commit Small
+
+```bash
+# Good: Focused commits
+git commit -m "Add user model"
+git commit -m "Add user controller"
+git commit -m "Add user routes"
+
+# Bad: Giant commits
+git commit -m "Add entire user system"
+```
+
+### Use Present Tense
+
+```bash
+# Good
+git commit -m "Add feature"
+
+# Avoid
+git commit -m "Added feature"
+```
+
+## Branch Best Practices
+
+### Naming Conventions
+
+```
+feature/user-authentication
+bugfix/login-error
+hotfix/security-patch
+release/v1.0.0
+```
+
+### Keep Branches Short-Lived
+
+- Merge within days, not weeks
+- Regularly sync with main
+- Delete after merging
+
+### Protect Main Branch
+
+```
+Settings → Branches → Add rule:
+☑ Require pull request
+☑ Require reviews
+☑ Require status checks
+```
+
+## Pull Request Best Practices
+
+### Keep PRs Small
+
+- Under 400 lines when possible
+- Single purpose
+- Easier to review
+
+### Write Good Descriptions
+
+```markdown
+## What
+Brief description
+
+## Why
+Reason for change
+
+## How
+Implementation details
+
+## Testing
+How to test
+
+Closes #123
+```
+
+### Request Appropriate Reviews
+
+- 1-2 reviewers usually enough
+- Use CODEOWNERS for automation
+
+## Repository Best Practices
+
+### Essential Files
+
+```
+README.md           # Project overview
+LICENSE             # Usage terms
+.gitignore          # Ignored files
+CONTRIBUTING.md     # How to contribute
+CHANGELOG.md        # Version history
+```
+
+### Use Issues and Projects
+
+- Track all work in issues
+- Use project boards
+- Link PRs to issues
+
+### Automate with Actions
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm test
+```
+
+## Security Best Practices
+
+### Never Commit Secrets
+
+```gitignore
+# .gitignore
+.env
+*.pem
+secrets/
+```
+
+### Use Environment Variables
+
+```bash
+# Not in code
+DB_PASSWORD=secret
+
+# In code
+process.env.DB_PASSWORD
+```
+
+### Enable Security Features
+
+- Dependabot alerts
+- Code scanning
+- Secret scanning
+
+## Team Workflow
+
+### Standard Flow
+
+```
+1. Create issue
+2. Create branch from main
+3. Make changes
+4. Open PR
+5. Get reviews
+6. Merge to main
+7. Delete branch
+```
+
+### Stay Synchronized
+
+```bash
+# Daily routine
+git checkout main
+git pull
+git checkout my-feature
+git rebase main
+```
+
+## Common Git Commands Cheatsheet
+
+```bash
+# Setup
+git init
+git clone <url>
+git config --global user.name "Name"
+
+# Daily Work
+git status
+git add .
+git commit -m "message"
+git push origin branch
+
+# Branching
+git checkout -b branch
+git switch branch
+git merge branch
+git branch -d branch
+
+# Remote
+git remote -v
+git fetch origin
+git pull origin main
+git push origin branch
+
+# History
+git log --oneline
+git diff
+git show commit
+
+# Undo
+git reset HEAD~1
+git revert commit
+git stash
+```
+
+## Summary
+
+### Golden Rules
+
+1. **Commit often** with clear messages
+2. **Branch** for every feature
+3. **Review** all code through PRs
+4. **Never** commit secrets
+5. **Automate** testing and deployment
+6. **Document** your project
+
+Congratulations! You've completed the Git and GitHub Essentials course! 🎉
+

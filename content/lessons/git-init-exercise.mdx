@@ -1,0 +1,272 @@
+---
+title: Exercise - init Command
+chapterSlug: git-introduction
+duration: 10
+order: 7
+---
+
+## Exercise: Using the init Command
+
+Let's practice initializing Git repositories with hands-on exercises.
+
+## Exercise 1: Create Your First Repository
+
+### Task
+
+Create a new Git repository for a personal website project.
+
+### Steps
+
+```bash
+# Step 1: Create the project folder
+mkdir my-website
+cd my-website
+
+# Step 2: Initialize Git
+git init
+
+# Step 3: Verify the repository was created
+ls -la
+
+# You should see the .git folder
+```
+
+### Expected Output
+
+```
+Initialized empty Git repository in /path/to/my-website/.git/
+```
+
+### Verify
+
+```bash
+# Check that .git exists
+ls -la .git
+
+# Check Git status
+git status
+```
+
+---
+
+## Exercise 2: Create Project Structure
+
+### Task
+
+Create a basic website structure and make your first commit.
+
+### Steps
+
+```bash
+# Step 1: Create files
+echo "<!DOCTYPE html><html><body><h1>Hello World</h1></body></html>" > index.html
+echo "body { font-family: Arial; }" > style.css
+echo "# My Website" > README.md
+
+# Step 2: Check status
+git status
+
+# Step 3: Stage all files
+git add .
+
+# Step 4: Commit
+git commit -m "Initial commit: Add basic website structure"
+```
+
+### Expected Output
+
+```
+[main (root-commit) abc1234] Initial commit: Add basic website structure
+ 3 files changed, 3 insertions(+)
+ create mode 100644 README.md
+ create mode 100644 index.html
+ create mode 100644 style.css
+```
+
+---
+
+## Exercise 3: Create a .gitignore
+
+### Task
+
+Add a `.gitignore` file to exclude unnecessary files.
+
+### Steps
+
+```bash
+# Step 1: Create .gitignore
+cat > .gitignore << EOF
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+EOF
+
+# Step 2: Check status
+git status
+
+# Step 3: Stage and commit
+git add .gitignore
+git commit -m "Add .gitignore file"
+```
+
+---
+
+## Exercise 4: View Repository Info
+
+### Task
+
+Explore the repository you created.
+
+### Steps
+
+```bash
+# View commit history
+git log
+
+# View commit history (compact)
+git log --oneline
+
+# View current branch
+git branch
+
+# View Git configuration
+git config --list --local
+```
+
+### Expected Output
+
+```
+# git log --oneline
+abc1234 Add .gitignore file
+def5678 Initial commit: Add basic website structure
+
+# git branch
+* main
+```
+
+---
+
+## Exercise 5: Initialize with Custom Branch
+
+### Task
+
+Create a new repository with a custom default branch name.
+
+### Steps
+
+```bash
+# Create new project
+mkdir new-project
+cd new-project
+
+# Initialize with 'main' branch
+git init -b main
+
+# Verify branch name
+git branch
+
+# Should output: * main
+```
+
+---
+
+## Challenge Exercise
+
+### Task
+
+Create a complete project structure for a Node.js application.
+
+### Requirements
+
+1. Create folder structure:
+   - `src/` for source code
+   - `tests/` for test files
+   - `docs/` for documentation
+
+2. Create initial files:
+   - `package.json`
+   - `README.md`
+   - `.gitignore`
+   - `src/index.js`
+
+3. Initialize Git and make first commit
+
+### Solution
+
+```bash
+# Create project
+mkdir node-app
+cd node-app
+
+# Initialize Git
+git init
+
+# Create directories
+mkdir src tests docs
+
+# Create package.json
+cat > package.json << EOF
+{
+  "name": "node-app",
+  "version": "1.0.0",
+  "main": "src/index.js"
+}
+EOF
+
+# Create README
+echo "# Node App" > README.md
+
+# Create .gitignore
+cat > .gitignore << EOF
+node_modules/
+.env
+EOF
+
+# Create main file
+echo "console.log('Hello World');" > src/index.js
+
+# Keep empty directories
+touch tests/.gitkeep
+touch docs/.gitkeep
+
+# Stage all files
+git add .
+
+# Commit
+git commit -m "Initial commit: Set up Node.js project structure"
+
+# Verify
+git log --oneline
+git status
+```
+
+## Self-Check Questions
+
+1. What command initializes a Git repository?
+2. What folder does Git create when initialized?
+3. Can you run `git init` in an already initialized repository?
+4. How do you initialize with a specific branch name?
+
+## Summary
+
+You've practiced:
+
+- ✅ Initializing new repositories
+- ✅ Creating project structures
+- ✅ Making initial commits
+- ✅ Using `.gitignore`
+- ✅ Viewing repository information
+
+Great job! You're ready to learn about SSH keys next.
+

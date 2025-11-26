@@ -30,6 +30,7 @@ export default config({
             { label: 'Rails', value: 'Rails' },
             { label: 'JavaScript', value: 'JavaScript' },
             { label: 'TypeScript', value: 'TypeScript' },
+            { label: 'DevOps', value: 'DevOps' },
           ],
           defaultValue: 'Docker',
         }),

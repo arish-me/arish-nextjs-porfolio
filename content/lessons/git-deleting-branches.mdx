@@ -1,0 +1,209 @@
+---
+title: Deleting Branches
+chapterSlug: git-branching
+duration: 6
+order: 7
+---
+
+## Deleting Branches
+
+Once a feature is merged or a branch is no longer needed, you should delete it to keep your repository clean.
+
+## Delete Local Branches
+
+### Safe Delete (-d)
+
+```bash
+# Delete a merged branch
+git branch -d branch-name
+```
+
+Git will only delete the branch if it has been merged:
+
+```bash
+git branch -d feature-complete
+# Deleted branch feature-complete (was abc1234).
+```
+
+If not merged, Git will warn you:
+
+```bash
+git branch -d unmerged-branch
+# error: The branch 'unmerged-branch' is not fully merged.
+# If you are sure you want to delete it, run 'git branch -D unmerged-branch'.
+```
+
+### Force Delete (-D)
+
+```bash
+# Force delete (even if not merged)
+git branch -D branch-name
+```
+
+⚠️ **Warning**: This permanently deletes the branch and its unique commits!
+
+```bash
+git branch -D abandoned-feature
+# Deleted branch abandoned-feature (was def5678).
+```
+
+## Delete Remote Branches
+
+### Method 1: git push --delete
+
+```bash
+git push origin --delete branch-name
+```
+
+### Method 2: git push with colon
+
+```bash
+git push origin :branch-name
+```
+
+### Example
+
+```bash
+# Delete remote branch
+git push origin --delete feature-old
+
+# Output:
+To github.com:user/repo.git
+ - [deleted]         feature-old
+```
+
+## Delete Both Local and Remote
+
+```bash
+# Delete local
+git branch -d feature-complete
+
+# Delete remote
+git push origin --delete feature-complete
+```
+
+## Clean Up Stale Remote References
+
+After remote branches are deleted, clean up local references:
+
+```bash
+# Prune stale remote-tracking branches
+git fetch --prune
+
+# Or prune for specific remote
+git remote prune origin
+```
+
+### See Stale Branches
+
+```bash
+# Show remote-tracking branches that no longer exist on remote
+git branch -vv | grep ': gone]'
+```
+
+## Cannot Delete Current Branch
+
+You cannot delete the branch you're currently on:
+
+```bash
+git checkout feature-xyz
+git branch -d feature-xyz
+# error: Cannot delete branch 'feature-xyz' checked out
+```
+
+**Solution**: Switch to another branch first:
+
+```bash
+git checkout main
+git branch -d feature-xyz
+# Deleted branch feature-xyz
+```
+
+## Delete Multiple Branches
+
+### One by One
+
+```bash
+git branch -d branch1 branch2 branch3
+```
+
+### Using Pattern (with grep)
+
+```bash
+# Delete all feature branches
+git branch | grep 'feature/' | xargs git branch -d
+```
+
+### Delete All Merged Branches
+
+```bash
+# Delete all merged branches except main
+git branch --merged | grep -v "main" | xargs git branch -d
+```
+
+## Best Practices
+
+### 1. Merge Before Deleting
+
+```bash
+# Ensure branch is merged
+git checkout main
+git merge feature-complete
+git branch -d feature-complete
+```
+
+### 2. Verify Before Force Delete
+
+```bash
+# Check what commits would be lost
+git log main..unmerged-branch
+
+# If you're sure
+git branch -D unmerged-branch
+```
+
+### 3. Clean Up Regularly
+
+```bash
+# Weekly cleanup script
+git fetch --prune
+git branch --merged | grep -v "main" | xargs git branch -d
+```
+
+## Common Scenarios
+
+### Delete Feature After PR Merge
+
+```bash
+# After PR is merged on GitHub
+git checkout main
+git pull origin main
+git branch -d feature-complete
+git fetch --prune
+```
+
+### Delete Abandoned Experiment
+
+```bash
+# Force delete abandoned work
+git branch -D experiment-failed
+```
+
+### Clean Up After Sprint
+
+```bash
+# Delete all merged feature branches
+git branch --merged main | grep -v "main" | xargs git branch -d
+```
+
+## Summary
+
+| Task | Command |
+|------|---------|
+| Safe delete (merged) | `git branch -d name` |
+| Force delete | `git branch -D name` |
+| Delete remote | `git push origin --delete name` |
+| Prune stale | `git fetch --prune` |
+
+Practice deleting branches in the next exercise!
+

@@ -1,0 +1,294 @@
+---
+title: Git and GitHub Project - Task 3
+chapterSlug: git-push-pull
+duration: 15
+order: 5
+---
+
+## Project Task 3: Push and Pull Workflow
+
+Practice a complete push/pull workflow with your portfolio project.
+
+## Objective
+
+Master the synchronization between local and remote repositories.
+
+## Part 1: Local Changes → Push
+
+### Step 1: Make Local Improvements
+
+```bash
+cd portfolio-project
+
+# Update the main heading
+# Edit index.html to improve the design
+```
+
+Add a new section to `index.html`:
+
+```html
+<section id="skills">
+    <h2>My Skills</h2>
+    <ul>
+        <li>HTML5 & CSS3</li>
+        <li>JavaScript</li>
+        <li>Git & GitHub</li>
+        <li>Responsive Design</li>
+    </ul>
+</section>
+```
+
+Add styles to `css/style.css`:
+
+```css
+#skills {
+    padding: 2rem;
+    background: #f9f9f9;
+}
+
+#skills ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+#skills li {
+    background: #333;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+}
+```
+
+### Step 2: Commit and Push
+
+```bash
+# Stage changes
+git add index.html css/style.css
+
+# Commit
+git commit -m "Add skills section with styling"
+
+# Push
+git push origin main
+```
+
+### Step 3: Verify on GitHub
+
+1. Go to your repository on GitHub
+2. Verify the new commit appears
+3. Check the files are updated
+
+## Part 2: Remote Changes → Pull
+
+### Step 4: Make Changes on GitHub
+
+1. On GitHub, click on `README.md`
+2. Edit to add more content:
+
+```markdown
+# My Portfolio Project
+
+A personal portfolio website showcasing my skills and projects.
+
+## Features
+- Responsive design
+- Clean code structure
+- Skills showcase
+- Contact information
+
+## Technologies
+- HTML5
+- CSS3
+- JavaScript
+- Git
+
+## Getting Started
+1. Clone this repository
+2. Open index.html in your browser
+
+## Author
+Your Name
+
+## License
+MIT
+```
+
+3. Commit with message: "Update README with detailed documentation"
+
+### Step 5: Pull to Local
+
+```bash
+# Fetch first to see what's new
+git fetch origin
+
+# Check what's new
+git log HEAD..origin/main --oneline
+
+# Pull the changes
+git pull origin main
+
+# Verify
+cat README.md
+```
+
+## Part 3: Simulate Team Collaboration
+
+### Step 6: Create Feature Branch
+
+```bash
+# Create and switch to feature branch
+git checkout -b feature/footer
+
+# Add footer to index.html
+cat >> index.html << 'EOF'
+    <footer>
+        <p>&copy; 2024 My Portfolio. All rights reserved.</p>
+        <nav>
+            <a href="https://github.com/username">GitHub</a>
+            <a href="https://linkedin.com/in/username">LinkedIn</a>
+        </nav>
+    </footer>
+EOF
+
+# Add footer styles
+cat >> css/style.css << 'EOF'
+
+footer {
+    background: #333;
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+footer a {
+    color: #4CAF50;
+    margin: 0 1rem;
+}
+EOF
+
+# Commit
+git add .
+git commit -m "Add footer with social links"
+
+# Push feature branch
+git push -u origin feature/footer
+```
+
+### Step 7: While on Feature Branch, Main Gets Updated
+
+Simulate this by editing on GitHub:
+
+1. Go to repository on GitHub
+2. Switch to `main` branch
+3. Edit `js/main.js` on GitHub:
+
+```javascript
+// Main JavaScript file
+console.log('Portfolio loaded!');
+
+// Smooth scrolling for navigation
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+```
+
+4. Commit with message: "Add smooth scrolling feature"
+
+### Step 8: Update Feature Branch with Main
+
+```bash
+# Fetch latest
+git fetch origin
+
+# Update your local main
+git checkout main
+git pull origin main
+
+# Go back to feature branch
+git checkout feature/footer
+
+# Merge main into feature
+git merge main
+
+# Or rebase (cleaner history)
+# git rebase main
+
+# Push updated feature branch
+git push origin feature/footer
+```
+
+### Step 9: Merge Feature to Main
+
+```bash
+# Switch to main
+git checkout main
+
+# Merge feature
+git merge feature/footer
+
+# Push main
+git push origin main
+
+# Delete feature branch
+git branch -d feature/footer
+git push origin --delete feature/footer
+```
+
+## Verification Checklist
+
+- [ ] Skills section visible on GitHub
+- [ ] README.md updated locally
+- [ ] Footer merged to main
+- [ ] Smooth scrolling in main.js
+- [ ] Feature branch deleted
+
+## Troubleshooting
+
+### Push Rejected
+
+```bash
+# Pull first
+git pull origin main
+
+# Then push
+git push origin main
+```
+
+### Merge Conflicts
+
+```bash
+# After git pull or git merge
+# Edit conflicting files
+# Remove conflict markers
+
+git add .
+git commit -m "Resolve merge conflicts"
+```
+
+### Lost Track of Changes
+
+```bash
+# See all recent activity
+git log --oneline --all --graph -10
+```
+
+## Summary
+
+In Task 3, you practiced:
+
+- ✅ Pushing local changes
+- ✅ Pulling remote changes
+- ✅ Feature branch workflow
+- ✅ Keeping branches in sync
+- ✅ Merging and cleanup
+
+Next: Learn about GitHub Issues and Pull Requests!
+

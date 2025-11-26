@@ -1,0 +1,279 @@
+---
+title: Exercise - Switch Branches
+chapterSlug: git-branching
+duration: 8
+order: 4
+---
+
+## Exercise: Switching Branches
+
+Practice switching between branches and understanding how files change.
+
+## Setup
+
+Continue from the previous exercise, or create a fresh setup:
+
+```bash
+mkdir switch-practice
+cd switch-practice
+git init
+
+# Create main with a file
+echo "Main content" > main.txt
+git add main.txt
+git commit -m "Initial commit on main"
+
+# Create feature-a with its own file
+git checkout -b feature-a
+echo "Feature A content" > feature-a.txt
+git add feature-a.txt
+git commit -m "Add feature A"
+
+# Create feature-b with its own file
+git checkout main
+git checkout -b feature-b
+echo "Feature B content" > feature-b.txt
+git add feature-b.txt
+git commit -m "Add feature B"
+```
+
+---
+
+## Exercise 1: Basic Branch Switching
+
+### Task
+
+Switch between the three branches and observe file changes.
+
+### Steps
+
+```bash
+# Check current branch
+git branch
+
+# List files
+ls
+
+# Switch to main
+git checkout main
+ls
+# Only main.txt
+
+# Switch to feature-a
+git checkout feature-a
+ls
+# main.txt and feature-a.txt
+
+# Switch to feature-b
+git checkout feature-b
+ls
+# main.txt and feature-b.txt
+```
+
+### Observation
+
+Notice how the files change as you switch branches!
+
+---
+
+## Exercise 2: Use git switch
+
+### Task
+
+Switch branches using the modern `git switch` command.
+
+### Steps
+
+```bash
+# Switch to main
+git switch main
+
+# Switch to feature-a
+git switch feature-a
+
+# Try to switch to non-existent branch
+git switch feature-xyz
+# error: invalid reference: feature-xyz
+
+# Verify current branch
+git switch -
+# Switches to previous branch (like cd -)
+```
+
+---
+
+## Exercise 3: Switch with Uncommitted Changes
+
+### Task
+
+Understand what happens with uncommitted changes.
+
+### Steps
+
+```bash
+# Go to feature-a
+git checkout feature-a
+
+# Make a change but don't commit
+echo "Uncommitted work" >> feature-a.txt
+
+# Try to switch branches
+git checkout main
+# Warning or error about uncommitted changes
+```
+
+### Solutions
+
+```bash
+# Option 1: Commit the changes
+git add feature-a.txt
+git commit -m "Update feature A"
+git checkout main
+
+# Option 2: Stash the changes
+git stash
+git checkout main
+git checkout feature-a
+git stash pop
+
+# Option 3: Discard changes (careful!)
+git checkout -- feature-a.txt
+git checkout main
+```
+
+---
+
+## Exercise 4: Quick Branch Switching
+
+### Task
+
+Learn shortcuts for switching between recent branches.
+
+### Steps
+
+```bash
+# Switch to main
+git checkout main
+
+# Switch to feature-a
+git checkout feature-a
+
+# Switch back to previous branch (main)
+git checkout -
+
+# Switch back again (feature-a)
+git checkout -
+```
+
+The `-` refers to the previously checked out branch.
+
+---
+
+## Exercise 5: Check Where You Are
+
+### Task
+
+Learn different ways to see your current branch.
+
+### Steps
+
+```bash
+# Method 1: git branch (shows * next to current)
+git branch
+
+# Method 2: git status
+git status
+# On branch feature-a
+
+# Method 3: git branch --show-current
+git branch --show-current
+# feature-a
+
+# Method 4: Check HEAD
+cat .git/HEAD
+# ref: refs/heads/feature-a
+```
+
+---
+
+## Exercise 6: Switch to Remote Branch
+
+### Task
+
+Switch to a branch that exists on remote (simulated).
+
+### Steps
+
+```bash
+# First, create a "remote" branch locally for practice
+git checkout main
+git checkout -b origin/feature-remote
+git checkout main
+
+# Now pretend you want to track this remote branch
+git checkout -b feature-remote origin/feature-remote
+# Or simply:
+git checkout feature-remote
+```
+
+In real scenarios:
+
+```bash
+# Fetch remote branches
+git fetch origin
+
+# Switch to remote branch (creates local tracking branch)
+git checkout remote-branch-name
+```
+
+---
+
+## Challenge: Branch Navigation
+
+### Task
+
+Navigate through this sequence correctly:
+
+1. Start on `main`
+2. Switch to `feature-a`
+3. Go back to `main`
+4. Switch to `feature-b`
+5. Go to the previous branch
+6. Create and switch to `feature-c`
+7. Return to `main`
+
+### Solution
+
+```bash
+git checkout main        # 1. Start on main
+git checkout feature-a   # 2. Switch to feature-a
+git checkout main        # 3. Go back to main
+git checkout feature-b   # 4. Switch to feature-b
+git checkout -           # 5. Previous branch (main)
+git checkout -b feature-c # 6. Create and switch to feature-c
+git checkout main        # 7. Return to main
+```
+
+---
+
+## Quick Reference
+
+| Action | Command |
+|--------|---------|
+| Switch branch | `git checkout branch` or `git switch branch` |
+| Previous branch | `git checkout -` or `git switch -` |
+| Current branch | `git branch --show-current` |
+| List branches | `git branch` |
+
+## Summary
+
+You've practiced:
+
+- ✅ Switching between branches
+- ✅ Using `git checkout` and `git switch`
+- ✅ Handling uncommitted changes
+- ✅ Quick switching with `-`
+- ✅ Checking current branch
+
+Next, let's learn about renaming branches!
+

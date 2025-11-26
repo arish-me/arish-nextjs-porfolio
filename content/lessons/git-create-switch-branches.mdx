@@ -1,0 +1,230 @@
+---
+title: Create and Switch Branches
+chapterSlug: git-branching
+duration: 10
+order: 2
+---
+
+## Creating and Switching Branches
+
+Let's learn the essential commands for working with branches.
+
+## Viewing Branches
+
+### List Local Branches
+
+```bash
+git branch
+
+# Output:
+* main
+  feature-login
+  bugfix-header
+```
+
+The `*` indicates your current branch.
+
+### List All Branches (Including Remote)
+
+```bash
+git branch -a
+
+# Output:
+* main
+  feature-login
+  remotes/origin/main
+  remotes/origin/develop
+```
+
+### List with Details
+
+```bash
+git branch -v
+
+# Output:
+* main          abc1234 Latest commit message
+  feature-login def5678 Working on login
+```
+
+## Creating Branches
+
+### Method 1: git branch
+
+```bash
+# Create a new branch (but don't switch to it)
+git branch feature-new
+
+# Verify it was created
+git branch
+```
+
+### Method 2: git checkout -b
+
+```bash
+# Create AND switch to new branch
+git checkout -b feature-new
+
+# This is equivalent to:
+git branch feature-new
+git checkout feature-new
+```
+
+### Method 3: git switch -c (Modern)
+
+```bash
+# Create AND switch (newer syntax)
+git switch -c feature-new
+```
+
+## Switching Branches
+
+### Using git checkout
+
+```bash
+# Switch to an existing branch
+git checkout main
+
+# Switch to another branch
+git checkout feature-login
+```
+
+### Using git switch (Modern)
+
+```bash
+# Switch to an existing branch
+git switch main
+
+# Switch to another branch
+git switch feature-login
+```
+
+## git checkout vs git switch
+
+| Command | Purpose |
+|---------|---------|
+| `git checkout` | Multi-purpose (branches, files, commits) |
+| `git switch` | Only for switching branches |
+
+`git switch` was introduced in Git 2.23 to make branch switching clearer.
+
+## Create Branch from Specific Commit
+
+```bash
+# Create branch from a specific commit
+git branch feature-old abc1234
+
+# Create and switch from specific commit
+git checkout -b feature-old abc1234
+```
+
+## Create Branch from Another Branch
+
+```bash
+# First, switch to the base branch
+git checkout develop
+
+# Then create your feature branch
+git checkout -b feature-new
+
+# Or do it in one command
+git checkout -b feature-new develop
+```
+
+## Working with Branches Example
+
+```bash
+# Start on main
+git checkout main
+
+# Create and switch to feature branch
+git checkout -b feature-user-profile
+
+# Make changes
+echo "Profile page" > profile.html
+git add profile.html
+git commit -m "Add profile page"
+
+# Switch back to main
+git checkout main
+
+# Your changes are in feature branch, not main
+ls  # profile.html is not here
+
+# Switch back to feature
+git checkout feature-user-profile
+ls  # profile.html is here
+```
+
+## Track Remote Branches
+
+### Create Local Branch from Remote
+
+```bash
+# Fetch remote branches
+git fetch origin
+
+# Create local branch tracking remote
+git checkout -b feature-remote origin/feature-remote
+
+# Or using the shorthand (if branch name is unique)
+git checkout feature-remote
+```
+
+### Set Upstream for Existing Branch
+
+```bash
+git branch --set-upstream-to=origin/feature-remote
+```
+
+## Quick Reference
+
+| Task | Command |
+|------|---------|
+| List branches | `git branch` |
+| Create branch | `git branch name` |
+| Switch branch | `git checkout name` or `git switch name` |
+| Create + switch | `git checkout -b name` or `git switch -c name` |
+| Delete branch | `git branch -d name` |
+
+## Common Issues
+
+### Uncommitted Changes
+
+If you have uncommitted changes:
+
+```bash
+# Option 1: Commit them
+git add .
+git commit -m "Save work"
+git checkout other-branch
+
+# Option 2: Stash them
+git stash
+git checkout other-branch
+git stash pop  # Restore changes
+
+# Option 3: Force switch (dangerous!)
+git checkout -f other-branch  # Loses changes!
+```
+
+### Branch Already Exists
+
+```bash
+git checkout -b feature-new
+# fatal: A branch named 'feature-new' already exists.
+
+# Solution: Just switch to it
+git checkout feature-new
+```
+
+## Summary
+
+Key commands for branches:
+
+- **View**: `git branch`
+- **Create**: `git branch name` or `git checkout -b name`
+- **Switch**: `git checkout name` or `git switch name`
+- **Create + Switch**: `git checkout -b name` or `git switch -c name`
+
+Practice these commands in the next exercises!
+

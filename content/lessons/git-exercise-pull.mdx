@@ -1,0 +1,273 @@
+---
+title: Exercise - Pulling Changes
+chapterSlug: git-push-pull
+duration: 10
+order: 4
+---
+
+## Exercise: Pulling Changes
+
+Practice pulling changes from remote repositories.
+
+## Setup
+
+For these exercises, you'll simulate having changes on remote by editing files directly on GitHub.
+
+---
+
+## Exercise 1: Make Remote Change on GitHub
+
+### Task
+
+Create a change directly on GitHub to pull down.
+
+### Steps
+
+1. Go to your repository on GitHub
+2. Click on `README.md`
+3. Click the pencil icon (Edit)
+4. Add a line: `## Updated on GitHub`
+5. Commit directly to main
+
+### Now Pull Locally
+
+```bash
+cd portfolio-project
+
+# Check current status
+git status
+
+# Pull the changes
+git pull origin main
+
+# Verify the change
+cat README.md
+# Should show "## Updated on GitHub"
+```
+
+---
+
+## Exercise 2: Fetch vs Pull
+
+### Task
+
+Understand the difference between fetch and pull.
+
+### Make Another GitHub Change
+
+1. On GitHub, edit `README.md`
+2. Add another line: `### This is a fetch test`
+3. Commit to main
+
+### Fetch (Download Only)
+
+```bash
+# Fetch without merging
+git fetch origin
+
+# Your local file is unchanged
+cat README.md
+# Doesn't show the new line yet
+
+# See what was fetched
+git log HEAD..origin/main --oneline
+# Shows the new commit
+
+# See the diff
+git diff HEAD..origin/main
+
+# Now merge when ready
+git merge origin/main
+
+# Verify
+cat README.md
+```
+
+---
+
+## Exercise 3: Pull with Local Changes
+
+### Task
+
+Pull when you have uncommitted local changes.
+
+### Make Local Uncommitted Change
+
+```bash
+echo "Local work in progress" >> notes.txt
+```
+
+### Try to Pull
+
+```bash
+git pull origin main
+# May warn about uncommitted changes
+```
+
+### Solution: Use Stash
+
+```bash
+# Stash local changes
+git stash
+
+# Now pull
+git pull origin main
+
+# Restore local changes
+git stash pop
+
+# Check status
+git status
+```
+
+---
+
+## Exercise 4: Pull with Committed Changes
+
+### Task
+
+Pull when remote and local both have commits.
+
+### Setup
+
+1. Make a local commit:
+```bash
+echo "// Local feature" >> js/main.js
+git add js/main.js
+git commit -m "Add local feature"
+```
+
+2. On GitHub, edit another file (e.g., add comment to style.css)
+3. Commit on GitHub
+
+### Pull
+
+```bash
+# Pull will merge remote changes
+git pull origin main
+
+# Git creates a merge commit
+# View the merge
+git log --oneline --graph -5
+```
+
+---
+
+## Exercise 5: Pull with Rebase
+
+### Task
+
+Use rebase instead of merge when pulling.
+
+### Setup
+
+1. Make a local commit:
+```bash
+echo "// Another local change" >> js/main.js
+git add js/main.js
+git commit -m "Add another local change"
+```
+
+2. Make a change on GitHub to a different file
+
+### Pull with Rebase
+
+```bash
+# Pull with rebase
+git pull --rebase origin main
+
+# Your commit is replayed on top
+git log --oneline -5
+# History is linear, no merge commit
+```
+
+---
+
+## Exercise 6: Handle Pull Conflict
+
+### Task
+
+Resolve a conflict during pull.
+
+### Create Conflicting Changes
+
+1. Locally, edit line 1 of README.md:
+```bash
+# Edit README.md - change the title
+sed -i '' '1s/.*/# My Awesome Portfolio/' README.md  # Mac
+# or manually edit the first line
+git add README.md
+git commit -m "Update local title"
+```
+
+2. On GitHub, edit the SAME line differently
+   - Change first line to "# My GitHub Portfolio"
+   - Commit on GitHub
+
+### Pull and Resolve
+
+```bash
+git pull origin main
+# CONFLICT!
+
+# Check status
+git status
+# both modified: README.md
+
+# Open README.md and resolve
+# Remove conflict markers, keep what you want
+
+# Complete the merge
+git add README.md
+git commit -m "Resolve README title conflict"
+
+# Push the resolution
+git push origin main
+```
+
+---
+
+## Exercise 7: Configure Default Pull Behavior
+
+### Task
+
+Set up your preferred pull behavior.
+
+### Option 1: Always Rebase
+
+```bash
+# Global setting
+git config --global pull.rebase true
+
+# Now 'git pull' uses rebase by default
+```
+
+### Option 2: Always Merge
+
+```bash
+git config --global pull.rebase false
+```
+
+### Option 3: Fast-Forward Only
+
+```bash
+git config --global pull.ff only
+# Fails if can't fast-forward
+```
+
+---
+
+## Summary
+
+You've practiced:
+
+- ✅ Basic pulling
+- ✅ Fetch vs pull difference
+- ✅ Pulling with uncommitted changes (stash)
+- ✅ Pull with merge
+- ✅ Pull with rebase
+- ✅ Resolving pull conflicts
+- ✅ Configuring pull behavior
+
+Continue to Project Task 3!
+

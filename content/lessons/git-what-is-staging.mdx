@@ -1,0 +1,231 @@
+---
+title: What is Staging?
+chapterSlug: git-staging
+duration: 8
+order: 1
+---
+
+## What is Staging?
+
+The staging area (also called the "index") is a key concept in Git. It's an intermediate area where you prepare commits before permanently recording them.
+
+## The Three Areas of Git
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    Working      │     │    Staging      │     │   Repository    │
+│   Directory     │────▶│     Area        │────▶│   (Commits)     │
+│  (Your files)   │     │   (Index)       │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │                       │
+        │      git add         │     git commit        │
+        └──────────────────────┴───────────────────────┘
+```
+
+## Why Have a Staging Area?
+
+### 1. Control What Goes Into Each Commit
+
+```bash
+# You changed 5 files, but only want to commit 2
+git add file1.js file2.js
+git commit -m "Add user authentication"
+
+# The other 3 files can go in a separate commit
+git add file3.js file4.js file5.js
+git commit -m "Update styling"
+```
+
+### 2. Review Before Committing
+
+```bash
+# Stage files
+git add .
+
+# Review what's staged
+git diff --staged
+
+# If something's wrong, unstage it
+git reset HEAD file.js
+```
+
+### 3. Build Commits Incrementally
+
+```bash
+# Work on multiple things
+# Then stage related changes together
+
+git add src/auth/*
+git commit -m "Add authentication module"
+
+git add src/ui/*
+git commit -m "Add UI components"
+```
+
+## Staging Commands
+
+### Add Files to Staging
+
+```bash
+# Add specific file
+git add filename.js
+
+# Add multiple files
+git add file1.js file2.js file3.js
+
+# Add all files in a directory
+git add src/
+
+# Add all changed files
+git add .
+
+# Add all files (including deletions)
+git add -A
+```
+
+### View Staged Files
+
+```bash
+# See status (staged and unstaged)
+git status
+
+# See what's staged (detailed)
+git diff --staged
+```
+
+### Remove from Staging
+
+```bash
+# Unstage a file (keep changes)
+git reset HEAD filename.js
+
+# Or using restore (modern)
+git restore --staged filename.js
+
+# Unstage all files
+git reset HEAD
+```
+
+## File States
+
+Files in Git can be in these states:
+
+### 1. Untracked
+
+New files Git doesn't know about:
+
+```bash
+git status
+# Untracked files:
+#   new-file.js
+```
+
+### 2. Modified
+
+Changed files not yet staged:
+
+```bash
+git status
+# Changes not staged for commit:
+#   modified: existing-file.js
+```
+
+### 3. Staged
+
+Files ready to be committed:
+
+```bash
+git status
+# Changes to be committed:
+#   modified: staged-file.js
+```
+
+### 4. Committed
+
+Files safely stored in the repository.
+
+## Staging Workflow Example
+
+```bash
+# 1. Make changes to files
+echo "New feature" >> feature.js
+
+# 2. Check status
+git status
+# Changes not staged for commit:
+#   modified: feature.js
+
+# 3. Stage the changes
+git add feature.js
+
+# 4. Check status again
+git status
+# Changes to be committed:
+#   modified: feature.js
+
+# 5. Review staged changes
+git diff --staged
+
+# 6. Commit
+git commit -m "Add new feature"
+```
+
+## Partial Staging
+
+Stage only parts of a file:
+
+```bash
+# Interactive staging
+git add -p filename.js
+
+# Options:
+# y - stage this hunk
+# n - don't stage this hunk
+# s - split into smaller hunks
+# e - manually edit the hunk
+# q - quit
+```
+
+This is useful when you have multiple unrelated changes in one file.
+
+## Common Patterns
+
+### Stage Everything
+
+```bash
+git add .
+# or
+git add -A
+```
+
+### Stage Only Modified (Not New)
+
+```bash
+git add -u
+```
+
+### Stage by Pattern
+
+```bash
+# All JavaScript files
+git add *.js
+
+# All files in src
+git add src/
+
+# All test files
+git add **/*.test.js
+```
+
+## Summary
+
+The staging area:
+
+- ✅ Sits between working directory and repository
+- ✅ Lets you control what goes in each commit
+- ✅ Allows reviewing before committing
+- ✅ Enables building commits incrementally
+- ✅ Supports partial file staging
+
+Practice staging in the next exercise!
+

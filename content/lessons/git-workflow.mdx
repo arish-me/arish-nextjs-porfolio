@@ -1,0 +1,202 @@
+---
+title: Workflow of Git
+chapterSlug: git-introduction
+duration: 10
+order: 2
+---
+
+## The Git Workflow
+
+Understanding the Git workflow is crucial for using Git effectively. Let's break down how Git manages your files.
+
+## The Three States
+
+Git has three main states for your files:
+
+### 1. Modified
+
+Files that have been changed but not staged:
+
+```bash
+# Check which files are modified
+git status
+
+# Output:
+Changes not staged for commit:
+  modified:   index.html
+  modified:   style.css
+```
+
+### 2. Staged
+
+Files that are marked to go into the next commit:
+
+```bash
+# Stage a file
+git add index.html
+
+# Now it's staged
+Changes to be committed:
+  modified:   index.html
+```
+
+### 3. Committed
+
+Files that are safely stored in your local database:
+
+```bash
+# Commit staged files
+git commit -m "Updated homepage"
+
+# File is now committed
+[main a1b2c3d] Updated homepage
+ 1 file changed, 10 insertions(+)
+```
+
+## Visual Workflow
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    Working      │     │    Staging      │     │     Local       │
+│   Directory     │────▶│     Area        │────▶│   Repository    │
+│                 │     │    (Index)      │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │                       │
+        │     git add          │      git commit       │
+        │                       │                       │
+        │                       │                       │
+        │◀──────────────────────┴───────────────────────│
+        │              git checkout                     │
+```
+
+## Basic Workflow Commands
+
+### Step 1: Check Status
+
+Always start by checking the status:
+
+```bash
+git status
+```
+
+### Step 2: Stage Changes
+
+Add files to the staging area:
+
+```bash
+# Stage a specific file
+git add filename.txt
+
+# Stage all changed files
+git add .
+
+# Stage all files of a type
+git add *.js
+```
+
+### Step 3: Commit Changes
+
+Save your staged changes:
+
+```bash
+git commit -m "Your descriptive message"
+```
+
+### Step 4: Push to Remote
+
+Share your changes with others:
+
+```bash
+git push origin main
+```
+
+## A Complete Example
+
+Let's walk through a typical workflow:
+
+```bash
+# 1. Create a new file
+echo "Hello World" > hello.txt
+
+# 2. Check status
+git status
+# Output: Untracked files: hello.txt
+
+# 3. Stage the file
+git add hello.txt
+
+# 4. Check status again
+git status
+# Output: Changes to be committed: new file: hello.txt
+
+# 5. Commit the file
+git commit -m "Add hello.txt with greeting"
+# Output: [main a1b2c3d] Add hello.txt with greeting
+
+# 6. Push to remote
+git push origin main
+# Output: Successfully pushed to origin/main
+```
+
+## The .git Directory
+
+When you initialize a Git repository, a `.git` folder is created:
+
+```
+project/
+├── .git/           ← Git's database (hidden)
+│   ├── objects/    ← Your commits and files
+│   ├── refs/       ← Branches and tags
+│   ├── HEAD        ← Current branch pointer
+│   └── config      ← Repository settings
+├── index.html
+├── style.css
+└── app.js
+```
+
+## Workflow Best Practices
+
+### 1. Commit Often
+
+Make small, frequent commits:
+
+```bash
+# Good: Small, focused commits
+git commit -m "Add header component"
+git commit -m "Style header with CSS"
+git commit -m "Add navigation links"
+
+# Bad: Large, unfocused commits
+git commit -m "Add header, navigation, footer, and styling"
+```
+
+### 2. Write Good Commit Messages
+
+```bash
+# Good commit messages
+git commit -m "Fix login button not responding on mobile"
+git commit -m "Add password validation to signup form"
+
+# Bad commit messages
+git commit -m "fix"
+git commit -m "updates"
+```
+
+### 3. Check Status Before Committing
+
+```bash
+# Always review what you're about to commit
+git status
+git diff --staged
+```
+
+## Summary
+
+The Git workflow consists of:
+
+1. **Working Directory** - Where you edit files
+2. **Staging Area** - Where you prepare commits
+3. **Repository** - Where commits are stored
+
+Master this workflow, and you'll be comfortable with Git in no time!
+

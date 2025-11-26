@@ -1,0 +1,241 @@
+---
+title: Git Best Practices - Staging and Aliases
+chapterSlug: git-introduction
+duration: 10
+order: 9
+---
+
+## Git Best Practices
+
+Let's learn professional tips for staging changes and creating aliases to speed up your workflow.
+
+## Staging Best Practices
+
+### Stage Files Intentionally
+
+Don't blindly stage everything. Review what you're adding:
+
+```bash
+# See what changed
+git status
+
+# See detailed changes
+git diff
+
+# Stage intentionally
+git add specific-file.js
+```
+
+### Stage in Logical Groups
+
+Group related changes together:
+
+```bash
+# Good: Related changes in one commit
+git add src/auth/login.js src/auth/logout.js
+git commit -m "Add authentication functions"
+
+# Bad: Unrelated changes together
+git add login.js styles.css README.md  # Different concerns!
+```
+
+### Interactive Staging
+
+Stage specific parts of a file:
+
+```bash
+# Stage interactively
+git add -p filename.js
+
+# Options:
+# y - stage this hunk
+# n - skip this hunk
+# s - split into smaller hunks
+# q - quit
+```
+
+### Review Before Committing
+
+```bash
+# See what's staged
+git diff --staged
+
+# Or use the shorter form
+git diff --cached
+```
+
+## Creating Git Aliases
+
+Aliases let you create shortcuts for common commands.
+
+### Basic Aliases
+
+```bash
+# Status shortcut
+git config --global alias.st status
+
+# Now you can use:
+git st
+```
+
+### Common Aliases
+
+```bash
+# Shorthand for common commands
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.ci commit
+git config --global alias.unstage 'reset HEAD --'
+
+# Usage:
+git co main
+git br feature-branch
+git ci -m "Message"
+git unstage file.txt
+```
+
+### Logging Aliases
+
+```bash
+# Beautiful log
+git config --global alias.lg "log --oneline --graph --all --decorate"
+
+# Last commit
+git config --global alias.last "log -1 HEAD"
+
+# Show recent activity
+git config --global alias.recent "log --oneline -10"
+```
+
+### Useful Workflow Aliases
+
+```bash
+# Add all and commit
+git config --global alias.ac '!git add -A && git commit -m'
+# Usage: git ac "My commit message"
+
+# Amend last commit
+git config --global alias.amend 'commit --amend --no-edit'
+
+# Undo last commit (keep changes)
+git config --global alias.undo 'reset HEAD~1 --mixed'
+
+# Show all aliases
+git config --global alias.aliases 'config --get-regexp alias'
+```
+
+### View Your Aliases
+
+```bash
+# List all aliases
+git config --get-regexp alias
+
+# Or if you created the aliases alias:
+git aliases
+```
+
+## My Recommended Alias Setup
+
+Add these to your global Git config:
+
+```bash
+# Essential aliases
+git config --global alias.s status
+git config --global alias.a add
+git config --global alias.c commit
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.p push
+git config --global alias.pl pull
+
+# Enhanced aliases
+git config --global alias.lg "log --oneline --graph --all"
+git config --global alias.ll "log --pretty=format:'%h %ad | %s%d [%an]' --date=short"
+git config --global alias.last "log -1 HEAD --stat"
+git config --global alias.diff-staged "diff --staged"
+
+# Workflow aliases
+git config --global alias.save "stash save"
+git config --global alias.pop "stash pop"
+git config --global alias.wip '!git add -A && git commit -m "WIP"'
+```
+
+## Best Practices for Aliases
+
+### 1. Keep Them Memorable
+
+```bash
+# Good - easy to remember
+alias.st = status
+alias.co = checkout
+
+# Bad - hard to remember
+alias.x = status
+alias.y = checkout
+```
+
+### 2. Document Complex Aliases
+
+For complex aliases, add comments in your `.gitconfig`:
+
+```ini
+[alias]
+    # Show beautiful log with graph
+    lg = log --oneline --graph --all --decorate
+    
+    # Find commits by message
+    find = "!f() { git log --oneline --grep=\"$1\"; }; f"
+```
+
+### 3. Test Before Adding
+
+```bash
+# Test the command first
+git log --oneline --graph --all
+
+# If it works, make it an alias
+git config --global alias.lg "log --oneline --graph --all"
+```
+
+## Staging Workflow Example
+
+Here's a professional staging workflow:
+
+```bash
+# 1. Check status
+git status
+
+# 2. Review changes
+git diff
+
+# 3. Stage related changes
+git add src/feature/*.js
+
+# 4. Review staged changes
+git diff --staged
+
+# 5. Commit with good message
+git commit -m "Add user profile feature"
+
+# 6. Push to remote
+git push origin main
+```
+
+## Summary
+
+### Staging Best Practices
+
+- ✅ Stage files intentionally
+- ✅ Group related changes
+- ✅ Use interactive staging for precision
+- ✅ Review before committing
+
+### Alias Benefits
+
+- ✅ Save time on repetitive commands
+- ✅ Reduce typing errors
+- ✅ Customize Git to your workflow
+- ✅ Create complex command shortcuts
+
+You're now equipped with professional Git practices!
+

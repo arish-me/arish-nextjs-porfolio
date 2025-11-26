@@ -1,0 +1,326 @@
+---
+title: Exercise - Staging Files
+chapterSlug: git-staging
+duration: 10
+order: 2
+---
+
+## Exercise: Staging Files
+
+Practice different ways to stage files in Git.
+
+## Setup
+
+```bash
+mkdir staging-practice
+cd staging-practice
+git init
+
+# Create initial structure
+echo "# Staging Practice" > README.md
+git add README.md
+git commit -m "Initial commit"
+```
+
+---
+
+## Exercise 1: Stage a Single File
+
+### Task
+
+Create a file and stage it.
+
+### Steps
+
+```bash
+# Create a file
+echo "console.log('Hello');" > app.js
+
+# Check status
+git status
+# Untracked files: app.js
+
+# Stage the file
+git add app.js
+
+# Check status again
+git status
+# Changes to be committed: new file: app.js
+```
+
+---
+
+## Exercise 2: Stage Multiple Files
+
+### Task
+
+Create multiple files and stage them together.
+
+### Steps
+
+```bash
+# Create multiple files
+echo "body { margin: 0; }" > style.css
+echo "<!DOCTYPE html>" > index.html
+echo "function test() {}" > utils.js
+
+# Check status
+git status
+# Untracked files: index.html, style.css, utils.js
+
+# Stage all at once
+git add style.css index.html utils.js
+
+# Verify
+git status
+# Changes to be committed: index.html, style.css, utils.js
+
+# Commit them
+git commit -m "Add initial project files"
+```
+
+---
+
+## Exercise 3: Stage All Changes
+
+### Task
+
+Make changes to multiple files and stage all at once.
+
+### Steps
+
+```bash
+# Modify existing files
+echo "/* Updated */" >> style.css
+echo "<!-- Updated -->" >> index.html
+
+# Create a new file
+echo "config = {}" > config.js
+
+# Check status
+git status
+# Changes not staged: style.css, index.html
+# Untracked: config.js
+
+# Stage everything
+git add .
+
+# Verify
+git status
+# Changes to be committed: config.js, index.html, style.css
+```
+
+---
+
+## Exercise 4: Selective Staging
+
+### Task
+
+Make changes to 3 files but only stage 2 of them.
+
+### Steps
+
+```bash
+# Make changes
+echo "// Feature A" >> app.js
+echo "// Feature B" >> utils.js
+echo "/* Theme update */" >> style.css
+
+# Check status
+git status
+
+# Stage only app.js and utils.js
+git add app.js utils.js
+
+# Verify
+git status
+# Staged: app.js, utils.js
+# Not staged: style.css
+
+# Commit staged files
+git commit -m "Add features A and B"
+
+# style.css is still unstaged
+git status
+# Not staged: style.css
+```
+
+---
+
+## Exercise 5: Unstage a File
+
+### Task
+
+Stage multiple files, then unstage one.
+
+### Steps
+
+```bash
+# Stage the remaining change
+git add style.css
+
+# Make another change
+echo "// More code" >> app.js
+git add app.js
+
+# Check staged files
+git status
+# Staged: app.js, style.css
+
+# Unstage app.js
+git restore --staged app.js
+
+# Verify
+git status
+# Staged: style.css
+# Not staged: app.js
+```
+
+---
+
+## Exercise 6: View Staged Changes
+
+### Task
+
+See exactly what you're about to commit.
+
+### Steps
+
+```bash
+# Make changes
+echo "// Debug code" >> utils.js
+git add utils.js
+
+# View staged changes
+git diff --staged
+
+# You'll see the exact lines added/removed
+
+# View unstaged changes
+git diff
+```
+
+---
+
+## Exercise 7: Stage by Pattern
+
+### Task
+
+Stage files matching a pattern.
+
+### Steps
+
+```bash
+# Create several JavaScript files
+echo "// Module 1" > module1.js
+echo "// Module 2" > module2.js
+echo "// Module 3" > module3.js
+
+# Create a CSS file
+echo "/* styles */" > new-styles.css
+
+# Stage only JS files
+git add *.js
+
+# Check status
+git status
+# Staged: module1.js, module2.js, module3.js
+# Untracked: new-styles.css
+```
+
+---
+
+## Exercise 8: Interactive Staging
+
+### Task
+
+Stage only parts of a file.
+
+### Steps
+
+```bash
+# Create a file with multiple sections
+cat > features.js << EOF
+// Section 1: Authentication
+function login() {}
+function logout() {}
+
+// Section 2: Dashboard  
+function showDashboard() {}
+
+// Section 3: Settings
+function updateSettings() {}
+EOF
+
+git add features.js
+git commit -m "Add features template"
+
+# Now modify multiple sections
+cat > features.js << EOF
+// Section 1: Authentication
+function login() { console.log('login'); }
+function logout() { console.log('logout'); }
+
+// Section 2: Dashboard  
+function showDashboard() { console.log('dashboard'); }
+
+// Section 3: Settings
+function updateSettings() { console.log('settings'); }
+EOF
+
+# Stage interactively
+git add -p features.js
+
+# You can choose which changes to stage
+# y = stage, n = skip, s = split
+```
+
+---
+
+## Challenge: Organize Commits
+
+### Task
+
+You have changes for 2 different features. Create separate commits.
+
+### Setup
+
+```bash
+# Make changes for feature 1 (authentication)
+echo "// Auth logic" > auth.js
+echo "/* Auth styles */" > auth.css
+
+# Make changes for feature 2 (profile)
+echo "// Profile logic" > profile.js
+echo "/* Profile styles */" > profile.css
+```
+
+### Solution
+
+```bash
+# Commit feature 1
+git add auth.js auth.css
+git commit -m "Add authentication feature"
+
+# Commit feature 2
+git add profile.js profile.css
+git commit -m "Add user profile feature"
+
+# Verify history
+git log --oneline
+```
+
+## Summary
+
+You've practiced:
+
+- ✅ Staging single and multiple files
+- ✅ Staging all changes with `git add .`
+- ✅ Selective staging
+- ✅ Unstaging files
+- ✅ Viewing staged changes
+- ✅ Staging by pattern
+- ✅ Interactive staging
+
+Great work with staging!
+

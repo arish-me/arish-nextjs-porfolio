@@ -1,0 +1,216 @@
+---
+title: How to Push Changes
+chapterSlug: git-push-pull
+duration: 8
+order: 1
+---
+
+## Pushing Changes to Remote
+
+The `git push` command uploads your local commits to a remote repository.
+
+## Basic Push
+
+```bash
+git push <remote> <branch>
+
+# Example
+git push origin main
+```
+
+## First Push (Set Upstream)
+
+When pushing a branch for the first time:
+
+```bash
+# Set upstream and push
+git push -u origin main
+
+# Or the long form
+git push --set-upstream origin main
+```
+
+After setting upstream, you can just use:
+
+```bash
+git push
+```
+
+## Push Options
+
+### Push Current Branch
+
+```bash
+# Push current branch to its upstream
+git push
+
+# Push current branch to origin
+git push origin HEAD
+```
+
+### Push All Branches
+
+```bash
+git push --all origin
+```
+
+### Push Tags
+
+```bash
+# Push a specific tag
+git push origin v1.0.0
+
+# Push all tags
+git push origin --tags
+```
+
+### Force Push
+
+```bash
+# Force push (overwrites remote - DANGEROUS!)
+git push --force origin main
+
+# Or short form
+git push -f origin main
+
+# Safer force push (fails if remote has new commits)
+git push --force-with-lease origin main
+```
+
+⚠️ **Warning**: Never force push to shared branches without team agreement!
+
+## Understanding Push
+
+### What Happens When You Push
+
+```
+Local Repository                Remote Repository
+                                
+┌──────────────┐                ┌──────────────┐
+│ A ─ B ─ C ─ D│   git push     │ A ─ B        │
+│     (main)   │ ───────────▶   │    (main)    │
+└──────────────┘                └──────────────┘
+                                
+After push:
+                                
+┌──────────────┐                ┌──────────────┐
+│ A ─ B ─ C ─ D│                │ A ─ B ─ C ─ D│
+│     (main)   │                │    (main)    │
+└──────────────┘                └──────────────┘
+```
+
+### Push Rejected?
+
+If someone else pushed first:
+
+```
+Local:  A ─ B ─ C
+Remote: A ─ B ─ D
+```
+
+Git will reject your push:
+
+```bash
+git push origin main
+# error: failed to push some refs
+# hint: Updates were rejected because the remote contains work
+```
+
+**Solution**: Pull first, then push:
+
+```bash
+git pull origin main
+git push origin main
+```
+
+## Push Workflow
+
+### Standard Workflow
+
+```bash
+# 1. Make changes
+echo "update" >> file.txt
+
+# 2. Stage
+git add file.txt
+
+# 3. Commit
+git commit -m "Update file"
+
+# 4. Push
+git push origin main
+```
+
+### Feature Branch Workflow
+
+```bash
+# 1. Create feature branch
+git checkout -b feature/new-feature
+
+# 2. Work and commit
+git add .
+git commit -m "Add new feature"
+
+# 3. Push feature branch
+git push -u origin feature/new-feature
+
+# 4. Create Pull Request on GitHub
+
+# 5. After merge, delete branch
+git checkout main
+git pull origin main
+git branch -d feature/new-feature
+```
+
+## Push Best Practices
+
+### 1. Pull Before Push
+
+```bash
+# Always pull first to avoid conflicts
+git pull origin main
+git push origin main
+```
+
+### 2. Push Often
+
+Don't let local changes accumulate:
+
+```bash
+# After each logical chunk of work
+git push
+```
+
+### 3. Review Before Pushing
+
+```bash
+# See what will be pushed
+git log origin/main..HEAD
+
+# See commits to push
+git diff origin/main..HEAD
+```
+
+### 4. Never Force Push to Shared Branches
+
+```bash
+# BAD - affects others
+git push -f origin main
+
+# OKAY - only for your own branches
+git push -f origin my-feature-branch
+```
+
+## Summary
+
+| Command | Description |
+|---------|-------------|
+| `git push origin main` | Push main to origin |
+| `git push -u origin branch` | Push and set upstream |
+| `git push` | Push current branch |
+| `git push --all` | Push all branches |
+| `git push --tags` | Push all tags |
+| `git push -f` | Force push (dangerous!) |
+
+Practice pushing in the next exercise!
+

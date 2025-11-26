@@ -1,0 +1,193 @@
+---
+title: Renaming Branches
+chapterSlug: git-branching
+duration: 5
+order: 5
+---
+
+## Renaming Branches
+
+Sometimes you need to rename a branch - maybe there's a typo, or you want to follow a naming convention.
+
+## Rename Current Branch
+
+### Using -m Flag
+
+```bash
+# First, switch to the branch you want to rename
+git checkout old-branch-name
+
+# Rename the current branch
+git branch -m new-branch-name
+```
+
+### Example
+
+```bash
+# You're on 'feture-login' (typo!)
+git branch
+# * feture-login
+
+# Rename to fix the typo
+git branch -m feature-login
+
+# Verify
+git branch
+# * feature-login
+```
+
+## Rename a Different Branch
+
+You can rename a branch you're not currently on:
+
+```bash
+# Rename any branch (don't need to be on it)
+git branch -m old-name new-name
+```
+
+### Example
+
+```bash
+# You're on main, want to rename feature-1
+git branch
+# * main
+#   feature-1
+
+# Rename feature-1 to feature-user-auth
+git branch -m feature-1 feature-user-auth
+
+# Verify
+git branch
+# * main
+#   feature-user-auth
+```
+
+## Force Rename
+
+If a branch with the new name already exists, use `-M` (uppercase):
+
+```bash
+# Force rename (overwrites existing branch)
+git branch -M old-name new-name
+```
+
+⚠️ **Warning**: This deletes the existing branch with that name!
+
+## Rename Remote Branches
+
+Renaming a remote branch requires a few steps:
+
+### Step 1: Rename Local Branch
+
+```bash
+# Rename the local branch
+git branch -m old-name new-name
+```
+
+### Step 2: Delete Old Remote Branch
+
+```bash
+# Delete the old branch on remote
+git push origin --delete old-name
+```
+
+### Step 3: Push New Branch
+
+```bash
+# Push the renamed branch
+git push origin new-name
+
+# Set upstream
+git push -u origin new-name
+```
+
+### Complete Example
+
+```bash
+# Rename local branch
+git branch -m feature-old feature-new
+
+# Delete old branch from GitHub
+git push origin --delete feature-old
+
+# Push new branch to GitHub
+git push -u origin feature-new
+```
+
+## Rename main/master Branch
+
+To rename the default branch:
+
+### Local Rename
+
+```bash
+# Rename master to main
+git branch -m master main
+```
+
+### Update Remote
+
+```bash
+# Push the new main branch
+git push -u origin main
+
+# Delete the old master branch
+git push origin --delete master
+```
+
+### Update Default on GitHub
+
+1. Go to repository Settings
+2. Click on Branches
+3. Change default branch to `main`
+4. Then delete `master`
+
+## Verify the Rename
+
+After renaming, verify everything is correct:
+
+```bash
+# Check local branches
+git branch
+
+# Check remote branches
+git branch -r
+
+# Check tracking
+git branch -vv
+```
+
+## Common Scenarios
+
+### Fix a Typo
+
+```bash
+# Wrong: feture-login → Right: feature-login
+git branch -m feture-login feature-login
+```
+
+### Follow Naming Convention
+
+```bash
+# Add prefix for consistency
+git branch -m user-auth feature/user-auth
+```
+
+### Rename to Add Ticket Number
+
+```bash
+# Add JIRA ticket reference
+git branch -m user-auth JIRA-123-user-auth
+```
+
+## Summary
+
+Renaming branches:
+
+- **Local current**: `git branch -m new-name`
+- **Local other**: `git branch -m old-name new-name`
+- **Force rename**: `git branch -M old-name new-name`
+- **Remote**: Rename local, delete old remote, push new
+
+Practice this in the next exercise!
+

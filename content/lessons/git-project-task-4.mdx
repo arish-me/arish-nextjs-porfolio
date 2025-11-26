@@ -1,0 +1,265 @@
+---
+title: Git and GitHub Project - Task 4
+chapterSlug: github-features
+duration: 15
+order: 3
+---
+
+## Project Task 4: Issues and Pull Requests
+
+Practice using GitHub Issues and Pull Requests in your portfolio project.
+
+## Part 1: Create Issues
+
+### Step 1: Create a Bug Report Issue
+
+On GitHub:
+
+1. Go to your portfolio repository
+2. Click **Issues** → **New issue**
+3. Create an issue:
+
+**Title**: `Navigation links not styled on hover`
+
+**Description**:
+```markdown
+## Bug Description
+Navigation links don't change color when hovering.
+
+## Expected Behavior
+Links should change color on hover for better UX.
+
+## Current Behavior
+Links remain the same color.
+
+## Proposed Solution
+Add CSS hover styles to navigation links.
+```
+
+4. Add label: `bug`
+5. Submit issue (note the issue number, e.g., #1)
+
+### Step 2: Create a Feature Request Issue
+
+Create another issue:
+
+**Title**: `Add dark mode support`
+
+**Description**:
+```markdown
+## Feature Request
+Add a toggle for dark/light mode.
+
+## Why?
+Better user experience, especially at night.
+
+## Proposed Implementation
+- Add toggle button in header
+- Use CSS variables for theming
+- Save preference in localStorage
+```
+
+Add label: `enhancement`
+
+## Part 2: Work on Issue with Pull Request
+
+### Step 3: Create Branch for Issue
+
+```bash
+cd portfolio-project
+
+# Make sure you're on main
+git checkout main
+git pull origin main
+
+# Create branch for the issue
+git checkout -b fix/navigation-hover
+```
+
+### Step 4: Make Changes
+
+Update `css/style.css`:
+
+```css
+/* Add to your navigation styles */
+nav a {
+    color: white;
+    margin-right: 1rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+nav a:hover {
+    color: #4CAF50;
+}
+
+/* Add underline effect */
+nav a::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px;
+    background: #4CAF50;
+    transition: width 0.3s;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+```
+
+### Step 5: Commit with Issue Reference
+
+```bash
+git add css/style.css
+git commit -m "Add hover styles to navigation - fixes #1"
+```
+
+### Step 6: Push and Create PR
+
+```bash
+git push -u origin fix/navigation-hover
+```
+
+On GitHub:
+
+1. Click **Compare & pull request**
+2. Fill in PR details:
+
+**Title**: `Fix navigation hover styles`
+
+**Description**:
+```markdown
+## Description
+Add hover effects to navigation links for better UX.
+
+## Changes
+- Add color transition on hover
+- Add underline animation effect
+
+## Testing
+1. Open site in browser
+2. Hover over navigation links
+3. Verify color change and underline appear
+
+## Related
+Fixes #1
+
+## Screenshots
+[Add before/after screenshots if possible]
+```
+
+3. Click **Create pull request**
+
+### Step 7: Review Your Own PR
+
+1. Go to **Files changed** tab
+2. Review your changes
+3. Leave a comment on the code
+
+### Step 8: Merge the PR
+
+1. Click **Merge pull request**
+2. Choose **Squash and merge** for clean history
+3. Confirm merge
+4. Delete the branch
+
+### Step 9: Verify Issue is Closed
+
+Go to Issues tab - issue #1 should be automatically closed!
+
+## Part 3: Update Local Repository
+
+```bash
+# Switch to main
+git checkout main
+
+# Pull the merged changes
+git pull origin main
+
+# Delete local feature branch
+git branch -d fix/navigation-hover
+
+# Verify
+git log --oneline -5
+```
+
+## Part 4: Create Another PR (Practice)
+
+### Create Branch for Dark Mode
+
+```bash
+git checkout -b feature/dark-mode-prep
+```
+
+### Add Basic Structure (Partial Implementation)
+
+Add to `css/style.css`:
+
+```css
+/* CSS Variables for theming */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --header-bg: #333333;
+    --header-text: #ffffff;
+}
+
+/* Dark mode (to be toggled later) */
+[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --header-bg: #000000;
+    --header-text: #ffffff;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+```
+
+### Push and Create Draft PR
+
+```bash
+git add css/style.css
+git commit -m "Add CSS variables for dark mode support"
+git push -u origin feature/dark-mode-prep
+```
+
+On GitHub:
+
+1. Create pull request
+2. Click dropdown on **Create pull request**
+3. Select **Create draft pull request**
+4. This marks it as work in progress
+
+### Update Issue
+
+Comment on issue #2:
+```
+Started working on this. See draft PR #3 for progress.
+```
+
+## Verification Checklist
+
+- [ ] Bug issue created with proper format
+- [ ] Feature request issue created
+- [ ] PR created and linked to issue
+- [ ] Issue automatically closed on merge
+- [ ] Draft PR created for work in progress
+- [ ] Local repo updated after merge
+
+## Summary
+
+In Task 4, you learned:
+
+- ✅ Creating formatted issues
+- ✅ Creating branches for issues
+- ✅ Referencing issues in commits
+- ✅ Creating and reviewing PRs
+- ✅ Merging PRs and auto-closing issues
+- ✅ Using draft PRs for WIP
+
+Next: Learn about GitHub UI features!
+

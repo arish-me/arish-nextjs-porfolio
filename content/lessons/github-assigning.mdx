@@ -1,0 +1,187 @@
+---
+title: Assigning Issues and Pull Requests
+chapterSlug: github-ui
+duration: 6
+order: 1
+---
+
+## Assigning Issues and Pull Requests
+
+Learn how to assign work to team members and manage responsibilities on GitHub.
+
+## Assigning Issues
+
+### Via GitHub Interface
+
+1. Open an issue
+2. Click **Assignees** in the right sidebar
+3. Select team member(s)
+4. They'll receive a notification
+
+### Multiple Assignees
+
+You can assign multiple people to one issue:
+
+- Great for pair programming
+- Useful for complex issues
+- Shows shared responsibility
+
+### Self-Assigning
+
+When you start working on something:
+
+1. Find an unassigned issue
+2. Click **Assignees**
+3. Click your name
+4. Start working!
+
+## Assigning Pull Requests
+
+Same process as issues:
+
+1. Open a PR
+2. Click **Assignees**
+3. Select the person responsible for merging
+
+**Note**: Assignee ≠ Reviewer
+
+- **Assignee**: Responsible for the PR
+- **Reviewer**: Reviews the code
+
+## Requesting Reviewers
+
+### Add Reviewers to PR
+
+1. Open your PR
+2. Click **Reviewers** in sidebar
+3. Select team members
+4. They'll be notified to review
+
+### Suggested Reviewers
+
+GitHub suggests reviewers based on:
+
+- Who owns the code (CODEOWNERS)
+- Who recently modified the files
+- Team membership
+
+### CODEOWNERS File
+
+Create `.github/CODEOWNERS`:
+
+```
+# Default owners
+* @default-owner
+
+# Frontend code
+/src/components/ @frontend-team
+*.css @design-team
+
+# Backend code
+/api/ @backend-team
+
+# Documentation
+/docs/ @docs-team
+*.md @docs-team
+```
+
+Now PRs automatically request reviews from relevant owners.
+
+## Managing Assignments
+
+### Finding Your Work
+
+```
+# In search bar
+is:open assignee:@me           # Issues assigned to you
+is:open author:@me             # Issues you created
+is:open mentions:@me           # Issues that mention you
+review-requested:@me           # PRs needing your review
+```
+
+### Using GitHub Notifications
+
+1. Click bell icon (🔔)
+2. Filter by:
+   - Assigned
+   - Review requested
+   - Mentioned
+
+### Setting Up Email Notifications
+
+Settings → Notifications → Email preferences
+
+Configure notifications for:
+- Assigned issues
+- Review requests
+- Mentions
+
+## Best Practices
+
+### 1. Keep Issues Assigned
+
+```
+# Good
+Issue with clear assignee = clear ownership
+
+# Bad
+Issue with no assignee = nobody working on it
+```
+
+### 2. Don't Over-Assign
+
+- One assignee per issue is usually enough
+- Use multiple only when truly shared work
+
+### 3. Reassign When Needed
+
+If you can't complete something:
+
+1. Remove yourself as assignee
+2. Leave a comment explaining
+3. Let someone else pick it up
+
+### 4. Use Teams
+
+For organizations:
+
+1. Create teams (frontend, backend, etc.)
+2. Assign to teams instead of individuals
+3. Team members can self-assign
+
+### 5. Review Response Time
+
+Set expectations for review turnaround:
+
+- Acknowledge review request within 24 hours
+- Complete review within 48 hours
+- Communicate delays
+
+## Team Workflow Example
+
+```
+1. Issue created (unassigned)
+   ↓
+2. Team member self-assigns
+   ↓
+3. Creates branch and PR
+   ↓
+4. Requests reviews from teammates
+   ↓
+5. Reviews completed
+   ↓
+6. PR merged, issue closed
+```
+
+## Summary
+
+Effective assignment helps teams:
+
+- ✅ Know who's working on what
+- ✅ Avoid duplicate work
+- ✅ Track responsibilities
+- ✅ Ensure issues don't get forgotten
+- ✅ Speed up the review process
+
+Next: Learn how to merge pull requests!
+

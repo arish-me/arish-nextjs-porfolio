@@ -1,0 +1,261 @@
+---
+title: Exercise - Pushing Changes
+chapterSlug: git-push-pull
+duration: 10
+order: 2
+---
+
+## Exercise: Pushing Changes
+
+Practice pushing commits to remote repositories.
+
+## Prerequisites
+
+- A repository with a remote configured
+- Use your portfolio project from earlier tasks
+
+---
+
+## Exercise 1: Basic Push
+
+### Task
+
+Make a change and push it to the remote.
+
+### Steps
+
+```bash
+cd portfolio-project
+
+# Make a change
+echo "/* Footer styles */" >> css/style.css
+echo "footer { padding: 20px; }" >> css/style.css
+
+# Stage and commit
+git add css/style.css
+git commit -m "Add footer styles"
+
+# Push to remote
+git push origin main
+
+# Verify on GitHub
+```
+
+---
+
+## Exercise 2: Check Before Pushing
+
+### Task
+
+Review what will be pushed before actually pushing.
+
+### Steps
+
+```bash
+# Make changes
+echo "// New utility function" >> js/main.js
+git add js/main.js
+git commit -m "Add utility function"
+
+# See commits that will be pushed
+git log origin/main..HEAD --oneline
+
+# See diff that will be pushed
+git diff origin/main..HEAD
+
+# Now push
+git push origin main
+```
+
+---
+
+## Exercise 3: Push with Upstream
+
+### Task
+
+Create a new branch and push it with upstream tracking.
+
+### Steps
+
+```bash
+# Create new branch
+git checkout -b feature/contact-form
+
+# Make changes
+echo "<form>Contact Form</form>" >> index.html
+git add index.html
+git commit -m "Add contact form placeholder"
+
+# Push with upstream (-u)
+git push -u origin feature/contact-form
+
+# Now you can just use 'git push' on this branch
+echo "<!-- Updated -->" >> index.html
+git add index.html
+git commit -m "Update contact form"
+git push  # No need to specify remote/branch
+```
+
+---
+
+## Exercise 4: View Push Status
+
+### Task
+
+Check which branches need to be pushed.
+
+### Steps
+
+```bash
+# See all branches with tracking status
+git branch -vv
+
+# Output shows tracking info:
+# feature/contact-form abc1234 [origin/feature/contact-form] Update contact form
+# * main               def5678 [origin/main] Add footer styles
+```
+
+---
+
+## Exercise 5: Push After Local Changes
+
+### Task
+
+Make multiple commits locally, then push all at once.
+
+### Steps
+
+```bash
+# Switch to main
+git checkout main
+
+# Make multiple commits
+echo "/* Update 1 */" >> css/style.css
+git add css/style.css
+git commit -m "Style update 1"
+
+echo "/* Update 2 */" >> css/style.css
+git add css/style.css
+git commit -m "Style update 2"
+
+echo "/* Update 3 */" >> css/style.css
+git add css/style.css
+git commit -m "Style update 3"
+
+# Check commits to push
+git log origin/main..HEAD --oneline
+# Shows 3 commits
+
+# Push all at once
+git push origin main
+```
+
+---
+
+## Exercise 6: Handle Push Rejection (Simulated)
+
+### Task
+
+Understand what happens when push is rejected.
+
+### Explanation
+
+When your push is rejected:
+
+```bash
+git push origin main
+# ! [rejected]        main -> main (fetch first)
+# error: failed to push some refs
+```
+
+### Solution
+
+```bash
+# Pull first
+git pull origin main
+
+# Then push
+git push origin main
+```
+
+If there are conflicts, you'll need to resolve them first.
+
+---
+
+## Exercise 7: Clean Up Feature Branch
+
+### Task
+
+After a feature branch is merged, clean up.
+
+### Steps
+
+```bash
+# Switch to main
+git checkout main
+
+# Pull latest (includes merged feature)
+git pull origin main
+
+# Delete local feature branch
+git branch -d feature/contact-form
+
+# Delete remote feature branch
+git push origin --delete feature/contact-form
+```
+
+---
+
+## Challenge: Multi-Commit Push Workflow
+
+### Task
+
+Practice a realistic workflow with multiple commits.
+
+### Steps
+
+```bash
+# 1. Start feature
+git checkout -b feature/about-section
+
+# 2. Add HTML structure
+cat >> index.html << 'EOF'
+<section id="about">
+    <h2>About Me</h2>
+    <p>Welcome to my portfolio!</p>
+</section>
+EOF
+git add index.html
+git commit -m "Add about section HTML"
+
+# 3. Add styles
+cat >> css/style.css << 'EOF'
+#about {
+    padding: 2rem;
+    background: #f5f5f5;
+}
+EOF
+git add css/style.css
+git commit -m "Add about section styles"
+
+# 4. Push feature branch
+git push -u origin feature/about-section
+
+# 5. Verify on GitHub and create PR
+```
+
+---
+
+## Summary
+
+You've practiced:
+
+- ✅ Basic pushing
+- ✅ Reviewing before pushing
+- ✅ Setting upstream with `-u`
+- ✅ Pushing multiple commits
+- ✅ Handling push rejection
+- ✅ Cleaning up after merge
+
+Next: Learn how to pull changes!
+

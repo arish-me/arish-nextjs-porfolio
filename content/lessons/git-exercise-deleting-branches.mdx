@@ -1,0 +1,291 @@
+---
+title: Exercise - Deleting Branches
+chapterSlug: git-branching
+duration: 8
+order: 8
+---
+
+## Exercise: Deleting Branches
+
+Practice safely deleting branches in various scenarios.
+
+## Setup
+
+```bash
+mkdir delete-practice
+cd delete-practice
+git init
+
+# Create initial commit
+echo "# Delete Practice" > README.md
+git add README.md
+git commit -m "Initial commit"
+
+# Create and commit on a feature branch (to be merged)
+git checkout -b feature-merged
+echo "Merged feature" > merged.txt
+git add merged.txt
+git commit -m "Add merged feature"
+
+# Merge it back to main
+git checkout main
+git merge feature-merged
+
+# Create an unmerged branch
+git checkout -b feature-unmerged
+echo "Unmerged feature" > unmerged.txt
+git add unmerged.txt
+git commit -m "Add unmerged feature"
+
+# Create more branches for practice
+git checkout main
+git branch old-feature
+git branch abandoned-work
+git branch temp-testing
+```
+
+---
+
+## Exercise 1: Delete a Merged Branch
+
+### Task
+
+Delete the `feature-merged` branch (it's already merged to main).
+
+### Steps
+
+```bash
+# Ensure you're on main
+git checkout main
+
+# Delete the merged branch
+git branch -d feature-merged
+
+# Verify
+git branch
+```
+
+### Expected Output
+
+```
+Deleted branch feature-merged (was abc1234).
+```
+
+---
+
+## Exercise 2: Try to Delete Unmerged Branch
+
+### Task
+
+Try to delete `feature-unmerged` using safe delete.
+
+### Steps
+
+```bash
+git checkout main
+git branch -d feature-unmerged
+```
+
+### Expected Output
+
+```
+error: The branch 'feature-unmerged' is not fully merged.
+If you are sure you want to delete it, run 'git branch -D feature-unmerged'.
+```
+
+Git protects you from losing work!
+
+---
+
+## Exercise 3: Force Delete Unmerged Branch
+
+### Task
+
+Force delete the `feature-unmerged` branch.
+
+### Steps
+
+```bash
+# Force delete
+git branch -D feature-unmerged
+
+# Verify
+git branch
+```
+
+### Expected Output
+
+```
+Deleted branch feature-unmerged (was def5678).
+```
+
+---
+
+## Exercise 4: Delete Multiple Branches
+
+### Task
+
+Delete `old-feature` and `temp-testing` in one command.
+
+### Steps
+
+```bash
+# Delete multiple branches at once
+git branch -d old-feature temp-testing
+
+# Verify
+git branch
+```
+
+### Expected Output
+
+```
+Deleted branch old-feature (was abc1234).
+Deleted branch temp-testing (was abc1234).
+```
+
+---
+
+## Exercise 5: Try to Delete Current Branch
+
+### Task
+
+Attempt to delete the branch you're currently on.
+
+### Steps
+
+```bash
+# Switch to abandoned-work
+git checkout abandoned-work
+
+# Try to delete it
+git branch -d abandoned-work
+```
+
+### Expected Output
+
+```
+error: Cannot delete branch 'abandoned-work' checked out at '/path/to/repo'
+```
+
+### Solution
+
+```bash
+# Switch to another branch first
+git checkout main
+
+# Now delete it
+git branch -D abandoned-work
+```
+
+---
+
+## Exercise 6: List and Delete Merged Branches
+
+### Task
+
+Create several branches, merge some, then delete only the merged ones.
+
+### Setup
+
+```bash
+# Create and merge branch 1
+git checkout -b feature-a
+echo "A" > a.txt && git add a.txt && git commit -m "Add A"
+git checkout main && git merge feature-a
+
+# Create and merge branch 2
+git checkout -b feature-b
+echo "B" > b.txt && git add b.txt && git commit -m "Add B"
+git checkout main && git merge feature-b
+
+# Create unmerged branch
+git checkout -b feature-c
+echo "C" > c.txt && git add c.txt && git commit -m "Add C"
+git checkout main
+```
+
+### Steps
+
+```bash
+# List merged branches (excluding main)
+git branch --merged main | grep -v "main"
+
+# Delete merged branches
+git branch --merged main | grep -v "main" | xargs git branch -d
+
+# Verify only unmerged branches remain
+git branch
+```
+
+### Expected Output
+
+```
+  feature-c
+* main
+```
+
+---
+
+## Challenge: Cleanup Script
+
+### Task
+
+Write a sequence of commands to clean up a repository.
+
+### Requirements
+
+1. Switch to main
+2. List all merged branches
+3. Delete all merged branches (except main)
+4. List remaining branches
+
+### Solution
+
+```bash
+#!/bin/bash
+# Cleanup script
+
+# Switch to main
+git checkout main
+
+# Show merged branches
+echo "Merged branches to delete:"
+git branch --merged main | grep -v "main"
+
+# Delete them
+git branch --merged main | grep -v "main" | xargs git branch -d
+
+# Show remaining
+echo "Remaining branches:"
+git branch
+```
+
+---
+
+## Self-Check Questions
+
+1. What's the difference between `-d` and `-D`?
+2. Can you delete the branch you're currently on?
+3. How do you delete a remote branch?
+4. How do you list merged branches?
+
+## Answers
+
+1. `-d` is safe delete (only merged), `-D` forces delete
+2. No, you must switch to another branch first
+3. `git push origin --delete branch-name`
+4. `git branch --merged`
+
+## Summary
+
+You've practiced:
+
+- ✅ Safe delete with `-d`
+- ✅ Force delete with `-D`
+- ✅ Deleting multiple branches
+- ✅ Understanding deletion restrictions
+- ✅ Cleaning up merged branches
+
+Great work! You've mastered branch management!
+

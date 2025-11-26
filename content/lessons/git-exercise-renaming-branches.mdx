@@ -1,0 +1,263 @@
+---
+title: Exercise - Renaming Branches
+chapterSlug: git-branching
+duration: 8
+order: 6
+---
+
+## Exercise: Renaming Branches
+
+Practice renaming branches in various scenarios.
+
+## Setup
+
+```bash
+mkdir rename-practice
+cd rename-practice
+git init
+
+echo "# Rename Practice" > README.md
+git add README.md
+git commit -m "Initial commit"
+
+# Create branches with "mistakes"
+git branch feture-login      # Typo
+git branch feature1          # No description
+git branch my-branch         # Not following convention
+git branch user-profile      # Missing prefix
+```
+
+---
+
+## Exercise 1: Fix a Typo
+
+### Task
+
+Rename `feture-login` to `feature-login`.
+
+### Steps
+
+```bash
+# Rename from anywhere
+git branch -m feture-login feature-login
+
+# Verify
+git branch
+```
+
+### Expected Output
+
+```
+  feature-login
+  feature1
+* main
+  my-branch
+  user-profile
+```
+
+---
+
+## Exercise 2: Add Description to Branch Name
+
+### Task
+
+Rename `feature1` to `feature-payment-gateway`.
+
+### Steps
+
+```bash
+# Rename the branch
+git branch -m feature1 feature-payment-gateway
+
+# Verify
+git branch
+```
+
+---
+
+## Exercise 3: Rename Current Branch
+
+### Task
+
+Switch to `my-branch` and rename it to `feature-navigation`.
+
+### Steps
+
+```bash
+# Switch to the branch
+git checkout my-branch
+
+# Rename current branch (no old name needed)
+git branch -m feature-navigation
+
+# Verify
+git branch
+```
+
+### Expected Output
+
+```
+  feature-login
+* feature-navigation
+  feature-payment-gateway
+  main
+  user-profile
+```
+
+---
+
+## Exercise 4: Add Prefix to Branch
+
+### Task
+
+Rename `user-profile` to `feature/user-profile` following Git Flow convention.
+
+### Steps
+
+```bash
+# Rename with prefix
+git branch -m user-profile feature/user-profile
+
+# Verify
+git branch
+```
+
+---
+
+## Exercise 5: Rename Multiple Branches
+
+### Task
+
+Standardize all feature branches to use `feature/` prefix.
+
+### Steps
+
+```bash
+# Rename each branch
+git branch -m feature-login feature/login
+git branch -m feature-navigation feature/navigation
+git branch -m feature-payment-gateway feature/payment-gateway
+
+# Verify all branches
+git branch
+```
+
+### Expected Output
+
+```
+  feature/login
+  feature/navigation
+  feature/payment-gateway
+  feature/user-profile
+* main
+```
+
+---
+
+## Exercise 6: Handle Existing Name Conflict
+
+### Task
+
+Try to rename a branch to a name that already exists.
+
+### Steps
+
+```bash
+# Create a branch
+git branch temp-feature
+
+# Try to rename to existing branch
+git branch -m temp-feature feature/login
+# Error: A branch named 'feature/login' already exists
+
+# Force rename (this will delete the old feature/login!)
+# git branch -M temp-feature feature/login
+
+# Better: Choose a different name
+git branch -m temp-feature feature/temp
+
+# Verify
+git branch
+```
+
+---
+
+## Challenge: Complete Branch Reorganization
+
+### Task
+
+Reorganize branches to follow this convention:
+- Features: `feature/description`
+- Bugfixes: `bugfix/description`
+- Hotfixes: `hotfix/description`
+
+### Setup
+
+```bash
+# Create branches to reorganize
+git branch login-fix
+git branch urgent-security-patch
+git branch new-dashboard
+git branch fix-header-bug
+```
+
+### Solution
+
+```bash
+# Rename feature branch
+git branch -m new-dashboard feature/dashboard
+
+# Rename bugfix branches
+git branch -m login-fix bugfix/login
+git branch -m fix-header-bug bugfix/header
+
+# Rename hotfix branch
+git branch -m urgent-security-patch hotfix/security-patch
+
+# Verify
+git branch
+```
+
+### Expected Output
+
+```
+  bugfix/header
+  bugfix/login
+  feature/dashboard
+  feature/login
+  feature/navigation
+  feature/payment-gateway
+  feature/temp
+  feature/user-profile
+  hotfix/security-patch
+* main
+```
+
+---
+
+## Self-Check Questions
+
+1. What flag is used to rename a branch?
+2. How do you rename the current branch?
+3. How do you rename a branch you're not on?
+4. What does `-M` (uppercase) do?
+
+## Answers
+
+1. `-m` flag: `git branch -m new-name`
+2. Just: `git branch -m new-name` (no old name needed)
+3. `git branch -m old-name new-name`
+4. Force rename (overwrites existing branch)
+
+## Summary
+
+You've practiced:
+
+- ✅ Fixing typos in branch names
+- ✅ Adding descriptions to branch names
+- ✅ Renaming current branch
+- ✅ Adding prefixes for organization
+- ✅ Handling naming conflicts
+
+Next, let's learn about deleting branches!
+

@@ -1,0 +1,284 @@
+---
+title: Git and GitHub Project - Task 5
+chapterSlug: github-ui
+duration: 15
+order: 3
+---
+
+## Project Task 5: Complete PR Workflow
+
+Practice a full pull request workflow including assignment, review, and merge.
+
+## Objective
+
+Execute a complete PR workflow from issue to merge.
+
+## Part 1: Set Up the Issue
+
+### Step 1: Create a New Issue
+
+On GitHub, create an issue:
+
+**Title**: `Add responsive navigation menu`
+
+**Description**:
+```markdown
+## Feature Request
+Make navigation responsive for mobile devices.
+
+## Requirements
+- [ ] Hamburger menu icon on mobile
+- [ ] Slide-out menu
+- [ ] Smooth animations
+
+## Design Notes
+- Menu icon appears below 768px
+- Menu slides from right
+- Close button in menu
+
+## Acceptance Criteria
+- Works on all mobile devices
+- Animations are smooth
+- Menu closes when clicking outside
+```
+
+Add labels: `enhancement`, `mobile`
+
+### Step 2: Assign Yourself
+
+1. Click **Assignees**
+2. Select your username
+3. You're now responsible!
+
+## Part 2: Create the PR
+
+### Step 3: Create Branch
+
+```bash
+cd portfolio-project
+git checkout main
+git pull origin main
+git checkout -b feature/responsive-nav
+```
+
+### Step 4: Implement Changes
+
+Update `css/style.css`:
+
+```css
+/* Mobile Navigation */
+@media (max-width: 768px) {
+    header nav {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 250px;
+        height: 100vh;
+        background: #222;
+        padding: 60px 20px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    }
+
+    header nav.active {
+        display: block;
+        transform: translateX(0);
+    }
+
+    header nav a {
+        display: block;
+        margin: 20px 0;
+        font-size: 1.2rem;
+    }
+
+    .menu-toggle {
+        display: block;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .menu-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 1.5rem;
+        color: white;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+}
+
+@media (min-width: 769px) {
+    .menu-toggle,
+    .menu-close {
+        display: none;
+    }
+}
+```
+
+Update `index.html` header:
+
+```html
+<header>
+    <h1>Welcome to My Portfolio</h1>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav id="main-nav">
+        <button class="menu-close" onclick="toggleMenu()">×</button>
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+    </nav>
+</header>
+```
+
+Update `js/main.js`:
+
+```javascript
+// Mobile menu toggle
+function toggleMenu() {
+    const nav = document.getElementById('main-nav');
+    nav.classList.toggle('active');
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', function(event) {
+    const nav = document.getElementById('main-nav');
+    const toggle = document.querySelector('.menu-toggle');
+    
+    if (!nav.contains(event.target) && !toggle.contains(event.target)) {
+        nav.classList.remove('active');
+    }
+});
+```
+
+### Step 5: Commit and Push
+
+```bash
+git add .
+git commit -m "Add responsive navigation menu
+
+- Add hamburger menu for mobile
+- Implement slide-out navigation
+- Add click-outside to close
+
+Closes #3"
+
+git push -u origin feature/responsive-nav
+```
+
+## Part 3: Create and Complete PR
+
+### Step 6: Create Pull Request
+
+On GitHub:
+
+**Title**: `Add responsive navigation menu`
+
+**Description**:
+```markdown
+## Description
+Implement responsive navigation for mobile devices.
+
+## Changes
+- Added hamburger menu button
+- Created slide-out navigation panel
+- Added smooth CSS transitions
+- Implemented click-outside to close
+
+## Testing
+1. Open site on desktop - normal navigation
+2. Resize to < 768px - hamburger appears
+3. Click hamburger - menu slides out
+4. Click outside or × - menu closes
+
+## Screenshots
+[Add mobile and desktop screenshots]
+
+## Checklist
+- [x] Tested on mobile
+- [x] Animations smooth
+- [x] Closes #3
+
+Closes #3
+```
+
+### Step 7: Self-Review
+
+1. Go to **Files changed** tab
+2. Review each file
+3. Leave comments on your own code:
+   - Good practices
+   - Things to improve later
+
+### Step 8: Request Review (If Team)
+
+If working with others:
+1. Click **Reviewers**
+2. Select teammates
+
+### Step 9: Merge the PR
+
+1. Verify all checks pass
+2. Click **Squash and merge**
+3. Edit commit message if needed
+4. Click **Confirm squash and merge**
+5. Click **Delete branch**
+
+## Part 4: Clean Up
+
+### Step 10: Update Local
+
+```bash
+git checkout main
+git pull origin main
+git branch -d feature/responsive-nav
+```
+
+### Step 11: Verify
+
+1. Check issue #3 is closed
+2. View commits on main
+3. Test the responsive nav
+
+## Bonus: Set Up Branch Protection
+
+Configure protection for main branch:
+
+1. Settings → Branches
+2. Add rule for `main`
+3. Enable:
+   - Require PR before merging
+   - Require 1 approval (if team)
+   - Require status checks
+4. Save changes
+
+## Verification Checklist
+
+- [ ] Issue created and assigned
+- [ ] Feature branch created
+- [ ] Changes implemented
+- [ ] PR created with good description
+- [ ] Code reviewed (self or team)
+- [ ] PR merged (squash)
+- [ ] Branch deleted
+- [ ] Issue auto-closed
+- [ ] Local repo updated
+
+## Summary
+
+You've completed a full workflow:
+
+- ✅ Issue → Branch → Commits → PR → Review → Merge
+- ✅ Proper assignment and tracking
+- ✅ Code review process
+- ✅ Clean merge with squash
+- ✅ Branch cleanup
+
+Next: Learn about advanced branching concepts!
+

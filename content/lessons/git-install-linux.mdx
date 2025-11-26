@@ -1,0 +1,228 @@
+---
+title: Installing Git on Linux
+chapterSlug: git-introduction
+duration: 5
+order: 5
+---
+
+## Installing Git on Linux
+
+Git is available in the package repositories of most Linux distributions.
+
+## Ubuntu / Debian
+
+```bash
+# Update package list
+sudo apt update
+
+# Install Git
+sudo apt install git
+
+# Verify installation
+git --version
+```
+
+## Fedora
+
+```bash
+# Install Git
+sudo dnf install git
+
+# Verify installation
+git --version
+```
+
+## CentOS / RHEL
+
+```bash
+# Install Git
+sudo yum install git
+
+# Verify installation
+git --version
+```
+
+## Arch Linux
+
+```bash
+# Install Git
+sudo pacman -S git
+
+# Verify installation
+git --version
+```
+
+## openSUSE
+
+```bash
+# Install Git
+sudo zypper install git
+
+# Verify installation
+git --version
+```
+
+## Install from Source (Latest Version)
+
+If you need the latest version:
+
+```bash
+# Install dependencies
+sudo apt install make libssl-dev libghc-zlib-dev libcurl4-gnutls-dev libexpat1-dev gettext
+
+# Download source
+wget https://github.com/git/git/archive/refs/tags/v2.43.0.tar.gz
+
+# Extract
+tar -xzf v2.43.0.tar.gz
+cd git-2.43.0
+
+# Compile and install
+make prefix=/usr/local all
+sudo make prefix=/usr/local install
+```
+
+## Configure Git
+
+After installation, configure your identity:
+
+```bash
+# Set your name
+git config --global user.name "Your Name"
+
+# Set your email
+git config --global user.email "your.email@example.com"
+```
+
+### Verify Configuration
+
+```bash
+git config --list
+```
+
+## Set Default Editor
+
+```bash
+# For VS Code
+git config --global core.editor "code --wait"
+
+# For Vim (default on most Linux systems)
+git config --global core.editor "vim"
+
+# For Nano
+git config --global core.editor "nano"
+```
+
+## Set Default Branch Name
+
+```bash
+git config --global init.defaultBranch main
+```
+
+## Configure SSH for GitHub
+
+Generate an SSH key:
+
+```bash
+# Generate SSH key
+ssh-keygen -t ed25519 -C "your.email@example.com"
+
+# Start SSH agent
+eval "$(ssh-agent -s)"
+
+# Add key to agent
+ssh-add ~/.ssh/id_ed25519
+
+# Copy public key
+cat ~/.ssh/id_ed25519.pub
+```
+
+Add the public key to your GitHub account (Settings → SSH Keys).
+
+## Test Your Installation
+
+```bash
+# Create a test folder
+mkdir git-test
+cd git-test
+
+# Initialize a repository
+git init
+
+# Create a test file
+echo "Hello Git" > test.txt
+
+# Stage and commit
+git add test.txt
+git commit -m "Initial commit"
+
+# Success!
+[main (root-commit) abc1234] Initial commit
+ 1 file changed, 1 insertion(+)
+
+# Clean up
+cd ..
+rm -rf git-test
+```
+
+## Useful Git Configuration
+
+### Enable Colors
+
+```bash
+git config --global color.ui auto
+```
+
+### Set Pull Behavior
+
+```bash
+# Rebase by default when pulling
+git config --global pull.rebase true
+```
+
+### Create Useful Aliases
+
+```bash
+git config --global alias.st status
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.ci commit
+git config --global alias.lg "log --oneline --graph --all"
+```
+
+## Troubleshooting
+
+### Permission Denied
+
+If you get permission errors:
+
+```bash
+# Check file permissions
+ls -la ~/.gitconfig
+
+# Fix permissions if needed
+chmod 644 ~/.gitconfig
+```
+
+### Old Version in Repository
+
+If your distro has an old version:
+
+```bash
+# Add Git PPA (Ubuntu)
+sudo add-apt-repository ppa:git-core/ppa
+sudo apt update
+sudo apt install git
+```
+
+## Summary
+
+Git is now installed on your Linux system! Key points:
+
+1. Use your **package manager** for easy installation
+2. **Configure** your identity
+3. **Set up SSH** for GitHub authentication
+4. **Create aliases** for common commands
+
+You're ready to start using Git!
+

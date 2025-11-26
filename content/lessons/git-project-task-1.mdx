@@ -1,0 +1,253 @@
+---
+title: Git and GitHub Project - Task 1
+chapterSlug: git-setup-remote
+duration: 15
+order: 2
+---
+
+## Project Task 1: Create Your First Repository
+
+Let's apply what you've learned by creating a real project repository.
+
+## Objective
+
+Create a portfolio project repository on GitHub with a proper structure.
+
+## Requirements
+
+1. Create a local project with proper structure
+2. Initialize Git
+3. Create a remote repository on GitHub
+4. Push your code
+
+## Step-by-Step Instructions
+
+### Step 1: Create Project Structure
+
+```bash
+# Create project directory
+mkdir portfolio-project
+cd portfolio-project
+
+# Create project structure
+mkdir -p src css js images
+
+# Create main files
+touch index.html
+touch css/style.css
+touch js/main.js
+touch README.md
+```
+
+### Step 2: Add Content to Files
+
+**index.html:**
+```bash
+cat > index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to My Portfolio</h1>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+    <main>
+        <section id="about">
+            <h2>About Me</h2>
+            <p>I'm learning Git and GitHub!</p>
+        </section>
+    </main>
+    <script src="js/main.js"></script>
+</body>
+</html>
+EOF
+```
+
+**css/style.css:**
+```bash
+cat > css/style.css << 'EOF'
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+header {
+    background: #333;
+    color: white;
+    padding: 1rem;
+}
+
+nav a {
+    color: white;
+    margin-right: 1rem;
+}
+EOF
+```
+
+**js/main.js:**
+```bash
+cat > js/main.js << 'EOF'
+// Main JavaScript file
+console.log('Portfolio loaded!');
+EOF
+```
+
+**README.md:**
+```bash
+cat > README.md << 'EOF'
+# My Portfolio Project
+
+This is my first Git and GitHub project!
+
+## Technologies Used
+- HTML5
+- CSS3
+- JavaScript
+
+## Features
+- Responsive design
+- Clean code structure
+
+## How to Use
+1. Clone the repository
+2. Open index.html in your browser
+
+## License
+MIT
+EOF
+```
+
+### Step 3: Create .gitignore
+
+```bash
+cat > .gitignore << 'EOF'
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+EOF
+```
+
+### Step 4: Initialize Git Repository
+
+```bash
+# Initialize Git
+git init
+
+# Check status
+git status
+```
+
+### Step 5: Make Initial Commit
+
+```bash
+# Stage all files
+git add .
+
+# Verify staged files
+git status
+
+# Commit
+git commit -m "Initial commit: Add portfolio project structure"
+```
+
+### Step 6: Create GitHub Repository
+
+1. Go to [github.com](https://github.com)
+2. Click **+** → **New repository**
+3. Name: `portfolio-project`
+4. Description: "My first portfolio project"
+5. Keep it **Public**
+6. **DON'T** initialize with README (you already have one)
+7. Click **Create repository**
+
+### Step 7: Connect and Push
+
+```bash
+# Add remote
+git remote add origin https://github.com/YOUR-USERNAME/portfolio-project.git
+
+# Push to GitHub
+git push -u origin main
+```
+
+### Step 8: Verify on GitHub
+
+1. Go to your repository URL
+2. Verify all files are there
+3. Check the README displays correctly
+
+## Verification Checklist
+
+- [ ] Project has proper folder structure
+- [ ] `.gitignore` is present
+- [ ] `README.md` displays on GitHub
+- [ ] All files are pushed
+- [ ] Commit history shows on GitHub
+
+## Troubleshooting
+
+### "Permission denied" error
+```bash
+# Check your remote URL
+git remote -v
+
+# If using HTTPS, make sure credentials are correct
+# Or switch to SSH
+git remote set-url origin git@github.com:YOUR-USERNAME/portfolio-project.git
+```
+
+### "Repository not found" error
+- Verify the repository exists on GitHub
+- Check spelling of username and repo name
+- Ensure you have access
+
+### Branch name issue
+```bash
+# If your branch is 'master' instead of 'main'
+git branch -M main
+git push -u origin main
+```
+
+## Bonus Tasks
+
+1. Add more content to your portfolio
+2. Make additional commits
+3. Try viewing your commit history on GitHub
+
+## Summary
+
+You've completed Task 1! You now know how to:
+
+- ✅ Create a project structure
+- ✅ Initialize a Git repository
+- ✅ Create a GitHub repository
+- ✅ Push your code
+
+Continue to Task 2 to learn about the remote command!
+

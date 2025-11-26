@@ -1,0 +1,354 @@
+---
+title: Exercise - Ignoring Files
+chapterSlug: git-ignoring
+duration: 10
+order: 2
+---
+
+## Exercise: Ignoring Files
+
+Practice creating and using `.gitignore` files.
+
+## Setup
+
+```bash
+mkdir ignore-practice
+cd ignore-practice
+git init
+
+echo "# Ignore Practice" > README.md
+git add README.md
+git commit -m "Initial commit"
+```
+
+---
+
+## Exercise 1: Create Basic .gitignore
+
+### Task
+
+Create a `.gitignore` that ignores log files and the `node_modules` directory.
+
+### Steps
+
+```bash
+# Create .gitignore
+cat > .gitignore << EOF
+# Logs
+*.log
+
+# Dependencies
+node_modules/
+EOF
+
+# Verify it exists
+cat .gitignore
+
+# Stage and commit
+git add .gitignore
+git commit -m "Add .gitignore"
+```
+
+---
+
+## Exercise 2: Test File Ignoring
+
+### Task
+
+Verify that ignored files don't show in git status.
+
+### Steps
+
+```bash
+# Create files that should be ignored
+echo "Error log" > error.log
+echo "Debug log" > debug.log
+mkdir node_modules
+echo "package" > node_modules/package.js
+
+# Create a file that should NOT be ignored
+echo "console.log('app');" > app.js
+
+# Check status
+git status
+
+# You should only see app.js, not the logs or node_modules
+```
+
+### Expected Output
+
+```
+Untracked files:
+  app.js
+```
+
+---
+
+## Exercise 3: Ignore Environment Files
+
+### Task
+
+Add patterns to ignore environment files.
+
+### Steps
+
+```bash
+# Add to .gitignore
+cat >> .gitignore << EOF
+
+# Environment files
+.env
+.env.local
+.env.*.local
+EOF
+
+# Create environment files
+echo "SECRET_KEY=abc123" > .env
+echo "LOCAL_VAR=true" > .env.local
+echo "DEV_MODE=true" > .env.development.local
+
+# Check status - they should be ignored
+git status
+```
+
+---
+
+## Exercise 4: Ignore IDE/Editor Files
+
+### Task
+
+Add patterns for common IDE files.
+
+### Steps
+
+```bash
+# Add IDE patterns
+cat >> .gitignore << EOF
+
+# IDE/Editor
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*~
+EOF
+
+# Create IDE files
+mkdir .vscode
+echo '{"setting": true}' > .vscode/settings.json
+mkdir .idea
+echo "config" > .idea/workspace.xml
+
+# Verify they're ignored
+git status
+git check-ignore -v .vscode/settings.json
+```
+
+---
+
+## Exercise 5: Use Negation Pattern
+
+### Task
+
+Ignore all `.log` files except `important.log`.
+
+### Steps
+
+```bash
+# Update .gitignore
+cat >> .gitignore << EOF
+
+# Ignore all logs except important
+*.log
+!important.log
+EOF
+
+# Create log files
+echo "Regular log" > regular.log
+echo "IMPORTANT" > important.log
+
+# Check status
+git status
+# Only important.log should show as untracked
+```
+
+---
+
+## Exercise 6: Ignore Build Directories
+
+### Task
+
+Ignore common build output directories.
+
+### Steps
+
+```bash
+# Add build patterns
+cat >> .gitignore << EOF
+
+# Build outputs
+dist/
+build/
+out/
+.cache/
+EOF
+
+# Create build directories
+mkdir -p dist build out .cache
+echo "bundle.js" > dist/bundle.js
+echo "output" > build/output.txt
+
+# Verify they're ignored
+git status
+```
+
+---
+
+## Exercise 7: Stop Tracking Already Tracked File
+
+### Task
+
+You accidentally committed a file that should be ignored. Fix it.
+
+### Steps
+
+```bash
+# Accidentally track a file
+echo "SECRET=password123" > secrets.txt
+git add secrets.txt
+git commit -m "Oops, added secrets"
+
+# Add to .gitignore
+echo "secrets.txt" >> .gitignore
+
+# Check status - file still tracked!
+git status
+# secrets.txt is NOT showing as ignored
+
+# Remove from tracking (keep the file)
+git rm --cached secrets.txt
+
+# Now commit the removal
+git add .gitignore
+git commit -m "Remove secrets.txt from tracking"
+
+# Verify
+git status
+# secrets.txt should now be ignored
+```
+
+---
+
+## Exercise 8: Check Why File is Ignored
+
+### Task
+
+Use `git check-ignore` to debug ignore patterns.
+
+### Steps
+
+```bash
+# Create various files
+echo "test" > test.log
+echo "test" > test.txt
+mkdir temp && echo "file" > temp/file.txt
+
+# Add patterns
+echo "temp/" >> .gitignore
+
+# Check which pattern ignores each file
+git check-ignore -v test.log
+git check-ignore -v temp/file.txt
+
+# Check a file that's NOT ignored
+git check-ignore -v test.txt
+# No output = not ignored
+```
+
+---
+
+## Challenge: Complete Project .gitignore
+
+### Task
+
+Create a comprehensive `.gitignore` for a Node.js/React project.
+
+### Solution
+
+```bash
+cat > .gitignore << 'EOF'
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Testing
+coverage/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE/Editor
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+.cache/
+*.tmp
+*.temp
+EOF
+
+git add .gitignore
+git commit -m "Add comprehensive .gitignore"
+```
+
+---
+
+## Self-Check
+
+View your complete `.gitignore`:
+
+```bash
+cat .gitignore
+```
+
+Test that files are properly ignored:
+
+```bash
+git status
+```
+
+## Summary
+
+You've practiced:
+
+- ✅ Creating `.gitignore` files
+- ✅ Using different patterns (wildcards, directories)
+- ✅ Using negation patterns
+- ✅ Stopping tracking of already-tracked files
+- ✅ Debugging with `git check-ignore`
+
+Great work!
+

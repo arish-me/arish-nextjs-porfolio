@@ -1,0 +1,269 @@
+---
+title: Exercise - Create Branches
+chapterSlug: git-branching
+duration: 10
+order: 3
+---
+
+## Exercise: Creating Branches
+
+Practice creating branches in different scenarios.
+
+## Setup
+
+First, create a practice repository:
+
+```bash
+# Create and initialize
+mkdir branch-practice
+cd branch-practice
+git init
+
+# Create initial commit
+echo "# Branch Practice" > README.md
+git add README.md
+git commit -m "Initial commit"
+```
+
+---
+
+## Exercise 1: Create a Simple Branch
+
+### Task
+
+Create a branch called `feature-header`.
+
+### Steps
+
+```bash
+# Create the branch
+git branch feature-header
+
+# Verify it was created
+git branch
+```
+
+### Expected Output
+
+```
+  feature-header
+* main
+```
+
+---
+
+## Exercise 2: Create and Switch to a Branch
+
+### Task
+
+Create a branch called `feature-footer` and switch to it.
+
+### Steps
+
+```bash
+# Create and switch in one command
+git checkout -b feature-footer
+
+# Verify you're on the new branch
+git branch
+```
+
+### Expected Output
+
+```
+  feature-header
+* feature-footer
+  main
+```
+
+---
+
+## Exercise 3: Make Changes on a Branch
+
+### Task
+
+While on `feature-footer`, add a file and commit.
+
+### Steps
+
+```bash
+# Ensure you're on feature-footer
+git checkout feature-footer
+
+# Create a file
+echo "<footer>Copyright 2024</footer>" > footer.html
+
+# Stage and commit
+git add footer.html
+git commit -m "Add footer component"
+
+# Verify the commit
+git log --oneline
+```
+
+### Expected Output
+
+```
+abc1234 (HEAD -> feature-footer) Add footer component
+def5678 (main, feature-header) Initial commit
+```
+
+---
+
+## Exercise 4: Create Branch from Another Branch
+
+### Task
+
+Create `feature-footer-social` from `feature-footer`.
+
+### Steps
+
+```bash
+# Ensure you're on feature-footer
+git checkout feature-footer
+
+# Create new branch from current branch
+git checkout -b feature-footer-social
+
+# Verify the branch hierarchy
+git log --oneline --graph --all
+```
+
+### Expected Output
+
+```
+* abc1234 (HEAD -> feature-footer-social, feature-footer) Add footer component
+* def5678 (main, feature-header) Initial commit
+```
+
+---
+
+## Exercise 5: Create Multiple Feature Branches
+
+### Task
+
+From `main`, create three branches for different features.
+
+### Steps
+
+```bash
+# Switch to main
+git checkout main
+
+# Create multiple branches
+git branch feature-about
+git branch feature-contact
+git branch feature-services
+
+# List all branches
+git branch
+```
+
+### Expected Output
+
+```
+  feature-about
+  feature-contact
+  feature-footer
+  feature-footer-social
+  feature-header
+  feature-services
+* main
+```
+
+---
+
+## Exercise 6: Use git switch (Modern Syntax)
+
+### Task
+
+Use `git switch` to create and switch to a new branch.
+
+### Steps
+
+```bash
+# Create and switch using modern syntax
+git switch -c feature-gallery
+
+# Verify
+git branch --show-current
+```
+
+### Expected Output
+
+```
+feature-gallery
+```
+
+---
+
+## Challenge Exercise
+
+### Task
+
+Create a branch structure for a team project:
+
+1. Create `develop` branch from `main`
+2. From `develop`, create:
+   - `feature/user-auth`
+   - `feature/dashboard`
+   - `feature/settings`
+3. Add a commit to each feature branch
+
+### Solution
+
+```bash
+# Start from main
+git checkout main
+
+# Create develop branch
+git checkout -b develop
+
+# Create feature branches from develop
+git checkout -b feature/user-auth develop
+echo "Auth module" > auth.js
+git add auth.js
+git commit -m "Add auth module"
+
+git checkout -b feature/dashboard develop
+echo "Dashboard" > dashboard.js
+git add dashboard.js
+git commit -m "Add dashboard"
+
+git checkout -b feature/settings develop
+echo "Settings" > settings.js
+git add settings.js
+git commit -m "Add settings"
+
+# View the branch structure
+git log --oneline --graph --all
+```
+
+---
+
+## Self-Check
+
+Verify your work:
+
+```bash
+# List all branches
+git branch
+
+# View branch relationships
+git log --oneline --graph --all
+```
+
+You should have branches organized logically with their own commits.
+
+## Summary
+
+You've practiced:
+
+- ✅ Creating branches with `git branch`
+- ✅ Creating and switching with `git checkout -b`
+- ✅ Using modern `git switch -c`
+- ✅ Creating branches from other branches
+- ✅ Managing multiple feature branches
+
+Great work! Next, let's practice switching between branches.
+

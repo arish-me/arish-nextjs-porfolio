@@ -1,0 +1,229 @@
+---
+title: How to Pull Changes
+chapterSlug: git-push-pull
+duration: 8
+order: 3
+---
+
+## Pulling Changes from Remote
+
+The `git pull` command downloads changes from a remote repository and integrates them with your local branch.
+
+## Basic Pull
+
+```bash
+git pull <remote> <branch>
+
+# Example
+git pull origin main
+```
+
+## What git pull Does
+
+`git pull` is actually two commands in one:
+
+```bash
+git pull origin main
+
+# Is equivalent to:
+git fetch origin main
+git merge origin/main
+```
+
+## Pull Options
+
+### Pull Current Branch
+
+```bash
+# Pull the tracked remote branch
+git pull
+```
+
+### Pull with Rebase
+
+```bash
+# Rebase instead of merge
+git pull --rebase origin main
+
+# Or short form
+git pull -r origin main
+```
+
+**Merge vs Rebase:**
+
+```
+Merge (default):          Rebase:
+                          
+A─B─C─────M (merge)       A─B─C─D'─E' (linear)
+     \   /                      
+      D─E                 
+```
+
+### Pull All Branches
+
+```bash
+git fetch --all
+```
+
+## Understanding Pull
+
+### Scenario: Remote Has New Commits
+
+```
+Your Local:    A ─ B ─ C
+Remote:        A ─ B ─ C ─ D ─ E
+
+After git pull:
+
+Your Local:    A ─ B ─ C ─ D ─ E
+```
+
+### Scenario: Both Have New Commits
+
+```
+Your Local:    A ─ B ─ C ─ X
+Remote:        A ─ B ─ C ─ D
+
+After git pull (merge):
+
+Your Local:    A ─ B ─ C ─ X ─ M
+                       \   /
+                        D
+```
+
+## Handling Pull Conflicts
+
+When your changes conflict with remote changes:
+
+```bash
+git pull origin main
+# CONFLICT (content): Merge conflict in file.txt
+# Automatic merge failed; fix conflicts and then commit
+```
+
+### Resolve Conflicts
+
+1. Open the conflicting file(s)
+2. Find conflict markers:
+
+```
+<<<<<<< HEAD
+Your changes
+=======
+Remote changes
+>>>>>>> origin/main
+```
+
+3. Edit to keep what you want
+4. Remove conflict markers
+5. Stage and commit:
+
+```bash
+git add file.txt
+git commit -m "Resolve merge conflict"
+```
+
+## Fetch vs Pull
+
+| Command | Action |
+|---------|--------|
+| `git fetch` | Download changes (don't merge) |
+| `git pull` | Download AND merge changes |
+
+### When to Use Fetch
+
+```bash
+# See what's new without merging
+git fetch origin
+
+# Review changes
+git log HEAD..origin/main
+
+# Then decide to merge
+git merge origin/main
+```
+
+## Pull Best Practices
+
+### 1. Pull Before Starting Work
+
+```bash
+# Start of day
+git pull origin main
+# Now start coding
+```
+
+### 2. Pull Before Push
+
+```bash
+git pull origin main
+git push origin main
+```
+
+### 3. Use Rebase for Cleaner History
+
+```bash
+# Configure rebase as default
+git config --global pull.rebase true
+
+# Or per-pull
+git pull --rebase
+```
+
+### 4. Stash Changes If Needed
+
+```bash
+# If you have uncommitted changes
+git stash
+git pull origin main
+git stash pop
+```
+
+## Common Pull Workflows
+
+### Simple Update
+
+```bash
+git pull origin main
+```
+
+### Update Feature Branch
+
+```bash
+# On feature branch
+git checkout feature/my-feature
+
+# Get latest main
+git checkout main
+git pull origin main
+
+# Update feature with latest main
+git checkout feature/my-feature
+git merge main
+# Or: git rebase main
+```
+
+### Fork Sync
+
+```bash
+# Fetch from upstream
+git fetch upstream
+
+# Merge upstream changes
+git merge upstream/main
+
+# Push to your fork
+git push origin main
+```
+
+## Summary
+
+| Command | Description |
+|---------|-------------|
+| `git pull` | Pull current branch's upstream |
+| `git pull origin main` | Pull main from origin |
+| `git pull --rebase` | Pull with rebase |
+| `git fetch` | Download without merging |
+
+Practice pulling in the next exercise!
+

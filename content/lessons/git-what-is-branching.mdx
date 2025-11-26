@@ -1,0 +1,188 @@
+---
+title: What is Branching?
+chapterSlug: git-branching
+duration: 8
+order: 1
+---
+
+## What is Branching?
+
+Branching is one of Git's most powerful features. A branch allows you to diverge from the main line of development and work independently without affecting other branches.
+
+## Why Use Branches?
+
+### 1. Parallel Development
+
+Work on multiple features simultaneously:
+
+```
+main ────●────●────●────●────●
+              │
+feature-a     └──●──●──●
+              │
+feature-b     └──●──●
+```
+
+### 2. Isolated Changes
+
+Keep experimental work separate from stable code:
+
+```bash
+# Create a branch for experiments
+git checkout -b experiment
+
+# Try risky changes safely
+# If it works: merge
+# If it fails: delete the branch
+```
+
+### 3. Team Collaboration
+
+Each team member works on their own branch:
+
+```
+main ────●────●────●────●
+              │
+alice-feature └──●──●──●
+              │
+bob-bugfix    └──●──●
+```
+
+## How Branches Work
+
+### The Pointer Concept
+
+A branch is simply a pointer to a commit:
+
+```
+          HEAD
+            ↓
+main ──●──●──●
+              ↑
+          branch pointer
+```
+
+Creating a branch just creates a new pointer:
+
+```
+main ──●──●──●
+              ↑
+        feature (new branch)
+```
+
+### HEAD Pointer
+
+`HEAD` points to your current branch:
+
+```bash
+# Check where HEAD points
+cat .git/HEAD
+# ref: refs/heads/main
+```
+
+## Branch Naming Conventions
+
+### Common Patterns
+
+```bash
+# Feature branches
+feature/user-authentication
+feature/shopping-cart
+feature/payment-integration
+
+# Bug fix branches
+bugfix/login-error
+fix/header-alignment
+
+# Hotfix branches (urgent fixes)
+hotfix/security-patch
+
+# Release branches
+release/v1.0.0
+release/2024-01
+```
+
+### Best Practices
+
+1. **Use lowercase** - `feature/login` not `Feature/Login`
+2. **Use hyphens** - `feature-name` not `feature_name`
+3. **Be descriptive** - `fix/user-login-timeout` not `fix/bug1`
+4. **Include ticket numbers** - `feature/JIRA-123-user-profile`
+
+## Common Branching Strategies
+
+### 1. Git Flow
+
+```
+main ─────●─────────────────●───────●
+           \               /        /
+develop ────●────●────●───●────●───●
+                  \      /
+feature            ●────●
+```
+
+- `main` - Production code
+- `develop` - Integration branch
+- `feature/*` - New features
+- `release/*` - Release preparation
+- `hotfix/*` - Emergency fixes
+
+### 2. GitHub Flow
+
+```
+main ────●────●────●────●────●
+              \        /
+feature        ●──●──●
+```
+
+Simpler workflow:
+1. Branch from `main`
+2. Make changes
+3. Open Pull Request
+4. Merge to `main`
+
+### 3. Trunk-Based Development
+
+```
+main ────●────●────●────●────●
+              \    /
+feature        ●──●  (short-lived)
+```
+
+- Short-lived feature branches
+- Merge frequently
+- Feature flags for incomplete work
+
+## Visualizing Branches
+
+### Command Line
+
+```bash
+# Simple log with branches
+git log --oneline --graph --all
+
+# Example output:
+* abc1234 (HEAD -> main) Latest commit
+| * def5678 (feature) Feature work
+|/
+* 789abcd Previous commit
+```
+
+### GUI Tools
+
+- **GitKraken** - Visual branching
+- **SourceTree** - Free Git GUI
+- **VS Code** - Built-in Git graph extensions
+
+## Summary
+
+Branches in Git:
+
+- ✅ Allow parallel development
+- ✅ Keep changes isolated
+- ✅ Enable team collaboration
+- ✅ Are just pointers (lightweight)
+- ✅ Can be created/deleted easily
+
+Next, let's learn how to create and switch between branches!
+

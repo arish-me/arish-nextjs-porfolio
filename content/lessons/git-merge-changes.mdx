@@ -1,0 +1,260 @@
+---
+title: How to Merge Changes
+chapterSlug: git-advanced-branching
+duration: 10
+order: 1
+---
+
+## Merging Changes in Git
+
+Merging combines changes from different branches into one.
+
+## Basic Merge
+
+```bash
+# Switch to target branch
+git checkout main
+
+# Merge source branch
+git merge feature-branch
+```
+
+## Types of Merges
+
+### 1. Fast-Forward Merge
+
+When main hasn't changed since branch creation:
+
+```
+Before:
+main:    A ─ B ─ C
+                  \
+feature:           D ─ E
+
+After fast-forward:
+main:    A ─ B ─ C ─ D ─ E
+```
+
+```bash
+git checkout main
+git merge feature-branch
+# Fast-forward (no merge commit)
+```
+
+### 2. Three-Way Merge
+
+When both branches have new commits:
+
+```
+Before:
+main:    A ─ B ─ C ─ F
+              \
+feature:       D ─ E
+
+After merge:
+main:    A ─ B ─ C ─ F ─ M
+              \       /
+feature:       D ─ E
+```
+
+```bash
+git checkout main
+git merge feature-branch
+# Creates merge commit M
+```
+
+## Merge Options
+
+### No Fast-Forward
+
+Always create merge commit:
+
+```bash
+git merge --no-ff feature-branch
+```
+
+Useful for:
+- Preserving feature branch history
+- Easier to revert features
+- Clear branch structure in log
+
+### Squash Merge
+
+Combine all commits into one:
+
+```bash
+git merge --squash feature-branch
+git commit -m "Add feature"
+```
+
+### Abort Merge
+
+If something goes wrong:
+
+```bash
+git merge --abort
+```
+
+## Handling Merge Conflicts
+
+### When Conflicts Happen
+
+```bash
+git merge feature-branch
+# Auto-merging file.txt
+# CONFLICT (content): Merge conflict in file.txt
+# Automatic merge failed; fix conflicts and commit
+```
+
+### View Conflicts
+
+```bash
+git status
+# both modified: file.txt
+```
+
+### Conflict Markers
+
+```
+<<<<<<< HEAD
+Content from current branch (main)
+=======
+Content from merging branch (feature)
+>>>>>>> feature-branch
+```
+
+### Resolve Conflicts
+
+1. Open the conflicting file
+2. Decide what to keep
+3. Remove conflict markers
+4. Save the file
+
+**Example Resolution:**
+
+```javascript
+// Keep both changes combined
+function greet(name) {
+    console.log(`Hello, ${name}!`);
+    console.log('Welcome to the app!');
+}
+```
+
+### Complete the Merge
+
+```bash
+# Stage resolved files
+git add file.txt
+
+# Complete merge
+git commit -m "Merge feature-branch, resolve conflicts"
+```
+
+## Merge Strategies
+
+### Recursive (Default)
+
+```bash
+git merge -s recursive feature-branch
+```
+
+Best for most merges.
+
+### Ours
+
+Keep our version, ignore theirs:
+
+```bash
+git merge -s ours feature-branch
+```
+
+### Theirs
+
+Not a built-in strategy, but can use:
+
+```bash
+git merge -X theirs feature-branch
+```
+
+## Merge Workflow Example
+
+```bash
+# 1. Ensure main is up to date
+git checkout main
+git pull origin main
+
+# 2. Merge feature branch
+git merge feature/user-auth
+
+# 3. If conflicts, resolve them
+# Edit conflicting files
+git add .
+
+# 4. If no conflicts, push
+git push origin main
+
+# 5. Delete merged branch
+git branch -d feature/user-auth
+```
+
+## View Merge History
+
+```bash
+# See merge commits
+git log --merges
+
+# Graphical view
+git log --oneline --graph
+
+# Show branches merged into main
+git branch --merged main
+```
+
+## Merge Best Practices
+
+### 1. Keep Branches Up to Date
+
+```bash
+# Before merging to main, update your branch
+git checkout feature-branch
+git merge main  # or rebase
+```
+
+### 2. Test Before Merging
+
+```bash
+# On feature branch
+npm test
+# If tests pass, proceed with merge
+```
+
+### 3. Review the Diff
+
+```bash
+# Preview what will be merged
+git diff main...feature-branch
+```
+
+### 4. Use Descriptive Merge Messages
+
+```bash
+git merge feature-branch -m "Merge feature/user-auth: Add login functionality"
+```
+
+### 5. Delete Merged Branches
+
+```bash
+git branch -d feature-branch
+```
+
+## Summary
+
+| Merge Type | Command | Use Case |
+|------------|---------|----------|
+| Regular | `git merge branch` | Standard merge |
+| No FF | `git merge --no-ff` | Preserve branch history |
+| Squash | `git merge --squash` | Clean single commit |
+| Abort | `git merge --abort` | Cancel merge |
+
+Next: Learn about rebasing as an alternative to merging!
+
