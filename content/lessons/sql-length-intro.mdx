@@ -1,0 +1,28 @@
+---
+title: LENGTH Function
+chapterSlug: sql-length
+duration: 5
+order: 1
+---
+
+## LENGTH Function
+
+Returns the number of characters in a string.
+
+## Syntax
+
+```sql
+SELECT LENGTH(column) FROM table;
+```
+
+## Example
+
+```sql
+SELECT name, LENGTH(name) AS name_length FROM students;
+```
+
+| name | name_length |
+|------|-------------|
+| Alice | 5 |
+| Bob | 3 |
+

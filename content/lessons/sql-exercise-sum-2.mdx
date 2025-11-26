@@ -1,0 +1,18 @@
+---
+title: Practice - SUM with DISTINCT
+chapterSlug: sql-sum-avg
+duration: 5
+order: 3
+---
+
+## Exercise: Sum Distinct Values
+
+Sum distinct marks under 50.
+
+## Solution
+
+```sql
+SELECT SUM(DISTINCT marks) FROM students
+WHERE marks < 50;
+```
+

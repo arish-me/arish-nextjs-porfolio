@@ -1,0 +1,25 @@
+---
+title: Alphabetical Sorting
+chapterSlug: sql-order-advanced
+duration: 5
+order: 1
+---
+
+## Alphabetical Order
+
+Sort text columns alphabetically.
+
+```sql
+SELECT name FROM students
+ORDER BY name;
+```
+
+Returns A-Z order: Alice, Bob, Carol...
+
+## With Other Columns
+
+```sql
+SELECT name, course FROM students
+ORDER BY course, name;
+```
+

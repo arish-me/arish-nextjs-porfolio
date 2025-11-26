@@ -1,0 +1,19 @@
+---
+title: Practice - GROUP BY COUNT
+chapterSlug: sql-group-by-count
+duration: 5
+order: 2
+---
+
+## Exercise: Count by Grade
+
+Count students in each grade.
+
+## Solution
+
+```sql
+SELECT grade, COUNT(*) AS count
+FROM students
+GROUP BY grade;
+```
+

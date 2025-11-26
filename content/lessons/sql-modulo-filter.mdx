@@ -1,0 +1,17 @@
+---
+title: Modulo in Filters
+chapterSlug: sql-arithmetic-filter
+duration: 5
+order: 5
+---
+
+## Modulo Filtering
+
+```sql
+-- Marks divisible by 5
+SELECT * FROM students WHERE marks % 5 = 0;
+
+-- Every 3rd student
+SELECT * FROM students WHERE id % 3 = 0;
+```
+

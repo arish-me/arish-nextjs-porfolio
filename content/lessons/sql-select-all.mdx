@@ -1,0 +1,64 @@
+---
+title: SELECT All Data
+chapterSlug: sql-select-basics
+duration: 5
+order: 1
+---
+
+## The SELECT Statement
+
+The SELECT statement is the most fundamental SQL command. It retrieves data from database tables.
+
+## SELECT * Syntax
+
+The asterisk `*` means "all columns":
+
+```sql
+SELECT * FROM table_name;
+```
+
+## Example: Get All Students
+
+```sql
+SELECT * FROM students;
+```
+
+### Result
+
+| id | name | age | course | marks | grade |
+|----|------|-----|--------|-------|-------|
+| 1 | Alice | 14 | Python | 85 | A |
+| 2 | Bob | 12 | JavaScript | 78 | B |
+| 3 | Carol | 15 | Python | 92 | A |
+| 4 | David | 13 | Ruby | 65 | C |
+
+## Breaking Down the Query
+
+- `SELECT` - Command to retrieve data
+- `*` - All columns
+- `FROM` - Specifies the source
+- `students` - Table name
+
+## When to Use SELECT *
+
+**Good for:**
+- Quick data exploration
+- Small tables
+- Testing queries
+
+**Avoid when:**
+- Large tables (performance)
+- Production code (specify columns)
+- Joining tables (column confusion)
+
+## Best Practice
+
+In production, specify columns explicitly:
+
+```sql
+-- Better for production
+SELECT name, age, course FROM students;
+```
+
+This makes queries faster and more maintainable.
+

@@ -1,0 +1,21 @@
+---
+title: Practice - OFFSET
+chapterSlug: sql-limit-offset
+duration: 5
+order: 6
+---
+
+## Exercise: 6th Student
+
+Get the 6th student in alphabetical order.
+
+## Solution
+
+```sql
+SELECT * FROM students
+ORDER BY name
+LIMIT 1 OFFSET 5;
+```
+
+Skips first 5, gets the 6th.
+

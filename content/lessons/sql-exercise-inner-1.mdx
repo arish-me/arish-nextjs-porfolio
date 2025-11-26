@@ -1,0 +1,19 @@
+---
+title: Practice - INNER JOIN 1
+chapterSlug: sql-inner-join
+duration: 5
+order: 5
+---
+
+## Exercise: Students with Courses
+
+Join students with courses table.
+
+## Solution
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+INNER JOIN courses c ON s.course_id = c.id;
+```
+

@@ -1,0 +1,21 @@
+---
+title: Correlated Subqueries
+chapterSlug: sql-correlated
+duration: 6
+order: 1
+---
+
+## Correlated Subqueries
+
+References outer query.
+
+```sql
+SELECT s.name, s.marks FROM students s
+WHERE s.marks > (
+  SELECT AVG(marks) FROM students
+  WHERE course = s.course
+);
+```
+
+Above average within their course.
+

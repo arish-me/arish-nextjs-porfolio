@@ -1,0 +1,23 @@
+---
+title: Practice - JOIN GROUP 5
+chapterSlug: sql-joins-grouping
+duration: 5
+order: 6
+---
+
+## Exercise: Multiple Aggregates
+
+Get count, average, and max marks per course.
+
+## Solution
+
+```sql
+SELECT c.course_name,
+  COUNT(*) AS students,
+  AVG(s.marks) AS avg,
+  MAX(s.marks) AS max
+FROM students s
+JOIN courses c ON s.course_id = c.id
+GROUP BY c.course_name;
+```
+

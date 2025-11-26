@@ -1,0 +1,25 @@
+---
+title: Detecting Even and Odd Numbers
+chapterSlug: sql-arithmetic
+duration: 5
+order: 2
+---
+
+## Even and Odd
+
+```sql
+-- Even numbers (divisible by 2)
+SELECT * FROM students WHERE id % 2 = 0;
+
+-- Odd numbers
+SELECT * FROM students WHERE id % 2 = 1;
+```
+
+## Example
+
+```sql
+SELECT name, age,
+  CASE WHEN age % 2 = 0 THEN 'Even' ELSE 'Odd' END AS age_type
+FROM students;
+```
+

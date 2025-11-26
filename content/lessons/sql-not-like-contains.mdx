@@ -1,0 +1,25 @@
+---
+title: NOT LIKE - Contains Pattern
+chapterSlug: sql-not-like
+duration: 5
+order: 3
+---
+
+## Excluding Contains Pattern
+
+```sql
+-- Courses NOT containing 'y'
+SELECT * FROM students
+WHERE course NOT LIKE '%y%';
+```
+
+Excludes Python, Ruby...
+
+## Example
+
+```sql
+-- Names NOT containing 'ar'
+SELECT * FROM students
+WHERE name NOT LIKE '%ar%';
+```
+

@@ -1,0 +1,71 @@
+---
+title: Filter with Not Equal
+chapterSlug: sql-filtering-data
+duration: 5
+order: 4
+---
+
+## Not Equal Operator
+
+To find records that DON'T match a value, use `!=` or `<>`.
+
+## Syntax
+
+```sql
+-- Using !=
+SELECT * FROM students WHERE course != 'Python';
+
+-- Using <> (ANSI standard)
+SELECT * FROM students WHERE course <> 'Python';
+```
+
+Both operators work the same way.
+
+## Example: Non-Python Students
+
+```sql
+SELECT * FROM students
+WHERE course != 'Python';
+```
+
+### Result
+
+| id | name | age | course | marks |
+|----|------|-----|--------|-------|
+| 2 | Bob | 12 | JavaScript | 78 |
+| 4 | David | 13 | Ruby | 65 |
+| 6 | Frank | 14 | HTML | 71 |
+
+## More Examples
+
+```sql
+-- Students not in grade A
+SELECT * FROM students WHERE grade != 'A';
+
+-- Students not aged 12
+SELECT * FROM students WHERE age != 12;
+
+-- Students with marks not equal to 85
+SELECT * FROM students WHERE marks <> 85;
+```
+
+## != vs <>
+
+| Operator | Description |
+|----------|-------------|
+| `!=` | Common, widely supported |
+| `<>` | ANSI SQL standard |
+
+Both are correct. Choose one and be consistent.
+
+## Important Note
+
+Not equal does NOT match NULL values:
+
+```sql
+-- This won't return rows where course IS NULL
+SELECT * FROM students WHERE course != 'Python';
+```
+
+To include NULLs, use IS NULL separately (covered later).
+

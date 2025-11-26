@@ -1,0 +1,35 @@
+---
+title: Multi-Line Comments
+chapterSlug: sql-comments
+duration: 4
+order: 3
+---
+
+## Multi-Line Comments
+
+Use `/* */` for longer comments:
+
+```sql
+/*
+  This query finds all students
+  enrolled in Python course
+  with marks above 80
+*/
+SELECT * FROM students
+WHERE course = 'Python'
+AND marks > 80;
+```
+
+## Inline Multi-Line
+
+```sql
+SELECT name, /* student name */ marks /* score */
+FROM students;
+```
+
+## When to Use
+
+- Complex query explanations
+- Temporarily disabling code
+- Documentation blocks
+

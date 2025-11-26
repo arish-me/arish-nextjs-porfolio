@@ -1,0 +1,45 @@
+---
+title: Less Than or Equal To
+chapterSlug: sql-comparison-equal
+duration: 5
+order: 1
+---
+
+## Less Than or Equal To
+
+The `<=` operator includes the boundary value.
+
+## Syntax
+
+```sql
+SELECT * FROM students WHERE age <= 14;
+```
+
+## Example
+
+Find students aged 14 or younger:
+
+```sql
+SELECT * FROM students
+WHERE age <= 14;
+```
+
+This includes students who are exactly 14.
+
+## Comparison
+
+| Query | Includes 14? |
+|-------|-------------|
+| `age < 14` | No |
+| `age <= 14` | Yes |
+
+## More Examples
+
+```sql
+-- Marks up to 80 (including 80)
+SELECT * FROM students WHERE marks <= 80;
+
+-- Age 13 or below
+SELECT * FROM students WHERE age <= 13;
+```
+

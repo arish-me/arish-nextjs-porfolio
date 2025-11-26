@@ -1,0 +1,17 @@
+---
+title: UNION ALL
+chapterSlug: sql-union
+duration: 5
+order: 4
+---
+
+## UNION ALL
+
+Keeps duplicates (faster).
+
+```sql
+SELECT course FROM students
+UNION ALL
+SELECT course FROM archive_students;
+```
+

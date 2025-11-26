@@ -1,0 +1,30 @@
+---
+title: Practice - Single-Line Comments
+chapterSlug: sql-comments
+duration: 4
+order: 2
+---
+
+## Exercise: Add Comments
+
+Add a comment to explain this query:
+
+## Solution
+
+```sql
+-- Select students with high marks (above 85)
+SELECT name, marks
+FROM students
+WHERE marks > 85;
+```
+
+## More Examples
+
+```sql
+-- Filter by course
+SELECT * FROM students WHERE course = 'JavaScript';
+
+-- Get student count
+SELECT COUNT(*) FROM students; -- Total students
+```
+

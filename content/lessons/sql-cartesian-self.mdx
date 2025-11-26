@@ -1,0 +1,17 @@
+---
+title: SELF CROSS JOIN
+chapterSlug: sql-cartesian
+duration: 5
+order: 3
+---
+
+## Cartesian Self Join
+
+All pairs from same table.
+
+```sql
+SELECT a.name AS student1, b.name AS student2
+FROM students a, students b
+WHERE a.id < b.id;
+```
+

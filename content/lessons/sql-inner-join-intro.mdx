@@ -1,0 +1,19 @@
+---
+title: INNER JOIN
+chapterSlug: sql-inner-join
+duration: 6
+order: 2
+---
+
+## INNER JOIN
+
+Returns only matching rows from both tables.
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+INNER JOIN courses c ON s.course_id = c.id;
+```
+
+Only returns students with valid course_id.
+

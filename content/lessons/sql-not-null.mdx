@@ -1,0 +1,20 @@
+---
+title: NOT NULL Constraint
+chapterSlug: sql-constraints-basic
+duration: 5
+order: 1
+---
+
+## NOT NULL
+
+Prevents NULL values.
+
+```sql
+CREATE TABLE students (
+  id INTEGER NOT NULL,
+  name TEXT NOT NULL
+);
+```
+
+INSERT will fail if these are NULL.
+

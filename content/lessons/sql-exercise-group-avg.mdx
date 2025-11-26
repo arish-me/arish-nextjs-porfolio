@@ -1,0 +1,19 @@
+---
+title: Practice - AVG by Group
+chapterSlug: sql-group-by-aggregate
+duration: 5
+order: 5
+---
+
+## Exercise: Average per Grade
+
+Find average marks in each grade.
+
+## Solution
+
+```sql
+SELECT grade, ROUND(AVG(marks), 2) AS avg_marks
+FROM students
+GROUP BY grade;
+```
+

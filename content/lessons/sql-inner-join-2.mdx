@@ -1,0 +1,19 @@
+---
+title: INNER JOIN - Multiple Columns
+chapterSlug: sql-inner-join
+duration: 5
+order: 3
+---
+
+## Selecting Multiple Columns
+
+```sql
+SELECT 
+  students.name,
+  students.age,
+  courses.course_name,
+  courses.instructor
+FROM students
+INNER JOIN courses ON students.course_id = courses.id;
+```
+

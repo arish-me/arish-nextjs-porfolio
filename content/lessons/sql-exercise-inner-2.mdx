@@ -1,0 +1,19 @@
+---
+title: Practice - INNER JOIN 2
+chapterSlug: sql-inner-join
+duration: 5
+order: 6
+---
+
+## Exercise: Students and Instructors
+
+Get student names with their instructor.
+
+## Solution
+
+```sql
+SELECT s.name, c.instructor
+FROM students s
+INNER JOIN courses c ON s.course_id = c.id;
+```
+

@@ -1,0 +1,16 @@
+---
+title: JOINs with GROUP BY
+chapterSlug: sql-joins-grouping
+duration: 6
+order: 1
+---
+
+## Aggregating Joined Data
+
+```sql
+SELECT c.course_name, COUNT(*) AS students
+FROM students s
+JOIN courses c ON s.course_id = c.id
+GROUP BY c.course_name;
+```
+

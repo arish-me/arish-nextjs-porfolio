@@ -1,0 +1,20 @@
+---
+title: Practice - EXISTS 1
+chapterSlug: sql-exists
+duration: 5
+order: 2
+---
+
+## Exercise: Courses With Students
+
+Find courses that have students.
+
+## Solution
+
+```sql
+SELECT course_name FROM courses c
+WHERE EXISTS (
+  SELECT 1 FROM students WHERE course_id = c.id
+);
+```
+

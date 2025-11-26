@@ -1,0 +1,18 @@
+---
+title: Practice - Subquery 2
+chapterSlug: sql-subqueries
+duration: 5
+order: 3
+---
+
+## Exercise: Max Score Student
+
+Find student with highest marks.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE marks = (SELECT MAX(marks) FROM students);
+```
+

@@ -1,0 +1,21 @@
+---
+title: Practice - JOIN with Filter 2
+chapterSlug: sql-joins-filter
+duration: 5
+order: 3
+---
+
+## Exercise: Multiple Conditions
+
+Find grade A students in programming courses.
+
+## Solution
+
+```sql
+SELECT s.name, s.grade, c.course_name
+FROM students s
+JOIN courses c ON s.course_id = c.id
+WHERE s.grade = 'A'
+AND c.category = 'Programming';
+```
+

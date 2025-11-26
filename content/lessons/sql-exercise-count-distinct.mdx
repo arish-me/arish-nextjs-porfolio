@@ -1,0 +1,28 @@
+---
+title: Practice - COUNT DISTINCT
+chapterSlug: sql-count-distinct
+duration: 5
+order: 2
+---
+
+## Exercise: Count Unique Values
+
+Count the number of different grades.
+
+## Solution
+
+```sql
+SELECT COUNT(DISTINCT grade) FROM students;
+```
+
+## Practice
+
+```sql
+-- Count unique ages
+SELECT COUNT(DISTINCT age) FROM students;
+
+-- Count unique ages of Python students
+SELECT COUNT(DISTINCT age) FROM students
+WHERE course = 'Python';
+```
+

@@ -1,0 +1,19 @@
+---
+title: Practice - GROUP_CONCAT
+chapterSlug: sql-group-concat
+duration: 5
+order: 2
+---
+
+## Exercise: List Names by Grade
+
+List all names in each grade.
+
+## Solution
+
+```sql
+SELECT grade, GROUP_CONCAT(name, ', ') AS students
+FROM students
+GROUP BY grade;
+```
+

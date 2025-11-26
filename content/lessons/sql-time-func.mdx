@@ -1,0 +1,25 @@
+---
+title: TIME Function
+chapterSlug: sql-date-functions
+duration: 5
+order: 2
+---
+
+## TIME Function
+
+Extracts time from datetime.
+
+```sql
+SELECT TIME('2024-03-15 14:30:00');
+-- Returns: 14:30:00
+
+SELECT TIME('now');
+-- Returns: current time
+```
+
+## Example
+
+```sql
+SELECT name, TIME(login_time) FROM users;
+```
+

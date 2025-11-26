@@ -1,0 +1,19 @@
+---
+title: LEFT OUTER JOIN
+chapterSlug: sql-outer-join
+duration: 6
+order: 1
+---
+
+## LEFT JOIN
+
+Returns ALL rows from left table, matching from right.
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+LEFT JOIN courses c ON s.course_id = c.id;
+```
+
+Students without courses show NULL for course_name.
+

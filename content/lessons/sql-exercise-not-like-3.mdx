@@ -1,0 +1,18 @@
+---
+title: Practice - NOT LIKE Contains
+chapterSlug: sql-not-like
+duration: 5
+order: 6
+---
+
+## Exercise: Exclude Contains
+
+Find students whose names do NOT contain 'on'.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE name NOT LIKE '%on%';
+```
+

@@ -1,0 +1,24 @@
+---
+title: Practice - FOREIGN KEY 2
+chapterSlug: sql-foreign-key
+duration: 5
+order: 5
+---
+
+## Exercise: Multiple FKs
+
+Create table with two foreign keys.
+
+## Solution
+
+```sql
+CREATE TABLE reviews (
+  id INTEGER PRIMARY KEY,
+  product_id INTEGER,
+  user_id INTEGER,
+  rating INTEGER,
+  FOREIGN KEY (product_id) REFERENCES products(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+

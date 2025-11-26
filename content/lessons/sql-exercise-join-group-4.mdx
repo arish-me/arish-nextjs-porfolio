@@ -1,0 +1,21 @@
+---
+title: Practice - JOIN GROUP 4
+chapterSlug: sql-joins-grouping
+duration: 5
+order: 5
+---
+
+## Exercise: Count with HAVING
+
+Courses with more than 5 students.
+
+## Solution
+
+```sql
+SELECT c.course_name, COUNT(*) AS count
+FROM students s
+JOIN courses c ON s.course_id = c.id
+GROUP BY c.course_name
+HAVING COUNT(*) > 5;
+```
+

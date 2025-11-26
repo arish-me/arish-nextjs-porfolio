@@ -1,0 +1,19 @@
+---
+title: Boolean Computed Columns
+chapterSlug: sql-modified-data
+duration: 5
+order: 1
+---
+
+## Boolean in SELECT
+
+Create true/false columns.
+
+```sql
+SELECT name, marks,
+  marks >= 80 AS passed
+FROM students;
+```
+
+Returns 1 (true) or 0 (false).
+

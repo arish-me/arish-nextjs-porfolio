@@ -1,0 +1,36 @@
+---
+title: Column Aliases with AS
+chapterSlug: sql-aliases
+duration: 6
+order: 1
+---
+
+## The AS Keyword
+
+AS gives a column a temporary name (alias).
+
+## Syntax
+
+```sql
+SELECT column AS alias_name FROM table;
+```
+
+## Example
+
+```sql
+SELECT name AS student_name FROM students;
+```
+
+### Result
+
+| student_name |
+|--------------|
+| Alice |
+| Bob |
+
+## Why Use Aliases?
+
+- More readable column names
+- Required for calculated columns
+- Shorter names for long columns
+

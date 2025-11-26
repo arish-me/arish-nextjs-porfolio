@@ -1,0 +1,18 @@
+---
+title: Practice - Copy Data 1
+chapterSlug: sql-statements-subqueries
+duration: 5
+order: 2
+---
+
+## Exercise: Archive Graduates
+
+Copy graduated students to archive.
+
+## Solution
+
+```sql
+INSERT INTO archive_students
+SELECT * FROM students WHERE status = 'graduated';
+```
+

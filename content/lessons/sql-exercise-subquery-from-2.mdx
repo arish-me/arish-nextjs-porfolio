@@ -1,0 +1,23 @@
+---
+title: Practice - FROM Subquery 2
+chapterSlug: sql-subqueries-from
+duration: 5
+order: 3
+---
+
+## Exercise: Ranked Results
+
+Rank courses by student count.
+
+## Solution
+
+```sql
+SELECT course, count,
+  (SELECT COUNT(*) FROM (SELECT course, COUNT(*) AS c FROM students GROUP BY course) AS t2
+   WHERE t2.c >= t.count) AS rank
+FROM (
+  SELECT course, COUNT(*) AS count
+  FROM students GROUP BY course
+) AS t;
+```
+

@@ -1,0 +1,18 @@
+---
+title: GROUP BY with ORDER
+chapterSlug: sql-group-by-advanced
+duration: 5
+order: 3
+---
+
+## Sorting Grouped Results
+
+```sql
+SELECT course, COUNT(*) AS count
+FROM students
+GROUP BY course
+ORDER BY count DESC;
+```
+
+Most popular courses first.
+

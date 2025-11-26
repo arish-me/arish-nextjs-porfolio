@@ -1,0 +1,32 @@
+---
+title: Practice - Multi-Line Comments
+chapterSlug: sql-comments
+duration: 4
+order: 4
+---
+
+## Exercise: Document a Query
+
+Add a multi-line comment explaining this query.
+
+## Solution
+
+```sql
+/*
+  Query: High achievers by course
+  Purpose: Find students scoring above 85
+  in their respective courses
+*/
+SELECT course, name, marks
+FROM students
+WHERE marks > 85
+ORDER BY course, marks DESC;
+```
+
+## Comment Summary
+
+| Type | Syntax | Use |
+|------|--------|-----|
+| Single | `-- comment` | Quick notes |
+| Multi | `/* comment */` | Long explanations |
+

@@ -1,0 +1,19 @@
+---
+title: EXCEPT
+chapterSlug: sql-intersect-except
+duration: 5
+order: 3
+---
+
+## EXCEPT
+
+Returns rows in first query but not in second.
+
+```sql
+SELECT course FROM all_courses
+EXCEPT
+SELECT course FROM active_courses;
+```
+
+Courses not currently active.
+

@@ -1,0 +1,19 @@
+---
+title: Practice - Multiple Grouping
+chapterSlug: sql-group-by-multiple
+duration: 5
+order: 2
+---
+
+## Exercise: Group by Two Columns
+
+Count students by grade and age.
+
+## Solution
+
+```sql
+SELECT grade, age, COUNT(*) AS count
+FROM students
+GROUP BY grade, age;
+```
+

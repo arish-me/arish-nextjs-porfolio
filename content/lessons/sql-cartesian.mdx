@@ -1,0 +1,19 @@
+---
+title: Cartesian Product
+chapterSlug: sql-cartesian
+duration: 5
+order: 1
+---
+
+## CROSS JOIN
+
+Every row from A paired with every row from B.
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+CROSS JOIN courses c;
+```
+
+If students has 10 rows and courses has 5, returns 50 rows.
+

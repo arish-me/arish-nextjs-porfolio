@@ -1,0 +1,33 @@
+---
+title: Practice - AND with OR
+chapterSlug: sql-and-or
+duration: 6
+order: 6
+---
+
+## Exercise: Complex Conditions
+
+Find students in (Python OR Ruby) AND with marks above 75.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE (course = 'Python' OR course = 'Ruby')
+AND marks > 75;
+```
+
+## Another Example
+
+Students aged (12 OR 14) with grade A:
+
+```sql
+SELECT * FROM students
+WHERE (age = 12 OR age = 14)
+AND grade = 'A';
+```
+
+## Key Point
+
+Always use parentheses to make your logic clear!
+

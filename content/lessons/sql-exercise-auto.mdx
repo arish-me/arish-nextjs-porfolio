@@ -1,0 +1,23 @@
+---
+title: Practice - AUTOINCREMENT
+chapterSlug: sql-autoincrement
+duration: 5
+order: 2
+---
+
+## Exercise: Auto ID Table
+
+Create table with auto-incrementing ID.
+
+## Solution
+
+```sql
+CREATE TABLE messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content TEXT
+);
+
+INSERT INTO messages (content) VALUES ('Hello');
+INSERT INTO messages (content) VALUES ('World');
+```
+

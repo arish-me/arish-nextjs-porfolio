@@ -1,0 +1,74 @@
+---
+title: Greater Than Operator
+chapterSlug: sql-comparison-less
+duration: 5
+order: 3
+---
+
+## The Greater Than Operator
+
+The `>` operator finds values larger than a specified number.
+
+## Syntax
+
+```sql
+SELECT * FROM table_name
+WHERE column > value;
+```
+
+## Example: High Achievers
+
+Find students with marks above 80:
+
+```sql
+SELECT * FROM students
+WHERE marks > 80;
+```
+
+### Result
+
+| id | name | marks | grade |
+|----|------|-------|-------|
+| 1 | Alice | 85 | A |
+| 3 | Carol | 92 | A |
+| 5 | Eve | 88 | A |
+
+## More Examples
+
+```sql
+-- Students older than 13
+SELECT * FROM students WHERE age > 13;
+
+-- Marks above 90
+SELECT name, marks FROM students WHERE marks > 90;
+
+-- Age above 14
+SELECT * FROM students WHERE age > 14;
+```
+
+## Combining Concepts
+
+```sql
+-- High achievers in specific columns
+SELECT name, course, marks
+FROM students
+WHERE marks > 85;
+```
+
+## Greater Than with Strings
+
+Works alphabetically:
+
+```sql
+-- Names after 'M' alphabetically
+SELECT * FROM students WHERE name > 'M';
+```
+
+Returns names starting with N, O, P, etc.
+
+## Key Points
+
+1. `>` excludes the boundary value
+2. `> 80` does NOT include 80
+3. Works with numbers, dates, strings
+

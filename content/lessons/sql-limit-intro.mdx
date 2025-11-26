@@ -1,0 +1,35 @@
+---
+title: LIMIT Clause
+chapterSlug: sql-limit
+duration: 5
+order: 1
+---
+
+## LIMIT Clause
+
+LIMIT restricts the number of rows returned.
+
+## Syntax
+
+```sql
+SELECT * FROM students LIMIT n;
+```
+
+## Example: First 5 Students
+
+```sql
+SELECT * FROM students LIMIT 5;
+```
+
+Returns only 5 rows.
+
+## With ORDER BY
+
+```sql
+SELECT * FROM students
+ORDER BY marks DESC
+LIMIT 5;
+```
+
+Top 5 by marks.
+

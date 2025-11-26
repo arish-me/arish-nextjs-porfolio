@@ -1,0 +1,48 @@
+---
+title: Combining Conditions with OR
+chapterSlug: sql-and-or
+duration: 6
+order: 3
+---
+
+## The OR Operator
+
+OR combines conditions where ANY can be true.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE condition1 OR condition2;
+```
+
+## Example
+
+Find Python OR JavaScript students:
+
+```sql
+SELECT * FROM students
+WHERE course = 'Python'
+OR course = 'JavaScript';
+```
+
+## How OR Works
+
+| course = 'Python' | course = 'JavaScript' | Result |
+|-------------------|----------------------|--------|
+| True | True | ✅ Included |
+| True | False | ✅ Included |
+| False | True | ✅ Included |
+| False | False | ❌ Excluded |
+
+At least one must be true!
+
+## Multiple ORs
+
+```sql
+SELECT * FROM students
+WHERE course = 'Python'
+OR course = 'JavaScript'
+OR course = 'Ruby';
+```
+

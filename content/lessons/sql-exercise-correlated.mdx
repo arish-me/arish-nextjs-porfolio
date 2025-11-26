@@ -1,0 +1,21 @@
+---
+title: Practice - Correlated 1
+chapterSlug: sql-correlated
+duration: 5
+order: 2
+---
+
+## Exercise: Above Course Average
+
+Find students above their course average.
+
+## Solution
+
+```sql
+SELECT name, course, marks FROM students s
+WHERE marks > (
+  SELECT AVG(marks) FROM students
+  WHERE course = s.course
+);
+```
+

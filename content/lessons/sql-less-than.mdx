@@ -1,0 +1,70 @@
+---
+title: Less Than Operator
+chapterSlug: sql-comparison-less
+duration: 5
+order: 1
+---
+
+## The Less Than Operator
+
+The `<` operator finds values smaller than a specified number.
+
+## Syntax
+
+```sql
+SELECT * FROM table_name
+WHERE column < value;
+```
+
+## Example: Young Students
+
+Find students younger than 14:
+
+```sql
+SELECT * FROM students
+WHERE age < 14;
+```
+
+### Result
+
+| id | name | age | course |
+|----|------|-----|--------|
+| 2 | Bob | 12 | JavaScript |
+| 4 | David | 13 | Ruby |
+| 5 | Eve | 12 | Python |
+
+## More Examples
+
+```sql
+-- Marks below 70
+SELECT * FROM students WHERE marks < 70;
+
+-- Students under 13
+SELECT * FROM students WHERE age < 13;
+
+-- Marks below passing (60)
+SELECT name, marks FROM students WHERE marks < 60;
+```
+
+## With Strings (Alphabetical Order)
+
+Less than works alphabetically with strings:
+
+```sql
+-- Names before 'D' alphabetically
+SELECT * FROM students WHERE name < 'D';
+```
+
+Returns: Alice, Bob, Carol (names starting with A, B, C)
+
+## Key Points
+
+1. `<` excludes the boundary value
+2. Works with numbers, dates, and strings
+3. For dates: earlier dates are "less than"
+
+```sql
+-- Orders before a date
+SELECT * FROM orders WHERE order_date < '2024-01-01';
+```
+

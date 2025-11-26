@@ -1,0 +1,17 @@
+---
+title: UPDATE with Subquery
+chapterSlug: sql-statements-subqueries
+duration: 5
+order: 4
+---
+
+## Subquery in UPDATE
+
+```sql
+UPDATE students 
+SET grade = 'A'
+WHERE marks > (SELECT AVG(marks) FROM students);
+```
+
+Update based on calculated value.
+

@@ -1,0 +1,45 @@
+---
+title: Using BETWEEN for Ranges
+chapterSlug: sql-between
+duration: 6
+order: 1
+---
+
+## The BETWEEN Operator
+
+BETWEEN selects values within a range (inclusive).
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE column BETWEEN value1 AND value2;
+```
+
+## Example
+
+Find students aged 12 to 14:
+
+```sql
+SELECT * FROM students
+WHERE age BETWEEN 12 AND 14;
+```
+
+This includes ages 12, 13, and 14.
+
+## Equivalent To
+
+```sql
+-- BETWEEN is the same as:
+SELECT * FROM students
+WHERE age >= 12 AND age <= 14;
+```
+
+## With Numbers
+
+```sql
+-- Marks between 70 and 90
+SELECT * FROM students
+WHERE marks BETWEEN 70 AND 90;
+```
+

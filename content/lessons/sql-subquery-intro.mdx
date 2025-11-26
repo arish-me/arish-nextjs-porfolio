@@ -1,0 +1,18 @@
+---
+title: Introduction to Subqueries
+chapterSlug: sql-subqueries
+duration: 6
+order: 1
+---
+
+## Subqueries
+
+A query inside another query.
+
+```sql
+SELECT name FROM students
+WHERE marks > (SELECT AVG(marks) FROM students);
+```
+
+Students above average marks.
+

@@ -1,0 +1,18 @@
+---
+title: Practice - Copy Data 2
+chapterSlug: sql-statements-subqueries
+duration: 5
+order: 3
+---
+
+## Exercise: Copy High Scorers
+
+Copy students with marks > 90.
+
+## Solution
+
+```sql
+INSERT INTO honor_roll (name, marks)
+SELECT name, marks FROM students WHERE marks > 90;
+```
+

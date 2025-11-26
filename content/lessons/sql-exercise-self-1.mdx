@@ -1,0 +1,21 @@
+---
+title: Practice - SELF JOIN 1
+chapterSlug: sql-self-join
+duration: 5
+order: 2
+---
+
+## Exercise: Employee Managers
+
+Find employees and their managers.
+
+## Solution
+
+```sql
+SELECT 
+  e.name AS employee,
+  m.name AS manager
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.id;
+```
+

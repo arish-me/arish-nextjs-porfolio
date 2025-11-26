@@ -1,0 +1,19 @@
+---
+title: Practice - SUM by Group
+chapterSlug: sql-group-by-aggregate
+duration: 5
+order: 4
+---
+
+## Exercise: Total Marks per Course
+
+Sum marks by course.
+
+## Solution
+
+```sql
+SELECT course, SUM(marks) AS total_marks
+FROM students
+GROUP BY course;
+```
+

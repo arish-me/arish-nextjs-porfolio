@@ -1,0 +1,66 @@
+---
+title: Practice - Filter by Age
+chapterSlug: sql-filtering-data
+duration: 5
+order: 3
+---
+
+## Exercise: Find Students by Age
+
+Write a query to find all students who are 12 years old.
+
+## Task
+
+Select all students where age equals 12.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE age = 12;
+```
+
+## Expected Output
+
+| id | name | age | course | marks | grade |
+|----|------|-----|--------|-------|-------|
+| 2 | Bob | 12 | JavaScript | 78 | B |
+| 5 | Eve | 12 | Python | 88 | A |
+
+## Numeric Comparisons
+
+When filtering by numbers:
+
+```sql
+-- No quotes needed for numbers
+SELECT * FROM students WHERE age = 12;
+
+-- This also works but is redundant
+SELECT * FROM students WHERE age = '12';
+```
+
+## Multiple Age Queries
+
+```sql
+-- Students who are 14
+SELECT * FROM students WHERE age = 14;
+
+-- Students who are 15
+SELECT * FROM students WHERE age = 15;
+
+-- Students with marks of 85
+SELECT * FROM students WHERE marks = 85;
+```
+
+## Key Differences
+
+| Type | Example | Quotes |
+|------|---------|--------|
+| String | `'Python'` | Required |
+| Number | `12` | Not required |
+| Date | `'2024-01-01'` | Required |
+
+## Next Steps
+
+We'll learn to filter with inequalities: less than, greater than, and more!
+

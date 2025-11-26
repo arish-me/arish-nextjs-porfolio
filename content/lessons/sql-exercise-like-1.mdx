@@ -1,0 +1,28 @@
+---
+title: Practice - LIKE Patterns
+chapterSlug: sql-like-pattern
+duration: 5
+order: 4
+---
+
+## Exercise: Find Names
+
+Find all students whose names start with 'J'.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE name LIKE 'J%';
+```
+
+## Practice
+
+```sql
+-- Names ending with 'e'
+SELECT * FROM students WHERE name LIKE '%e';
+
+-- Courses containing 'Script'
+SELECT * FROM students WHERE course LIKE '%Script%';
+```
+

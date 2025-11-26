@@ -1,0 +1,18 @@
+---
+title: Joining Multiple Tables
+chapterSlug: sql-multiple-joins
+duration: 6
+order: 1
+---
+
+## Three or More Tables
+
+```sql
+SELECT s.name, c.course_name, i.instructor_name
+FROM students s
+JOIN courses c ON s.course_id = c.id
+JOIN instructors i ON c.instructor_id = i.id;
+```
+
+Chain JOINs together.
+

@@ -1,0 +1,19 @@
+---
+title: INTERSECT
+chapterSlug: sql-intersect-except
+duration: 5
+order: 1
+---
+
+## INTERSECT
+
+Returns common rows in both queries.
+
+```sql
+SELECT course FROM students
+INTERSECT
+SELECT course FROM teachers;
+```
+
+Only courses in both tables.
+

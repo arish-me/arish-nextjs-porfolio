@@ -1,0 +1,30 @@
+---
+title: MIN Function
+chapterSlug: sql-max-min
+duration: 5
+order: 4
+---
+
+## MIN Function
+
+MIN returns the lowest value.
+
+## Syntax
+
+```sql
+SELECT MIN(column) FROM table;
+```
+
+## Example: Lowest Marks
+
+```sql
+SELECT MIN(marks) AS lowest FROM students;
+```
+
+## With WHERE
+
+```sql
+SELECT MIN(age) FROM students
+WHERE grade = 'A';
+```
+

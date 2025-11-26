@@ -1,0 +1,30 @@
+---
+title: MAX Function
+chapterSlug: sql-max-min
+duration: 5
+order: 1
+---
+
+## MAX Function
+
+MAX returns the highest value.
+
+## Syntax
+
+```sql
+SELECT MAX(column) FROM table;
+```
+
+## Example: Highest Age
+
+```sql
+SELECT MAX(age) AS oldest FROM students;
+```
+
+## With WHERE
+
+```sql
+SELECT MAX(marks) FROM students
+WHERE course = 'Python';
+```
+

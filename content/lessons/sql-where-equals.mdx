@@ -1,0 +1,83 @@
+---
+title: Filtering with WHERE and Equals
+chapterSlug: sql-filtering-data
+duration: 6
+order: 1
+---
+
+## The WHERE Clause
+
+The WHERE clause filters records based on conditions.
+
+## Basic Syntax
+
+```sql
+SELECT columns
+FROM table_name
+WHERE condition;
+```
+
+## Filter by Exact Match
+
+Find all students enrolled in Python:
+
+```sql
+SELECT * FROM students
+WHERE course = 'Python';
+```
+
+### Result
+
+| id | name | age | course | marks |
+|----|------|-----|--------|-------|
+| 1 | Alice | 14 | Python | 85 |
+| 3 | Carol | 15 | Python | 92 |
+
+## Comparison with Equals
+
+The `=` operator checks for exact matches:
+
+```sql
+-- Filter by course
+SELECT * FROM students WHERE course = 'Python';
+
+-- Filter by grade
+SELECT * FROM students WHERE grade = 'A';
+
+-- Filter by age
+SELECT * FROM students WHERE age = 14;
+```
+
+## String vs Number Comparisons
+
+```sql
+-- Strings need quotes
+SELECT * FROM students WHERE name = 'Alice';
+
+-- Numbers don't need quotes
+SELECT * FROM students WHERE age = 14;
+
+-- But this also works (not recommended)
+SELECT * FROM students WHERE age = '14';
+```
+
+## Case Sensitivity
+
+Depending on your database:
+
+```sql
+-- May or may not match 'Python'
+SELECT * FROM students WHERE course = 'python';
+```
+
+- **MySQL**: Case-insensitive by default
+- **PostgreSQL**: Case-sensitive
+- **SQLite**: Case-insensitive for ASCII
+
+## Key Points
+
+1. WHERE filters rows before returning results
+2. Use `=` for exact matches
+3. Strings require quotes, numbers don't
+4. Case sensitivity depends on database
+

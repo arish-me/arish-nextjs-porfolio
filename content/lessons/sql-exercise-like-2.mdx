@@ -1,0 +1,28 @@
+---
+title: Practice - More LIKE Patterns
+chapterSlug: sql-like-pattern
+duration: 5
+order: 5
+---
+
+## Exercise: Ending Pattern
+
+Find students whose names end with 'n'.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE name LIKE '%n';
+```
+
+## Single Character Wildcard
+
+The underscore `_` matches exactly one character:
+
+```sql
+-- Names with 4 characters
+SELECT * FROM students
+WHERE name LIKE '____';
+```
+

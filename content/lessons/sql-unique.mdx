@@ -1,0 +1,20 @@
+---
+title: UNIQUE Constraint
+chapterSlug: sql-constraints-basic
+duration: 5
+order: 3
+---
+
+## UNIQUE
+
+Prevents duplicate values.
+
+```sql
+CREATE TABLE users (
+  id INTEGER,
+  email TEXT UNIQUE
+);
+```
+
+No two rows can have same email.
+

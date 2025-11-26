@@ -1,0 +1,23 @@
+---
+title: Practice - VIEW 3
+chapterSlug: sql-views
+duration: 5
+order: 4
+---
+
+## Exercise: Stats View
+
+Create view with course statistics.
+
+## Solution
+
+```sql
+CREATE VIEW course_stats AS
+SELECT course,
+  COUNT(*) AS total,
+  AVG(marks) AS average,
+  MAX(marks) AS highest
+FROM students
+GROUP BY course;
+```
+

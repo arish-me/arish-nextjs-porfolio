@@ -1,0 +1,16 @@
+---
+title: INSERT with SELECT
+chapterSlug: sql-statements-subqueries
+duration: 5
+order: 1
+---
+
+## Copy Data Between Tables
+
+```sql
+INSERT INTO archive (name, course)
+SELECT name, course FROM students WHERE graduated = 1;
+```
+
+Insert results from SELECT.
+

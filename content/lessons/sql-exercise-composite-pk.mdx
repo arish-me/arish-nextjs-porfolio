@@ -1,0 +1,22 @@
+---
+title: Practice - Composite PK
+chapterSlug: sql-primary-key
+duration: 5
+order: 5
+---
+
+## Exercise: Multi-Column Key
+
+Create table with composite key.
+
+## Solution
+
+```sql
+CREATE TABLE grades (
+  student_id INTEGER,
+  subject TEXT,
+  grade TEXT,
+  PRIMARY KEY (student_id, subject)
+);
+```
+

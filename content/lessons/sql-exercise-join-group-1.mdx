@@ -1,0 +1,20 @@
+---
+title: Practice - JOIN GROUP 1
+chapterSlug: sql-joins-grouping
+duration: 5
+order: 2
+---
+
+## Exercise: Count per Course
+
+Count students per course.
+
+## Solution
+
+```sql
+SELECT c.course_name, COUNT(s.id) AS count
+FROM courses c
+LEFT JOIN students s ON s.course_id = c.id
+GROUP BY c.course_name;
+```
+

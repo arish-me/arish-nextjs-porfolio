@@ -1,0 +1,27 @@
+---
+title: DATETIME Modifiers
+chapterSlug: sql-date-functions
+duration: 5
+order: 5
+---
+
+## Date Modifiers
+
+```sql
+-- Add 7 days
+SELECT DATETIME('now', '+7 days');
+
+-- Subtract 1 month
+SELECT DATETIME('now', '-1 month');
+
+-- Start of month
+SELECT DATETIME('now', 'start of month');
+```
+
+## Examples
+
+```sql
+SELECT DATETIME('now', '+1 year');
+SELECT DATETIME('now', '-30 days');
+```
+

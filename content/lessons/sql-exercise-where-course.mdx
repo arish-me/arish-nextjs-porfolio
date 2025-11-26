@@ -1,0 +1,60 @@
+---
+title: Practice - Filter by Course
+chapterSlug: sql-filtering-data
+duration: 5
+order: 2
+---
+
+## Exercise: Find JavaScript Students
+
+Write a query to find all students enrolled in the JavaScript course.
+
+## Task
+
+Select all students where the course is 'JavaScript'.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE course = 'JavaScript';
+```
+
+## Expected Output
+
+| id | name | age | course | marks | grade |
+|----|------|-----|--------|-------|-------|
+| 2 | Bob | 12 | JavaScript | 78 | B |
+| 7 | Grace | 11 | JavaScript | 82 | B |
+
+## Understanding the Query
+
+1. `SELECT *` - Get all columns
+2. `FROM students` - From the students table
+3. `WHERE course = 'JavaScript'` - Only JavaScript students
+
+## Try These Variations
+
+```sql
+-- Find Ruby students
+SELECT * FROM students WHERE course = 'Ruby';
+
+-- Find Python students
+SELECT * FROM students WHERE course = 'Python';
+
+-- Find HTML students
+SELECT * FROM students WHERE course = 'HTML';
+```
+
+## Common Errors
+
+```sql
+-- Missing quotes around string
+SELECT * FROM students WHERE course = JavaScript;  -- Error!
+
+-- Wrong operator
+SELECT * FROM students WHERE course == 'JavaScript';  -- Error in SQL!
+```
+
+Remember: SQL uses single `=` for comparison, not `==`.
+

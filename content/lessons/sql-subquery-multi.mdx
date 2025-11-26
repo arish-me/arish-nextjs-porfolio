@@ -1,0 +1,16 @@
+---
+title: Subqueries with Multiple Results
+chapterSlug: sql-subqueries
+duration: 5
+order: 4
+---
+
+## IN with Subquery
+
+```sql
+SELECT * FROM students
+WHERE course_id IN (
+  SELECT id FROM courses WHERE category = 'Programming'
+);
+```
+

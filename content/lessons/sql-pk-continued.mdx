@@ -1,0 +1,21 @@
+---
+title: PRIMARY KEY Details
+chapterSlug: sql-primary-key
+duration: 5
+order: 2
+---
+
+## Primary Key Rules
+
+1. Must be unique
+2. Cannot be NULL
+3. One per table
+4. Usually numeric
+
+```sql
+CREATE TABLE orders (
+  order_id INTEGER PRIMARY KEY,
+  customer_id INTEGER
+);
+```
+

@@ -1,0 +1,33 @@
+---
+title: Descending Order
+chapterSlug: sql-order-asc-desc
+duration: 6
+order: 1
+---
+
+## ASC and DESC
+
+- ASC: Ascending (default, lowest to highest)
+- DESC: Descending (highest to lowest)
+
+## Syntax
+
+```sql
+SELECT * FROM students
+ORDER BY marks DESC;
+```
+
+## Example: Highest Marks First
+
+```sql
+SELECT name, marks FROM students
+ORDER BY marks DESC;
+```
+
+## Mixed Ordering
+
+```sql
+SELECT * FROM students
+ORDER BY grade ASC, marks DESC;
+```
+

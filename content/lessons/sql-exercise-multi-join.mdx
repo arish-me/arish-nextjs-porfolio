@@ -1,0 +1,20 @@
+---
+title: Practice - Multiple Joins
+chapterSlug: sql-multiple-joins
+duration: 5
+order: 2
+---
+
+## Exercise: Three Tables
+
+Join students, courses, and departments.
+
+## Solution
+
+```sql
+SELECT s.name, c.course_name, d.dept_name
+FROM students s
+JOIN courses c ON s.course_id = c.id
+JOIN departments d ON c.dept_id = d.id;
+```
+

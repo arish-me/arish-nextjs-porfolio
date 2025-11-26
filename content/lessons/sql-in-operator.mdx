@@ -1,0 +1,45 @@
+---
+title: The IN Operator
+chapterSlug: sql-in-not-in
+duration: 6
+order: 1
+---
+
+## The IN Operator
+
+IN matches values from a list - cleaner than multiple ORs.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE column IN (value1, value2, value3);
+```
+
+## Example
+
+Find Python, JavaScript, or Ruby students:
+
+```sql
+SELECT * FROM students
+WHERE course IN ('Python', 'JavaScript', 'Ruby');
+```
+
+## Equivalent To
+
+```sql
+-- IN is cleaner than:
+SELECT * FROM students
+WHERE course = 'Python'
+OR course = 'JavaScript'
+OR course = 'Ruby';
+```
+
+## With Numbers
+
+```sql
+-- Students aged 12, 14, or 15
+SELECT * FROM students
+WHERE age IN (12, 14, 15);
+```
+

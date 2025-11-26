@@ -1,0 +1,32 @@
+---
+title: Pattern Matching - Ends With
+chapterSlug: sql-like-pattern
+duration: 5
+order: 2
+---
+
+## Ending With a Pattern
+
+Use % at the beginning.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE name LIKE '%er';
+```
+
+Returns names ending with 'er': Peter, Oliver...
+
+## Examples
+
+```sql
+-- Names ending with 'a'
+SELECT * FROM students
+WHERE name LIKE '%a';
+
+-- Courses ending with 'Script'
+SELECT * FROM students
+WHERE course LIKE '%Script';
+```
+

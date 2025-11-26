@@ -1,0 +1,20 @@
+---
+title: Practice - CHECK
+chapterSlug: sql-constraints-default
+duration: 5
+order: 4
+---
+
+## Exercise: Age Validation
+
+Create table where age must be >= 0.
+
+## Solution
+
+```sql
+CREATE TABLE people (
+  name TEXT,
+  age INTEGER CHECK(age >= 0)
+);
+```
+

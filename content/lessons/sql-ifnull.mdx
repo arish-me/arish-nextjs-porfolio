@@ -1,0 +1,18 @@
+---
+title: IFNULL Function
+chapterSlug: sql-handling-null
+duration: 5
+order: 1
+---
+
+## IFNULL Function
+
+Replace NULL with a default value.
+
+```sql
+SELECT name, IFNULL(phone, 'No Phone') AS phone
+FROM students;
+```
+
+If phone is NULL, shows 'No Phone'.
+

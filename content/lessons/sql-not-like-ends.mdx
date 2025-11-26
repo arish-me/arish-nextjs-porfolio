@@ -1,0 +1,25 @@
+---
+title: NOT LIKE - Ending Pattern
+chapterSlug: sql-not-like
+duration: 5
+order: 2
+---
+
+## Excluding End Patterns
+
+```sql
+-- Courses NOT ending with 't'
+SELECT * FROM students
+WHERE course NOT LIKE '%t';
+```
+
+Excludes: JavaScript (ends with 't')
+
+## More Examples
+
+```sql
+-- Names NOT ending with 'a'
+SELECT * FROM students
+WHERE name NOT LIKE '%a';
+```
+

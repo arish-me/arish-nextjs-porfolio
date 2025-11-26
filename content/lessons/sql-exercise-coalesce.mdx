@@ -1,0 +1,19 @@
+---
+title: Practice - COALESCE
+chapterSlug: sql-handling-null
+duration: 5
+order: 4
+---
+
+## Exercise: First Available Contact
+
+Get first available: phone, email, or 'N/A'.
+
+## Solution
+
+```sql
+SELECT name,
+  COALESCE(phone, email, 'N/A') AS contact
+FROM students;
+```
+

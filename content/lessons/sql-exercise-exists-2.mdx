@@ -1,0 +1,20 @@
+---
+title: Practice - EXISTS 2
+chapterSlug: sql-exists
+duration: 5
+order: 3
+---
+
+## Exercise: High Achievers
+
+Find students with at least one A grade.
+
+## Solution
+
+```sql
+SELECT DISTINCT name FROM students s
+WHERE EXISTS (
+  SELECT 1 FROM grades WHERE student_id = s.id AND grade = 'A'
+);
+```
+

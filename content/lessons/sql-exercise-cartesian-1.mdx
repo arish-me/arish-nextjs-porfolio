@@ -1,0 +1,19 @@
+---
+title: Practice - CROSS JOIN
+chapterSlug: sql-cartesian
+duration: 5
+order: 2
+---
+
+## Exercise: All Combinations
+
+Get all student-course combinations.
+
+## Solution
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+CROSS JOIN courses c;
+```
+

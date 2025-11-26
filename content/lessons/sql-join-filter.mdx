@@ -1,0 +1,18 @@
+---
+title: JOINs with WHERE
+chapterSlug: sql-joins-filter
+duration: 5
+order: 1
+---
+
+## Filtering Joined Data
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+JOIN courses c ON s.course_id = c.id
+WHERE s.age > 13;
+```
+
+Apply filters after joining.
+

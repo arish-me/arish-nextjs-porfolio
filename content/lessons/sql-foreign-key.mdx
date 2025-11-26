@@ -1,0 +1,21 @@
+---
+title: FOREIGN KEY
+chapterSlug: sql-foreign-key
+duration: 6
+order: 1
+---
+
+## FOREIGN KEY
+
+References another table's primary key.
+
+```sql
+CREATE TABLE orders (
+  id INTEGER PRIMARY KEY,
+  customer_id INTEGER,
+  FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+```
+
+Ensures data integrity.
+

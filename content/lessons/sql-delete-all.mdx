@@ -1,0 +1,21 @@
+---
+title: Delete All Rows
+chapterSlug: sql-delete
+duration: 5
+order: 3
+---
+
+## Delete All (Dangerous!)
+
+```sql
+DELETE FROM students;
+```
+
+Removes all rows, keeps table structure.
+
+## vs TRUNCATE
+
+```sql
+TRUNCATE TABLE students;  -- Faster, resets counters
+```
+

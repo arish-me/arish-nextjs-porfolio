@@ -1,0 +1,23 @@
+---
+title: Practice - CASE Expression
+chapterSlug: sql-modified-data
+duration: 5
+order: 6
+---
+
+## Exercise: Age Category
+
+Categorize ages: Child (<13), Teen (13-17), Adult (18+).
+
+## Solution
+
+```sql
+SELECT name, age,
+  CASE
+    WHEN age < 13 THEN 'Child'
+    WHEN age <= 17 THEN 'Teen'
+    ELSE 'Adult'
+  END AS age_group
+FROM students;
+```
+

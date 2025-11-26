@@ -1,0 +1,29 @@
+---
+title: LIMIT with WHERE
+chapterSlug: sql-limit
+duration: 5
+order: 3
+---
+
+## LIMIT with Filters
+
+Combine WHERE and LIMIT.
+
+```sql
+SELECT * FROM students
+WHERE course IN ('Python', 'Ruby')
+LIMIT 4;
+```
+
+Returns first 4 Python or Ruby students.
+
+## Order of Clauses
+
+```sql
+SELECT columns
+FROM table
+WHERE condition
+ORDER BY column
+LIMIT n;
+```
+

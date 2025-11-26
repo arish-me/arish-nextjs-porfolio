@@ -1,0 +1,18 @@
+---
+title: Practice - Subquery 1
+chapterSlug: sql-subqueries
+duration: 5
+order: 2
+---
+
+## Exercise: Above Average
+
+Find students with marks above class average.
+
+## Solution
+
+```sql
+SELECT name, marks FROM students
+WHERE marks > (SELECT AVG(marks) FROM students);
+```
+

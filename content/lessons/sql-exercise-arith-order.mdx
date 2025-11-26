@@ -1,0 +1,19 @@
+---
+title: Practice - Sort by Calculation
+chapterSlug: sql-arithmetic-filter
+duration: 5
+order: 8
+---
+
+## Exercise: Sort by Combined
+
+Sort by marks minus age.
+
+## Solution
+
+```sql
+SELECT name, marks, age, marks - age AS diff
+FROM students
+ORDER BY marks - age DESC;
+```
+

@@ -1,0 +1,17 @@
+---
+title: Complex Grouping Across Tables
+chapterSlug: sql-joins-complex
+duration: 6
+order: 1
+---
+
+## Multiple Table Grouping
+
+```sql
+SELECT d.dept_name, c.course_name, COUNT(*) AS students
+FROM departments d
+JOIN courses c ON d.id = c.dept_id
+JOIN students s ON c.id = s.course_id
+GROUP BY d.dept_name, c.course_name;
+```
+

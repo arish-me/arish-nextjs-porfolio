@@ -1,0 +1,17 @@
+---
+title: ORDER BY with Arithmetic
+chapterSlug: sql-arithmetic-filter
+duration: 5
+order: 7
+---
+
+## Sort by Calculation
+
+```sql
+SELECT name, marks, age, marks + age AS combined
+FROM students
+ORDER BY marks + age DESC;
+```
+
+Sort by computed value.
+

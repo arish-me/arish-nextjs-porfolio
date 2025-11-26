@@ -1,0 +1,25 @@
+---
+title: Practice - RIGHT JOIN 1
+chapterSlug: sql-outer-join
+duration: 5
+order: 5
+---
+
+## Exercise: All Courses
+
+Get all courses with students.
+
+## Solution
+
+```sql
+-- MySQL/PostgreSQL
+SELECT s.name, c.course_name
+FROM students s
+RIGHT JOIN courses c ON s.course_id = c.id;
+
+-- SQLite alternative
+SELECT s.name, c.course_name
+FROM courses c
+LEFT JOIN students s ON s.course_id = c.id;
+```
+

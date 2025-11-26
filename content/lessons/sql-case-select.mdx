@@ -1,0 +1,32 @@
+---
+title: Conditional CASE Expression
+chapterSlug: sql-modified-data
+duration: 6
+order: 5
+---
+
+## CASE Expression
+
+```sql
+SELECT name, marks,
+  CASE
+    WHEN marks >= 90 THEN 'Excellent'
+    WHEN marks >= 80 THEN 'Good'
+    WHEN marks >= 70 THEN 'Average'
+    ELSE 'Needs Work'
+  END AS performance
+FROM students;
+```
+
+## Simple CASE
+
+```sql
+SELECT name,
+  CASE grade
+    WHEN 'A' THEN 'Top'
+    WHEN 'B' THEN 'Good'
+    ELSE 'Other'
+  END AS tier
+FROM students;
+```
+

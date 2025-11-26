@@ -1,0 +1,48 @@
+---
+title: Combining Conditions with AND
+chapterSlug: sql-and-or
+duration: 6
+order: 1
+---
+
+## The AND Operator
+
+AND combines multiple conditions. ALL conditions must be true.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE condition1 AND condition2;
+```
+
+## Example
+
+Find Python students with marks above 80:
+
+```sql
+SELECT * FROM students
+WHERE course = 'Python'
+AND marks > 80;
+```
+
+## How AND Works
+
+| course = 'Python' | marks > 80 | Result |
+|-------------------|------------|--------|
+| True | True | ✅ Included |
+| True | False | ❌ Excluded |
+| False | True | ❌ Excluded |
+| False | False | ❌ Excluded |
+
+Both must be true!
+
+## Multiple ANDs
+
+```sql
+SELECT * FROM students
+WHERE course = 'Python'
+AND marks > 80
+AND age > 12;
+```
+

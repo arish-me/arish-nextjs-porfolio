@@ -1,0 +1,25 @@
+---
+title: Practice - Filter by Length
+chapterSlug: sql-length
+duration: 5
+order: 4
+---
+
+## Exercise: Double Digit Marks
+
+Find students with marks having 2 digits (10-99).
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE LENGTH(marks) = 2;
+```
+
+Or more precisely:
+
+```sql
+SELECT * FROM students
+WHERE marks >= 10 AND marks <= 99;
+```
+

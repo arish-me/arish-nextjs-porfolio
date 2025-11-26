@@ -1,0 +1,32 @@
+---
+title: COUNT All Records
+chapterSlug: sql-count
+duration: 5
+order: 1
+---
+
+## COUNT Function
+
+COUNT returns the number of rows.
+
+## Count All Rows
+
+```sql
+SELECT COUNT(*) FROM students;
+```
+
+### Result
+
+| COUNT(*) |
+|----------|
+| 25 |
+
+## With WHERE
+
+```sql
+SELECT COUNT(*) FROM students
+WHERE course = 'Python';
+```
+
+Returns: Number of Python students.
+

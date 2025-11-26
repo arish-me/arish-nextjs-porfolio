@@ -1,0 +1,22 @@
+---
+title: CREATE VIEW
+chapterSlug: sql-views
+duration: 6
+order: 1
+---
+
+## VIEWS
+
+Virtual table from a query.
+
+```sql
+CREATE VIEW high_scorers AS
+SELECT name, marks FROM students WHERE marks > 85;
+```
+
+Use like a table:
+
+```sql
+SELECT * FROM high_scorers;
+```
+

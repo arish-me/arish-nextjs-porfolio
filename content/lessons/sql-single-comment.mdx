@@ -1,0 +1,36 @@
+---
+title: Single-Line Comments
+chapterSlug: sql-comments
+duration: 4
+order: 1
+---
+
+## SQL Comments
+
+Comments help document your SQL code. They're ignored during execution.
+
+## Single-Line Comments
+
+Use `--` (two dashes):
+
+```sql
+-- This is a comment
+SELECT * FROM students;
+
+SELECT * FROM students; -- Get all students
+```
+
+## Example
+
+```sql
+-- Find all Python students
+SELECT * FROM students
+WHERE course = 'Python';
+```
+
+## Best Practices
+
+- Explain complex logic
+- Document table purposes
+- Note query intentions
+

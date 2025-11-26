@@ -1,0 +1,20 @@
+---
+title: Subqueries in FROM
+chapterSlug: sql-subqueries-from
+duration: 5
+order: 1
+---
+
+## Derived Tables
+
+Subquery as a table.
+
+```sql
+SELECT avg_by_course.course, avg_by_course.avg
+FROM (
+  SELECT course, AVG(marks) AS avg
+  FROM students GROUP BY course
+) AS avg_by_course
+WHERE avg_by_course.avg > 75;
+```
+

@@ -1,0 +1,41 @@
+---
+title: COUNT with DISTINCT
+chapterSlug: sql-count-distinct
+duration: 5
+order: 1
+---
+
+## Combining COUNT and DISTINCT
+
+Count unique values.
+
+## Syntax
+
+```sql
+SELECT COUNT(DISTINCT column) FROM table;
+```
+
+## Example
+
+How many different courses?
+
+```sql
+SELECT COUNT(DISTINCT course) FROM students;
+```
+
+### Result
+
+| COUNT(DISTINCT course) |
+|------------------------|
+| 5 |
+
+## Comparison
+
+```sql
+-- Total rows
+SELECT COUNT(*) FROM students;  -- 25
+
+-- Unique courses
+SELECT COUNT(DISTINCT course) FROM students;  -- 5
+```
+

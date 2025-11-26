@@ -1,0 +1,26 @@
+---
+title: DATE Function
+chapterSlug: sql-date-functions
+duration: 6
+order: 1
+---
+
+## DATE Function
+
+Extracts date from datetime.
+
+```sql
+SELECT DATE('2024-03-15 14:30:00');
+-- Returns: 2024-03-15
+
+SELECT DATE('now');
+-- Returns: current date
+```
+
+## With Columns
+
+```sql
+SELECT name, DATE(created_at) AS join_date
+FROM students;
+```
+

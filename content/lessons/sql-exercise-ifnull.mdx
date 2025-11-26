@@ -1,0 +1,18 @@
+---
+title: Practice - IFNULL
+chapterSlug: sql-handling-null
+duration: 5
+order: 2
+---
+
+## Exercise: Default Email
+
+Replace NULL email with 'No Email'.
+
+## Solution
+
+```sql
+SELECT name, IFNULL(email, 'No Email') AS email
+FROM students;
+```
+

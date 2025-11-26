@@ -1,0 +1,21 @@
+---
+title: Practice - DEFAULT
+chapterSlug: sql-constraints-default
+duration: 5
+order: 2
+---
+
+## Exercise: Default Status
+
+Create table with default active status.
+
+## Solution
+
+```sql
+CREATE TABLE users (
+  id INTEGER,
+  name TEXT,
+  active INTEGER DEFAULT 1
+);
+```
+

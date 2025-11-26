@@ -1,0 +1,69 @@
+---
+title: Practice - SELECT All
+chapterSlug: sql-select-basics
+duration: 5
+order: 2
+---
+
+## Exercise: SELECT All Data
+
+Practice retrieving all data from tables.
+
+## Task 1: Get All Students
+
+Write a query to retrieve all records from the `students` table.
+
+### Solution
+
+```sql
+SELECT * FROM students;
+```
+
+## Task 2: Get All Courses
+
+Write a query to retrieve all records from the `courses` table.
+
+### Solution
+
+```sql
+SELECT * FROM courses;
+```
+
+## Task 3: Get All Teachers
+
+Write a query to retrieve all records from the `teachers` table.
+
+### Solution
+
+```sql
+SELECT * FROM teachers;
+```
+
+## Understanding the Output
+
+When you run `SELECT *`:
+
+1. All columns are returned
+2. All rows are returned
+3. Order matches table storage (unless specified)
+
+## Common Mistakes
+
+```sql
+-- Missing FROM clause
+SELECT * students;  -- Error!
+
+-- Missing table name
+SELECT * FROM;  -- Error!
+
+-- Typo in table name
+SELECT * FROM studnets;  -- Error!
+```
+
+## Key Takeaways
+
+- `SELECT *` retrieves all columns
+- Always specify the table with `FROM`
+- Table names are case-sensitive in some databases
+- End queries with semicolon
+

@@ -1,0 +1,20 @@
+---
+title: Practice - FULL JOIN
+chapterSlug: sql-outer-join
+duration: 5
+order: 8
+---
+
+## Exercise: Complete Picture
+
+Get all students and courses.
+
+## Solution
+
+```sql
+-- PostgreSQL
+SELECT s.name, c.course_name
+FROM students s
+FULL OUTER JOIN courses c ON s.course_id = c.id;
+```
+

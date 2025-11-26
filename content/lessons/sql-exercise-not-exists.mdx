@@ -1,0 +1,20 @@
+---
+title: Practice - NOT EXISTS
+chapterSlug: sql-exists
+duration: 5
+order: 5
+---
+
+## Exercise: Empty Courses
+
+Find courses with no students.
+
+## Solution
+
+```sql
+SELECT course_name FROM courses c
+WHERE NOT EXISTS (
+  SELECT 1 FROM students WHERE course_id = c.id
+);
+```
+

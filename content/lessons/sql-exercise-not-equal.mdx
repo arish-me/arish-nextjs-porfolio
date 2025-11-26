@@ -1,0 +1,68 @@
+---
+title: Practice - Not Equal Filter
+chapterSlug: sql-filtering-data
+duration: 5
+order: 5
+---
+
+## Exercise: Exclude a Course
+
+Find all students NOT enrolled in Ruby.
+
+## Task
+
+Select all students where course is not equal to 'Ruby'.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE course != 'Ruby';
+```
+
+Or using the alternative operator:
+
+```sql
+SELECT * FROM students
+WHERE course <> 'Ruby';
+```
+
+## Expected Output
+
+All students except those in Ruby course.
+
+| id | name | course |
+|----|------|--------|
+| 1 | Alice | Python |
+| 2 | Bob | JavaScript |
+| 3 | Carol | Python |
+| ... | ... | ... |
+
+## Practice More
+
+```sql
+-- Find students NOT in grade C
+SELECT * FROM students WHERE grade != 'C';
+
+-- Find students NOT aged 14
+SELECT * FROM students WHERE age <> 14;
+
+-- Find students with marks NOT equal to 78
+SELECT * FROM students WHERE marks != 78;
+```
+
+## Combining Concepts
+
+```sql
+-- Select specific columns, exclude a course
+SELECT name, age, marks
+FROM students
+WHERE course != 'Python';
+```
+
+## Summary
+
+- `!=` and `<>` both mean "not equal"
+- Works with strings, numbers, and dates
+- NULL values need special handling (IS NULL)
+

@@ -1,0 +1,21 @@
+---
+title: RIGHT OUTER JOIN
+chapterSlug: sql-outer-join
+duration: 5
+order: 4
+---
+
+## RIGHT JOIN
+
+Returns ALL rows from right table.
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+RIGHT JOIN courses c ON s.course_id = c.id;
+```
+
+Shows all courses, even without students.
+
+Note: SQLite doesn't support RIGHT JOIN directly.
+

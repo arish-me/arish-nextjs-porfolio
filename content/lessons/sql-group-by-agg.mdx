@@ -1,0 +1,18 @@
+---
+title: GROUP BY with Aggregates
+chapterSlug: sql-group-by-aggregate
+duration: 6
+order: 1
+---
+
+## Multiple Aggregates
+
+```sql
+SELECT course,
+  COUNT(*) AS total,
+  AVG(marks) AS avg_marks,
+  MAX(marks) AS top_marks
+FROM students
+GROUP BY course;
+```
+

@@ -1,0 +1,21 @@
+---
+title: Practice - Subquery Multi
+chapterSlug: sql-subqueries
+duration: 5
+order: 5
+---
+
+## Exercise: Students in Popular Courses
+
+Find students in courses with > 5 enrollments.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE course_id IN (
+  SELECT course_id FROM students
+  GROUP BY course_id HAVING COUNT(*) > 5
+);
+```
+

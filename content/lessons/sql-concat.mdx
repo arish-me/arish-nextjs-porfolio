@@ -1,0 +1,25 @@
+---
+title: Concatenating Strings
+chapterSlug: sql-concatenation
+duration: 5
+order: 1
+---
+
+## String Concatenation
+
+Combine columns into one.
+
+## SQLite / MySQL
+
+```sql
+SELECT name || ' - ' || course AS student_info
+FROM students;
+```
+
+## Using CONCAT
+
+```sql
+SELECT CONCAT(name, ' (', age, ')') AS display
+FROM students;
+```
+

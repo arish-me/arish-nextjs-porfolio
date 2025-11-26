@@ -1,0 +1,19 @@
+---
+title: Practice - EXCEPT
+chapterSlug: sql-intersect-except
+duration: 5
+order: 4
+---
+
+## Exercise: Exclusive Courses
+
+Courses in A but not in B.
+
+## Solution
+
+```sql
+SELECT course FROM dept_a
+EXCEPT
+SELECT course FROM dept_b;
+```
+

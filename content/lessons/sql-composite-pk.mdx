@@ -1,0 +1,19 @@
+---
+title: Composite PRIMARY KEY
+chapterSlug: sql-primary-key
+duration: 5
+order: 4
+---
+
+## Multiple Column PK
+
+```sql
+CREATE TABLE enrollments (
+  student_id INTEGER,
+  course_id INTEGER,
+  PRIMARY KEY (student_id, course_id)
+);
+```
+
+Combination must be unique.
+

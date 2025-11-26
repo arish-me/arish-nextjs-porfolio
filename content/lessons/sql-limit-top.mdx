@@ -1,0 +1,27 @@
+---
+title: Top N Results
+chapterSlug: sql-limit-offset
+duration: 6
+order: 1
+---
+
+## Getting Top Results
+
+Combine ORDER BY and LIMIT.
+
+```sql
+SELECT * FROM students
+ORDER BY marks DESC
+LIMIT 10;
+```
+
+Returns top 10 highest marks.
+
+## Top Performers
+
+```sql
+SELECT name, marks FROM students
+ORDER BY marks DESC
+LIMIT 5;
+```
+

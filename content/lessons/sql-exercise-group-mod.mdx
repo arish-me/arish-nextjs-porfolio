@@ -1,0 +1,21 @@
+---
+title: Practice - Computed GROUP BY
+chapterSlug: sql-group-by-advanced
+duration: 5
+order: 2
+---
+
+## Exercise: Group by Even/Odd
+
+Count students with even vs odd ages.
+
+## Solution
+
+```sql
+SELECT 
+  CASE WHEN age % 2 = 0 THEN 'Even' ELSE 'Odd' END AS age_type,
+  COUNT(*) AS count
+FROM students
+GROUP BY age % 2;
+```
+

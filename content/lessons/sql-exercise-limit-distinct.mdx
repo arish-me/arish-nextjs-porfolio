@@ -1,0 +1,19 @@
+---
+title: Practice - LIMIT with DISTINCT
+chapterSlug: sql-limit-offset
+duration: 5
+order: 4
+---
+
+## Exercise: Top 3 Courses
+
+Get first 3 unique courses alphabetically.
+
+## Solution
+
+```sql
+SELECT DISTINCT course FROM students
+ORDER BY course
+LIMIT 3;
+```
+

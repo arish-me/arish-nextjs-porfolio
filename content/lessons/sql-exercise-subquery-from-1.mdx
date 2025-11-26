@@ -1,0 +1,21 @@
+---
+title: Practice - FROM Subquery 1
+chapterSlug: sql-subqueries-from
+duration: 5
+order: 2
+---
+
+## Exercise: Top Performing Courses
+
+Find courses with average > 80.
+
+## Solution
+
+```sql
+SELECT * FROM (
+  SELECT course, AVG(marks) AS avg
+  FROM students GROUP BY course
+) AS t
+WHERE avg > 80;
+```
+

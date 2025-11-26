@@ -1,0 +1,47 @@
+---
+title: SELECT DISTINCT
+chapterSlug: sql-distinct
+duration: 5
+order: 1
+---
+
+## DISTINCT Operator
+
+DISTINCT removes duplicate values from results.
+
+## Syntax
+
+```sql
+SELECT DISTINCT column FROM table;
+```
+
+## Example: Unique Courses
+
+```sql
+SELECT DISTINCT course FROM students;
+```
+
+### Result
+
+| course |
+|--------|
+| Python |
+| JavaScript |
+| Ruby |
+| HTML |
+
+## Without DISTINCT
+
+```sql
+SELECT course FROM students;
+-- Returns duplicates: Python, Python, JavaScript, Python...
+```
+
+## Multiple Columns
+
+```sql
+SELECT DISTINCT course, grade FROM students;
+```
+
+Returns unique combinations.
+

@@ -1,0 +1,21 @@
+---
+title: Practice - JOIN GROUP 3
+chapterSlug: sql-joins-grouping
+duration: 5
+order: 4
+---
+
+## Exercise: Sum by Instructor
+
+Total marks taught by each instructor.
+
+## Solution
+
+```sql
+SELECT i.name, SUM(s.marks) AS total
+FROM instructors i
+JOIN courses c ON i.id = c.instructor_id
+JOIN students s ON s.course_id = c.id
+GROUP BY i.name;
+```
+

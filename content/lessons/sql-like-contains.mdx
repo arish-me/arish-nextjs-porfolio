@@ -1,0 +1,32 @@
+---
+title: Pattern Matching - Contains
+chapterSlug: sql-like-pattern
+duration: 5
+order: 3
+---
+
+## Containing a Pattern
+
+Use % on both sides.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE name LIKE '%ar%';
+```
+
+Returns names containing 'ar': Carol, Mark, Sarah...
+
+## Examples
+
+```sql
+-- Names containing 'li'
+SELECT * FROM students
+WHERE name LIKE '%li%';
+
+-- Courses containing 'on'
+SELECT * FROM students
+WHERE course LIKE '%on%';
+```
+

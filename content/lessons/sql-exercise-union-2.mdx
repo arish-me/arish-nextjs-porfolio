@@ -1,0 +1,19 @@
+---
+title: Practice - UNION 2
+chapterSlug: sql-union
+duration: 5
+order: 3
+---
+
+## Exercise: With Conditions
+
+Combine high-scoring and low-scoring students.
+
+## Solution
+
+```sql
+SELECT name, 'High' AS type FROM students WHERE marks > 80
+UNION
+SELECT name, 'Low' AS type FROM students WHERE marks < 50;
+```
+

@@ -1,0 +1,19 @@
+---
+title: Practice - SELF JOIN 2
+chapterSlug: sql-self-join
+duration: 5
+order: 3
+---
+
+## Exercise: Students Same Age
+
+Find pairs of students with same age.
+
+## Solution
+
+```sql
+SELECT a.name, b.name, a.age
+FROM students a
+JOIN students b ON a.age = b.age AND a.id < b.id;
+```
+

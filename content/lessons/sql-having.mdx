@@ -1,0 +1,25 @@
+---
+title: HAVING Clause
+chapterSlug: sql-group-by-advanced
+duration: 6
+order: 5
+---
+
+## HAVING Clause
+
+Filter groups (like WHERE but for aggregates).
+
+```sql
+SELECT course, COUNT(*) AS count
+FROM students
+GROUP BY course
+HAVING COUNT(*) > 3;
+```
+
+Only courses with more than 3 students.
+
+## WHERE vs HAVING
+
+- WHERE: Filters rows before grouping
+- HAVING: Filters groups after grouping
+

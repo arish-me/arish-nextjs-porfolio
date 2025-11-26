@@ -1,0 +1,32 @@
+---
+title: Introduction to JOINs
+chapterSlug: sql-inner-join
+duration: 6
+order: 1
+---
+
+## Why JOINs?
+
+Tables are related. JOINs combine data from multiple tables.
+
+## Example Tables
+
+**students:** id, name, course_id
+**courses:** id, course_name, instructor
+
+## The Problem
+
+```sql
+-- Students table has course_id
+-- Courses table has course details
+-- How to combine them?
+```
+
+## The Solution: JOIN
+
+```sql
+SELECT students.name, courses.course_name
+FROM students
+JOIN courses ON students.course_id = courses.id;
+```
+

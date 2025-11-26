@@ -1,0 +1,28 @@
+---
+title: Excluding Patterns with NOT LIKE
+chapterSlug: sql-not-like
+duration: 5
+order: 1
+---
+
+## NOT LIKE
+
+Excludes rows matching a pattern.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE name NOT LIKE 'A%';
+```
+
+Returns all names NOT starting with 'A'.
+
+## Example
+
+```sql
+-- Names NOT starting with 'J'
+SELECT * FROM students
+WHERE name NOT LIKE 'J%';
+```
+

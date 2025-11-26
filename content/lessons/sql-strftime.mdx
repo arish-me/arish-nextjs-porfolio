@@ -1,0 +1,34 @@
+---
+title: STRFTIME Function
+chapterSlug: sql-date-functions
+duration: 6
+order: 6
+---
+
+## STRFTIME Function
+
+Formats dates with custom patterns.
+
+```sql
+SELECT STRFTIME('%Y-%m-%d', 'now');
+-- Returns: 2024-03-15
+```
+
+## Format Codes
+
+| Code | Meaning |
+|------|---------|
+| %Y | Year (4 digits) |
+| %m | Month (01-12) |
+| %d | Day (01-31) |
+| %H | Hour (00-23) |
+| %M | Minute |
+| %S | Second |
+
+## Example
+
+```sql
+SELECT STRFTIME('%d/%m/%Y', '2024-03-15');
+-- Returns: 15/03/2024
+```
+

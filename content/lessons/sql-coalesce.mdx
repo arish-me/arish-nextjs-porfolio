@@ -1,0 +1,26 @@
+---
+title: COALESCE Function
+chapterSlug: sql-handling-null
+duration: 5
+order: 3
+---
+
+## COALESCE Function
+
+Returns first non-NULL value.
+
+```sql
+SELECT COALESCE(phone, email, 'No Contact') AS contact
+FROM students;
+```
+
+Checks phone first, then email, then default.
+
+## With Multiple Columns
+
+```sql
+SELECT name,
+  COALESCE(nickname, name) AS display_name
+FROM students;
+```
+

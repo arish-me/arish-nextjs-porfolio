@@ -1,0 +1,31 @@
+---
+title: More Alias Examples
+chapterSlug: sql-aliases
+duration: 5
+order: 3
+---
+
+## Multiple Aliases
+
+```sql
+SELECT 
+  name AS student_name,
+  course AS enrolled_course,
+  marks AS total_score
+FROM students;
+```
+
+## With Functions
+
+```sql
+SELECT COUNT(*) AS total_students FROM students;
+```
+
+## Without AS
+
+AS is optional (but recommended for clarity):
+
+```sql
+SELECT name student_name FROM students;
+```
+

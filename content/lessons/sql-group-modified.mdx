@@ -1,0 +1,17 @@
+---
+title: GROUP BY Computed Column
+chapterSlug: sql-group-by-advanced
+duration: 5
+order: 1
+---
+
+## Group by Computed Values
+
+```sql
+SELECT LENGTH(name) AS name_length, COUNT(*)
+FROM students
+GROUP BY LENGTH(name);
+```
+
+Group by calculated expression.
+

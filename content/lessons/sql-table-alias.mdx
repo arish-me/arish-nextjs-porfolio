@@ -1,0 +1,19 @@
+---
+title: Table Aliases in JOIN
+chapterSlug: sql-inner-join
+duration: 5
+order: 7
+---
+
+## Table Aliases
+
+```sql
+-- Without alias
+SELECT students.name FROM students INNER JOIN courses ON...
+
+-- With alias (cleaner)
+SELECT s.name FROM students s INNER JOIN courses c ON...
+```
+
+Use short meaningful aliases: s, c, o, t
+

@@ -1,0 +1,36 @@
+---
+title: SUM Function
+chapterSlug: sql-sum-avg
+duration: 5
+order: 1
+---
+
+## SUM Function
+
+SUM adds up numeric values.
+
+## Syntax
+
+```sql
+SELECT SUM(column) FROM table;
+```
+
+## Example: Total Age
+
+```sql
+SELECT SUM(age) FROM students;
+```
+
+## Example: Total Marks
+
+```sql
+SELECT SUM(marks) FROM students;
+```
+
+## With WHERE
+
+```sql
+SELECT SUM(marks) FROM students
+WHERE course = 'Python';
+```
+

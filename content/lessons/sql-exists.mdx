@@ -1,0 +1,20 @@
+---
+title: EXISTS Operator
+chapterSlug: sql-exists
+duration: 5
+order: 1
+---
+
+## EXISTS
+
+Returns TRUE if subquery returns any rows.
+
+```sql
+SELECT * FROM courses c
+WHERE EXISTS (
+  SELECT 1 FROM students s WHERE s.course_id = c.id
+);
+```
+
+Only courses with enrolled students.
+

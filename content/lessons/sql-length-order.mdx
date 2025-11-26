@@ -1,0 +1,23 @@
+---
+title: Ordering by LENGTH
+chapterSlug: sql-length
+duration: 5
+order: 5
+---
+
+## Sort by String Length
+
+```sql
+SELECT name FROM students
+ORDER BY LENGTH(name);
+```
+
+Shortest names first.
+
+## Descending
+
+```sql
+SELECT name FROM students
+ORDER BY LENGTH(name) DESC;
+```
+

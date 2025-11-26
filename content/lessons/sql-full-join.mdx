@@ -1,0 +1,19 @@
+---
+title: FULL OUTER JOIN
+chapterSlug: sql-outer-join
+duration: 5
+order: 7
+---
+
+## FULL OUTER JOIN
+
+Returns all rows from both tables.
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+FULL OUTER JOIN courses c ON s.course_id = c.id;
+```
+
+Shows all students AND all courses.
+

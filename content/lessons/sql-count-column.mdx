@@ -1,0 +1,26 @@
+---
+title: COUNT Specific Column
+chapterSlug: sql-count
+duration: 5
+order: 2
+---
+
+## COUNT Column
+
+COUNT on a column ignores NULL values.
+
+## Syntax
+
+```sql
+SELECT COUNT(phone) FROM students;
+```
+
+Only counts rows where phone is NOT NULL.
+
+## Example
+
+```sql
+-- Count students with email
+SELECT COUNT(email) FROM students;
+```
+

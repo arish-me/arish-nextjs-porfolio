@@ -1,0 +1,35 @@
+---
+title: The NOT IN Operator
+chapterSlug: sql-in-not-in
+duration: 5
+order: 3
+---
+
+## NOT IN
+
+Excludes values in a list.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE course NOT IN ('Python', 'Ruby');
+```
+
+## Example
+
+Find students NOT in Python or Ruby:
+
+```sql
+SELECT * FROM students
+WHERE course NOT IN ('Python', 'Ruby');
+```
+
+## With Numbers
+
+```sql
+-- Not aged 12 or 14
+SELECT * FROM students
+WHERE age NOT IN (12, 14);
+```
+

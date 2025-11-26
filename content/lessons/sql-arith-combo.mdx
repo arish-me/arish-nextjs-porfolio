@@ -1,0 +1,24 @@
+---
+title: Combined Arithmetic
+chapterSlug: sql-arithmetic
+duration: 5
+order: 7
+---
+
+## Multiple Column Operations
+
+```sql
+SELECT name, 
+  age + marks AS combined,
+  (age * 2) + marks AS weighted
+FROM students;
+```
+
+## Complex Calculations
+
+```sql
+SELECT name,
+  marks / 100.0 * 10 AS percentage
+FROM students;
+```
+

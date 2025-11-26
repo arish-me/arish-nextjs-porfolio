@@ -1,0 +1,23 @@
+---
+title: GROUP BY with COUNT
+chapterSlug: sql-group-by-count
+duration: 6
+order: 1
+---
+
+## GROUP BY Clause
+
+Groups rows with same values for aggregate calculations.
+
+```sql
+SELECT course, COUNT(*) AS student_count
+FROM students
+GROUP BY course;
+```
+
+| course | student_count |
+|--------|---------------|
+| Python | 8 |
+| JavaScript | 5 |
+| Ruby | 4 |
+

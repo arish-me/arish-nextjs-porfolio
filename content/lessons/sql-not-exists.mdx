@@ -1,0 +1,20 @@
+---
+title: NOT EXISTS
+chapterSlug: sql-exists
+duration: 5
+order: 4
+---
+
+## NOT EXISTS
+
+True if subquery returns no rows.
+
+```sql
+SELECT * FROM courses c
+WHERE NOT EXISTS (
+  SELECT 1 FROM students WHERE course_id = c.id
+);
+```
+
+Courses without students.
+

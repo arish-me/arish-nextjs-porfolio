@@ -1,0 +1,19 @@
+---
+title: Practice - Bottom Results
+chapterSlug: sql-limit-offset
+duration: 5
+order: 2
+---
+
+## Exercise: Lowest Marks
+
+Select 5 students with lowest marks.
+
+## Solution
+
+```sql
+SELECT * FROM students
+ORDER BY marks ASC
+LIMIT 5;
+```
+

@@ -1,0 +1,28 @@
+---
+title: Selecting Multiple Aggregate Values
+chapterSlug: sql-multiple-data
+duration: 5
+order: 1
+---
+
+## Multiple Aggregates
+
+Select several aggregate values at once.
+
+## Example
+
+```sql
+SELECT 
+  COUNT(*) AS total,
+  MIN(marks) AS lowest,
+  MAX(marks) AS highest,
+  AVG(marks) AS average
+FROM students;
+```
+
+## Result
+
+| total | lowest | highest | average |
+|-------|--------|---------|---------|
+| 25 | 45 | 98 | 76.5 |
+

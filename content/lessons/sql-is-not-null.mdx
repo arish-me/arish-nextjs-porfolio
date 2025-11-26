@@ -1,0 +1,35 @@
+---
+title: Finding Non-NULL Values
+chapterSlug: sql-null-values
+duration: 5
+order: 4
+---
+
+## IS NOT NULL
+
+Find rows WITH values.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE phone IS NOT NULL;
+```
+
+## Example
+
+Students with phone numbers:
+
+```sql
+SELECT * FROM students
+WHERE phone IS NOT NULL;
+```
+
+## Combined with Other Conditions
+
+```sql
+SELECT * FROM students
+WHERE phone IS NOT NULL
+AND course = 'Python';
+```
+

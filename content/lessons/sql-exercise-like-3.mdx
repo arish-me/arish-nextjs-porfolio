@@ -1,0 +1,20 @@
+---
+title: Practice - Complex LIKE
+chapterSlug: sql-like-pattern
+duration: 5
+order: 6
+---
+
+## Exercise: Contains Pattern
+
+Find students whose courses contain 'y'.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE course LIKE '%y%';
+```
+
+Returns: Python, Ruby, etc.
+

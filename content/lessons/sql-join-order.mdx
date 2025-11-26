@@ -1,0 +1,16 @@
+---
+title: JOINs with ORDER BY
+chapterSlug: sql-joins-filter
+duration: 5
+order: 4
+---
+
+## Ordering Joined Results
+
+```sql
+SELECT s.name, c.course_name, s.marks
+FROM students s
+JOIN courses c ON s.course_id = c.id
+ORDER BY c.course_name, s.marks DESC;
+```
+

@@ -1,0 +1,33 @@
+---
+title: Practice - AND Condition
+chapterSlug: sql-and-or
+duration: 5
+order: 2
+---
+
+## Exercise: Multiple Conditions
+
+Find students in grade A AND aged 14.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE grade = 'A'
+AND age = 14;
+```
+
+## Practice More
+
+```sql
+-- JavaScript students with marks above 75
+SELECT * FROM students
+WHERE course = 'JavaScript'
+AND marks > 75;
+
+-- Grade B students older than 12
+SELECT * FROM students
+WHERE grade = 'B'
+AND age > 12;
+```
+

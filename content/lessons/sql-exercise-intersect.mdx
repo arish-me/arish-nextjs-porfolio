@@ -1,0 +1,19 @@
+---
+title: Practice - INTERSECT
+chapterSlug: sql-intersect-except
+duration: 5
+order: 2
+---
+
+## Exercise: Common Courses
+
+Find courses taught by both departments.
+
+## Solution
+
+```sql
+SELECT course FROM dept_a
+INTERSECT
+SELECT course FROM dept_b;
+```
+

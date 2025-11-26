@@ -1,0 +1,20 @@
+---
+title: Practice - NOT BETWEEN
+chapterSlug: sql-between
+duration: 5
+order: 6
+---
+
+## Exercise: Exclude Range
+
+Find students with marks NOT between 60 and 80.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE marks NOT BETWEEN 60 AND 80;
+```
+
+Returns students with marks below 60 or above 80.
+

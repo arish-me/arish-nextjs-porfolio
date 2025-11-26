@@ -1,0 +1,37 @@
+---
+title: Using NOT BETWEEN
+chapterSlug: sql-between
+duration: 5
+order: 5
+---
+
+## NOT BETWEEN
+
+Excludes values within a range.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE age NOT BETWEEN 12 AND 14;
+```
+
+## Example
+
+Students NOT aged 12-14:
+
+```sql
+SELECT * FROM students
+WHERE age NOT BETWEEN 12 AND 14;
+```
+
+Returns students aged 11 or below, and 15 or above.
+
+## With Marks
+
+```sql
+-- Marks outside 70-80 range
+SELECT * FROM students
+WHERE marks NOT BETWEEN 70 AND 80;
+```
+

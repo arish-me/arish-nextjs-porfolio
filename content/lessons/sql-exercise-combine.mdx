@@ -1,0 +1,20 @@
+---
+title: Practice - Combined
+chapterSlug: sql-constraints-basic
+duration: 5
+order: 6
+---
+
+## Exercise: Required Unique
+
+Create table with required unique email.
+
+## Solution
+
+```sql
+CREATE TABLE members (
+  id INTEGER,
+  email TEXT NOT NULL UNIQUE
+);
+```
+

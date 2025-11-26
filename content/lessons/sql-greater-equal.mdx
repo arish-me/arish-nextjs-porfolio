@@ -1,0 +1,43 @@
+---
+title: Greater Than or Equal To
+chapterSlug: sql-comparison-equal
+duration: 5
+order: 3
+---
+
+## Greater Than or Equal To
+
+The `>=` operator includes the boundary value.
+
+## Syntax
+
+```sql
+SELECT * FROM students WHERE marks >= 80;
+```
+
+## Example
+
+Find students with 80 marks or higher:
+
+```sql
+SELECT * FROM students
+WHERE marks >= 80;
+```
+
+## Comparison
+
+| Query | Includes 80? |
+|-------|-------------|
+| `marks > 80` | No |
+| `marks >= 80` | Yes |
+
+## More Examples
+
+```sql
+-- Students 14 or older
+SELECT * FROM students WHERE age >= 14;
+
+-- Marks 90 and above
+SELECT * FROM students WHERE marks >= 90;
+```
+

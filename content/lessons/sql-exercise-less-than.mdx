@@ -1,0 +1,59 @@
+---
+title: Practice - Less Than
+chapterSlug: sql-comparison-less
+duration: 5
+order: 2
+---
+
+## Exercise: Find Low Scores
+
+Find all students with marks below 75.
+
+## Task
+
+Select all students where marks are less than 75.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE marks < 75;
+```
+
+## Expected Output
+
+| id | name | marks | grade |
+|----|------|-------|-------|
+| 4 | David | 65 | C |
+| 6 | Frank | 71 | B |
+| 9 | Ivan | 58 | D |
+
+## Practice Variations
+
+```sql
+-- Marks below 80
+SELECT * FROM students WHERE marks < 80;
+
+-- Age less than 13
+SELECT * FROM students WHERE age < 13;
+
+-- Show only names and marks
+SELECT name, marks FROM students WHERE marks < 75;
+```
+
+## Combining with Other Clauses
+
+```sql
+-- Low scores, showing specific columns
+SELECT name, course, marks
+FROM students
+WHERE marks < 75;
+```
+
+## Think About It
+
+- Does `< 75` include 75? **No!**
+- To include 75, you'd use `<= 75`
+
+We'll learn about `<=` in the next chapter!
+

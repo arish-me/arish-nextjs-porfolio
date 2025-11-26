@@ -1,0 +1,38 @@
+---
+title: Understanding NULL Values
+chapterSlug: sql-null-values
+duration: 6
+order: 1
+---
+
+## What is NULL?
+
+NULL represents missing or unknown data. It's NOT the same as:
+- Zero (0)
+- Empty string ('')
+- False
+
+## NULL Behavior
+
+```sql
+-- These don't work with NULL:
+NULL = NULL     -- Returns NULL, not true!
+NULL != NULL    -- Returns NULL, not true!
+```
+
+## Why NULL is Special
+
+NULL means "unknown value". You can't compare unknowns.
+
+## Checking for NULL
+
+Use IS NULL or IS NOT NULL:
+
+```sql
+-- Correct way
+SELECT * FROM students WHERE phone IS NULL;
+
+-- Wrong way (won't work!)
+SELECT * FROM students WHERE phone = NULL;
+```
+

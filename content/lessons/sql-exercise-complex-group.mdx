@@ -1,0 +1,22 @@
+---
+title: Practice - Complex Grouping
+chapterSlug: sql-joins-complex
+duration: 5
+order: 2
+---
+
+## Exercise: Department Stats
+
+Stats by department and course.
+
+## Solution
+
+```sql
+SELECT d.dept_name, c.course_name,
+  COUNT(*) AS count, AVG(s.marks) AS avg
+FROM departments d
+JOIN courses c ON d.id = c.dept_id
+JOIN students s ON c.id = s.course_id
+GROUP BY d.dept_name, c.course_name;
+```
+

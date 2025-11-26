@@ -1,0 +1,20 @@
+---
+title: Practice - RIGHT JOIN 2
+chapterSlug: sql-outer-join
+duration: 5
+order: 6
+---
+
+## Exercise: Courses Without Students
+
+Find courses with no students.
+
+## Solution
+
+```sql
+SELECT c.course_name
+FROM courses c
+LEFT JOIN students s ON s.course_id = c.id
+WHERE s.id IS NULL;
+```
+

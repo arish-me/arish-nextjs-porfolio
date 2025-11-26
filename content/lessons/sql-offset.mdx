@@ -1,0 +1,37 @@
+---
+title: OFFSET for Pagination
+chapterSlug: sql-limit-offset
+duration: 6
+order: 5
+---
+
+## OFFSET Clause
+
+OFFSET skips rows before returning results.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+LIMIT 5 OFFSET 5;
+```
+
+Skips first 5, returns next 5 (rows 6-10).
+
+## Example: Ranks 6-10
+
+```sql
+SELECT name, marks FROM students
+ORDER BY marks DESC
+LIMIT 5 OFFSET 5;
+```
+
+Top scorers ranked 6th to 10th.
+
+## Alternative Syntax
+
+```sql
+-- LIMIT offset, count
+SELECT * FROM students LIMIT 5, 5;
+```
+

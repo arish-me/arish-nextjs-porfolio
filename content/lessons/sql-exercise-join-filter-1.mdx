@@ -1,0 +1,20 @@
+---
+title: Practice - JOIN with Filter 1
+chapterSlug: sql-joins-filter
+duration: 5
+order: 2
+---
+
+## Exercise: Filter After Join
+
+Find Python course students over 12.
+
+## Solution
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+JOIN courses c ON s.course_id = c.id
+WHERE c.course_name = 'Python' AND s.age > 12;
+```
+

@@ -1,0 +1,20 @@
+---
+title: Practice - Self Cartesian
+chapterSlug: sql-cartesian
+duration: 5
+order: 4
+---
+
+## Exercise: All Pairs
+
+Get all unique student pairs.
+
+## Solution
+
+```sql
+SELECT a.name, b.name
+FROM students a
+CROSS JOIN students b
+WHERE a.id < b.id;
+```
+

@@ -1,0 +1,23 @@
+---
+title: Filtering by LENGTH
+chapterSlug: sql-length
+duration: 5
+order: 3
+---
+
+## Filter Using LENGTH
+
+```sql
+SELECT * FROM students
+WHERE LENGTH(name) > 5;
+```
+
+Names longer than 5 characters.
+
+## Example: Short Names
+
+```sql
+SELECT name FROM students
+WHERE LENGTH(name) <= 4;
+```
+

@@ -1,0 +1,17 @@
+---
+title: FOREIGN KEY Validation
+chapterSlug: sql-foreign-key
+duration: 5
+order: 2
+---
+
+## FK Enforcement
+
+SQLite: Enable with PRAGMA
+```sql
+PRAGMA foreign_keys = ON;
+```
+
+- Can't insert invalid reference
+- Can't delete referenced row (by default)
+

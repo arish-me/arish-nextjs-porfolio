@@ -1,0 +1,35 @@
+---
+title: Finding NULL Values
+chapterSlug: sql-null-values
+duration: 5
+order: 2
+---
+
+## IS NULL
+
+Find rows with missing values.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+WHERE phone IS NULL;
+```
+
+## Example
+
+Find students without phone numbers:
+
+```sql
+SELECT * FROM students
+WHERE phone IS NULL;
+```
+
+## Multiple NULL Checks
+
+```sql
+SELECT * FROM students
+WHERE phone IS NULL
+OR email IS NULL;
+```
+

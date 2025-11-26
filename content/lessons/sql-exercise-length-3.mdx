@@ -1,0 +1,18 @@
+---
+title: Practice - Order by Length
+chapterSlug: sql-length
+duration: 5
+order: 6
+---
+
+## Exercise: Sort by Course Length
+
+Order students by length of course names.
+
+## Solution
+
+```sql
+SELECT name, course FROM students
+ORDER BY LENGTH(course);
+```
+

@@ -1,0 +1,43 @@
+---
+title: Combining AND and OR
+chapterSlug: sql-and-or
+duration: 7
+order: 5
+---
+
+## Using AND and OR Together
+
+Use parentheses to group conditions correctly.
+
+## The Problem
+
+```sql
+-- Ambiguous without parentheses
+SELECT * FROM students
+WHERE course = 'Python' OR course = 'JavaScript'
+AND marks > 80;
+```
+
+## The Solution: Parentheses
+
+```sql
+-- Clear intention
+SELECT * FROM students
+WHERE (course = 'Python' OR course = 'JavaScript')
+AND marks > 80;
+```
+
+## Operator Precedence
+
+AND is evaluated before OR. Use parentheses to be explicit.
+
+## Example
+
+High-scoring Python or JavaScript students:
+
+```sql
+SELECT * FROM students
+WHERE (course = 'Python' OR course = 'JavaScript')
+AND marks > 80;
+```
+

@@ -1,0 +1,33 @@
+---
+title: Practice - OR Condition
+chapterSlug: sql-and-or
+duration: 5
+order: 4
+---
+
+## Exercise: Either Condition
+
+Find students who are either in grade A OR have marks above 90.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE grade = 'A'
+OR marks > 90;
+```
+
+## Practice More
+
+```sql
+-- Age 12 or 14
+SELECT * FROM students
+WHERE age = 12
+OR age = 14;
+
+-- Ruby or HTML course
+SELECT * FROM students
+WHERE course = 'Ruby'
+OR course = 'HTML';
+```
+

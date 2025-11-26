@@ -1,0 +1,19 @@
+---
+title: Practice - Date Functions
+chapterSlug: sql-date-functions
+duration: 5
+order: 8
+---
+
+## Exercise: Extract Year and Month
+
+Get year and month from a date.
+
+## Solution
+
+```sql
+SELECT 
+  STRFTIME('%Y', '2024-03-15') AS year,
+  STRFTIME('%m', '2024-03-15') AS month;
+```
+

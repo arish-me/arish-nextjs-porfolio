@@ -1,0 +1,20 @@
+---
+title: Practice - JOIN with ORDER
+chapterSlug: sql-joins-filter
+duration: 5
+order: 5
+---
+
+## Exercise: Sort Joined Data
+
+Sort by course then student name.
+
+## Solution
+
+```sql
+SELECT c.course_name, s.name
+FROM students s
+JOIN courses c ON s.course_id = c.id
+ORDER BY c.course_name, s.name;
+```
+

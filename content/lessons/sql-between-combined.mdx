@@ -1,0 +1,33 @@
+---
+title: BETWEEN with Other Conditions
+chapterSlug: sql-between
+duration: 6
+order: 3
+---
+
+## Combining BETWEEN with AND
+
+```sql
+SELECT * FROM students
+WHERE marks BETWEEN 70 AND 90
+AND course = 'Python';
+```
+
+## Example
+
+Python students with marks 75-85:
+
+```sql
+SELECT * FROM students
+WHERE course = 'Python'
+AND marks BETWEEN 75 AND 85;
+```
+
+## With OR
+
+```sql
+SELECT * FROM students
+WHERE marks BETWEEN 80 AND 90
+OR grade = 'A';
+```
+

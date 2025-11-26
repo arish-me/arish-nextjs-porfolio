@@ -1,0 +1,20 @@
+---
+title: Practice - JOIN GROUP 2
+chapterSlug: sql-joins-grouping
+duration: 5
+order: 3
+---
+
+## Exercise: Average by Course
+
+Find average marks per course.
+
+## Solution
+
+```sql
+SELECT c.course_name, AVG(s.marks) AS avg_marks
+FROM students s
+JOIN courses c ON s.course_id = c.id
+GROUP BY c.course_name;
+```
+

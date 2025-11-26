@@ -1,0 +1,26 @@
+---
+title: Practice - IN Operator
+chapterSlug: sql-in-not-in
+duration: 5
+order: 2
+---
+
+## Exercise: Multiple Courses
+
+Find students in HTML, CSS, or React courses.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE course IN ('HTML', 'CSS', 'React');
+```
+
+## Practice
+
+```sql
+-- Grades A, B, or C
+SELECT * FROM students
+WHERE grade IN ('A', 'B', 'C');
+```
+

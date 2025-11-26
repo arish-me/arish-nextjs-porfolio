@@ -1,0 +1,62 @@
+---
+title: Practice - Greater Than
+chapterSlug: sql-comparison-less
+duration: 5
+order: 4
+---
+
+## Exercise: Find Older Students
+
+Find all students older than 13 years.
+
+## Task
+
+Select all students where age is greater than 13.
+
+## Solution
+
+```sql
+SELECT * FROM students
+WHERE age > 13;
+```
+
+## Expected Output
+
+| id | name | age | course |
+|----|------|-----|--------|
+| 1 | Alice | 14 | Python |
+| 3 | Carol | 15 | Python |
+| 6 | Frank | 14 | HTML |
+
+## Practice More
+
+```sql
+-- Marks above 85
+SELECT * FROM students WHERE marks > 85;
+
+-- Age above 12
+SELECT * FROM students WHERE age > 12;
+
+-- Only names of high scorers
+SELECT name FROM students WHERE marks > 90;
+```
+
+## Challenge
+
+Find students with marks above 80 and show only their name, course, and marks:
+
+```sql
+SELECT name, course, marks
+FROM students
+WHERE marks > 80;
+```
+
+## Quick Reference
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| `<` | Less than | `age < 14` |
+| `>` | Greater than | `marks > 80` |
+| `=` | Equal to | `course = 'Python'` |
+| `!=` | Not equal | `grade != 'F'` |
+

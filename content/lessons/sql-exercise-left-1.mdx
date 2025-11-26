@@ -1,0 +1,19 @@
+---
+title: Practice - LEFT JOIN 1
+chapterSlug: sql-outer-join
+duration: 5
+order: 2
+---
+
+## Exercise: All Students
+
+Get all students, even without courses.
+
+## Solution
+
+```sql
+SELECT s.name, c.course_name
+FROM students s
+LEFT JOIN courses c ON s.course_id = c.id;
+```
+

@@ -1,0 +1,40 @@
+---
+title: Pattern Matching - Starts With
+chapterSlug: sql-like-pattern
+duration: 6
+order: 1
+---
+
+## The LIKE Operator
+
+LIKE performs pattern matching with wildcards.
+
+## Wildcards
+
+| Wildcard | Meaning |
+|----------|---------|
+| `%` | Any sequence of characters |
+| `_` | Any single character |
+
+## Names Starting With
+
+```sql
+-- Names starting with 'Al'
+SELECT * FROM students
+WHERE name LIKE 'Al%';
+```
+
+Returns: Alice, Albert, Alex...
+
+## More Examples
+
+```sql
+-- Courses starting with 'Java'
+SELECT * FROM students
+WHERE course LIKE 'Java%';
+
+-- Names starting with 'M'
+SELECT * FROM students
+WHERE name LIKE 'M%';
+```
+

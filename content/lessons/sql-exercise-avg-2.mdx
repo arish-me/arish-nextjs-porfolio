@@ -1,0 +1,18 @@
+---
+title: Practice - AVG with Conditions
+chapterSlug: sql-sum-avg
+duration: 5
+order: 6
+---
+
+## Exercise: Filtered Average
+
+Find average of distinct ages between 8 and 13.
+
+## Solution
+
+```sql
+SELECT AVG(DISTINCT age) FROM students
+WHERE age BETWEEN 8 AND 13;
+```
+

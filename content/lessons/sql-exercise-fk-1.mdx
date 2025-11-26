@@ -1,0 +1,21 @@
+---
+title: Practice - FOREIGN KEY 1
+chapterSlug: sql-foreign-key
+duration: 5
+order: 4
+---
+
+## Exercise: Create FK
+
+Create orders referencing customers.
+
+## Solution
+
+```sql
+CREATE TABLE orders (
+  id INTEGER PRIMARY KEY,
+  customer_id INTEGER NOT NULL,
+  FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+```
+

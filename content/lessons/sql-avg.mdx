@@ -1,0 +1,36 @@
+---
+title: AVG Function
+chapterSlug: sql-sum-avg
+duration: 5
+order: 4
+---
+
+## AVG Function
+
+AVG calculates the average (mean) value.
+
+## Syntax
+
+```sql
+SELECT AVG(column) FROM table;
+```
+
+## Example: Average Marks
+
+```sql
+SELECT AVG(marks) FROM students;
+```
+
+## With Rounding
+
+```sql
+SELECT ROUND(AVG(marks), 2) AS avg_marks FROM students;
+```
+
+## With WHERE
+
+```sql
+SELECT AVG(marks) FROM students
+WHERE grade = 'A';
+```
+

@@ -1,0 +1,25 @@
+---
+title: ORDER BY with DISTINCT
+chapterSlug: sql-order-advanced
+duration: 5
+order: 3
+---
+
+## Sorting Unique Values
+
+Combine DISTINCT with ORDER BY.
+
+```sql
+SELECT DISTINCT course FROM students
+ORDER BY course;
+```
+
+Returns unique courses in alphabetical order.
+
+## Descending
+
+```sql
+SELECT DISTINCT marks FROM students
+ORDER BY marks DESC;
+```
+

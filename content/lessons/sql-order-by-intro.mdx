@@ -1,0 +1,36 @@
+---
+title: Sorting with ORDER BY
+chapterSlug: sql-order-by
+duration: 6
+order: 1
+---
+
+## ORDER BY Clause
+
+ORDER BY sorts results.
+
+## Syntax
+
+```sql
+SELECT * FROM students
+ORDER BY column;
+```
+
+## Example: Sort by Marks
+
+```sql
+SELECT * FROM students
+ORDER BY marks;
+```
+
+Sorts from lowest to highest (ascending by default).
+
+## Multiple Columns
+
+```sql
+SELECT * FROM students
+ORDER BY grade, marks;
+```
+
+First by grade, then by marks within each grade.
+

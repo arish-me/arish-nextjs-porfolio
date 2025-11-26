@@ -1,0 +1,17 @@
+---
+title: GROUP BY Multiple Columns
+chapterSlug: sql-group-by-multiple
+duration: 6
+order: 1
+---
+
+## Multiple Column Grouping
+
+```sql
+SELECT course, grade, COUNT(*) AS count
+FROM students
+GROUP BY course, grade;
+```
+
+Groups by unique course-grade combinations.
+

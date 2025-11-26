@@ -1,0 +1,20 @@
+---
+title: Practice - LEFT JOIN 2
+chapterSlug: sql-outer-join
+duration: 5
+order: 3
+---
+
+## Exercise: Find Unmatched
+
+Find students without courses.
+
+## Solution
+
+```sql
+SELECT s.name
+FROM students s
+LEFT JOIN courses c ON s.course_id = c.id
+WHERE c.id IS NULL;
+```
+

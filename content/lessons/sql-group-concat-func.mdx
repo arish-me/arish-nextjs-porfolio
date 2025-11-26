@@ -1,0 +1,22 @@
+---
+title: GROUP_CONCAT Function
+chapterSlug: sql-group-concat
+duration: 5
+order: 1
+---
+
+## GROUP_CONCAT
+
+Combines values into a single string.
+
+```sql
+SELECT course, GROUP_CONCAT(name) AS students
+FROM students
+GROUP BY course;
+```
+
+| course | students |
+|--------|----------|
+| Python | Alice,Bob,Carol |
+| Ruby | David,Eve |
+

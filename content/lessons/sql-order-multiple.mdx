@@ -1,0 +1,32 @@
+---
+title: Multiple Column Sorting
+chapterSlug: sql-order-by
+duration: 5
+order: 3
+---
+
+## Sort by Multiple Columns
+
+```sql
+SELECT * FROM students
+ORDER BY grade, marks;
+```
+
+## Example
+
+Sort by grade first, then marks within grade:
+
+```sql
+SELECT name, grade, marks FROM students
+ORDER BY grade, marks;
+```
+
+## Result
+
+| name | grade | marks |
+|------|-------|-------|
+| David | A | 85 |
+| Alice | A | 92 |
+| Bob | B | 75 |
+| Carol | B | 78 |
+

@@ -1,0 +1,25 @@
+---
+title: Mixed ASC and DESC
+chapterSlug: sql-order-asc-desc
+duration: 5
+order: 3
+---
+
+## Mixed Ordering
+
+Different columns, different directions.
+
+```sql
+SELECT * FROM students
+ORDER BY age ASC, marks DESC;
+```
+
+Youngest first, within same age: highest marks first.
+
+## Example
+
+```sql
+SELECT name, age, marks FROM students
+ORDER BY age ASC, marks DESC;
+```
+

@@ -1,0 +1,18 @@
+---
+title: Multiple Foreign Keys
+chapterSlug: sql-foreign-key
+duration: 5
+order: 3
+---
+
+## Multiple FKs
+
+```sql
+CREATE TABLE enrollments (
+  student_id INTEGER,
+  course_id INTEGER,
+  FOREIGN KEY (student_id) REFERENCES students(id),
+  FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+```
+

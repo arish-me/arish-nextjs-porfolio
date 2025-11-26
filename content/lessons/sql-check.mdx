@@ -1,0 +1,19 @@
+---
+title: CHECK Constraint
+chapterSlug: sql-constraints-default
+duration: 5
+order: 3
+---
+
+## CHECK
+
+Validates data conditions.
+
+```sql
+CREATE TABLE products (
+  price REAL CHECK(price > 0)
+);
+```
+
+Only positive prices allowed.
+

@@ -1,0 +1,21 @@
+---
+title: Practice - Multiple Aggregates
+chapterSlug: sql-multiple-data
+duration: 5
+order: 2
+---
+
+## Exercise: Statistics
+
+Get count, sum, and average of marks.
+
+## Solution
+
+```sql
+SELECT 
+  COUNT(*) AS total_students,
+  SUM(marks) AS total_marks,
+  AVG(marks) AS average_marks
+FROM students;
+```
+

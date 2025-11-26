@@ -1,0 +1,20 @@
+---
+title: Practice - HAVING
+chapterSlug: sql-group-by-advanced
+duration: 5
+order: 6
+---
+
+## Exercise: Filter Groups
+
+Find grades with average marks > 75.
+
+## Solution
+
+```sql
+SELECT grade, AVG(marks) AS avg
+FROM students
+GROUP BY grade
+HAVING AVG(marks) > 75;
+```
+
