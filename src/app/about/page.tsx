@@ -95,7 +95,7 @@ export default function AboutPage() {
                 ],
               },
               {
-                role: "Senior Software Engineer | Client: Market Dojo",
+                role: "Senior Software Engineer | Client: e-Procrutement",
                 company: "Cyber Infrastructure Pvt. Ltd",
                 period: "May 2019 – Mar 2021",
                 description: "Lead the development of a scalable eSourcing platform for Market Dojo, a client in the procurement industry. Spearheaded a team focused on feature enhancement, bug resolution, and performance optimization. Implemented CI/CD pipelines using GitHub Actions.",

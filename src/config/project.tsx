@@ -1,7 +1,6 @@
 /* eslint-disable */
 
 import Symplr from '@/images/symplr-logo-vector.png';
-import MarketDojo from '@/images/marketdojo.jpg';
 import Vineti from '@/images/vineti.jpg';
 import Bukukas from '@/images/bukukas.jpg';
 import Manofix from '@/images/manofix.jpg';
@@ -24,12 +23,12 @@ export const PROJECTS_DATA: ProjectsData =
   },
   {
     id: 2,
-    title: "Market Dojo eSourcing Solutions",
+    title: "e-Procrutement eSourcing Solutions",
     description: "On-demand procurement software simplifying supplier management. Features RFx, eAuctions, and AI-powered automation for efficient eSourcing.",
-    longDescription: "Market Dojo offers versatile eSourcing tools designed for ease of use, enabling businesses to manage essential procurement objectives. Features include automated supplier onboarding, secure contract management, and advanced analytics for strategic decision-making.",
+    longDescription: "e-Procrutement offers versatile eSourcing tools designed for ease of use, enabling businesses to manage essential procurement objectives. Features include automated supplier onboarding, secure contract management, and advanced analytics for strategic decision-making.",
     technologies: ["Ruby on Rails", "ReactJS", "TypeScript", "Elasticsearch", "Digital Ocean"],
-    image: MarketDojo,
-    link: "https://marketdojo.com/",
+    image: Vineti,
+    link: "https://arishdev.com",
     github: null,
     featured: true,
     tags: ["Ruby on Rails", "ReactJS", "TypeScript", "eSourcing"]
